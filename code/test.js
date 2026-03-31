@@ -1,22 +1,58 @@
 const lib = require('./lib.js');
+const dataPath = '../data/v3.0/';
 
 let server = lib.http.createServer((req, res) => 
 	{
 		let url = lib.url.parse(req.url).pathname;
-		res.write(url + "\n");
-		search("Absol", res);
+		let dir = lib.utils.urlDir(url);
+		let arg = lib.utils.urlArg(url);
+		let dataName = arg.replaceAll("/", "");
+		let dataType = dir.replaceAll("/", "");
+		res.write(dir + "\n");
+		if (dir == "/")
+			return (tutorial(res));
+		res.write(dataName + "\n");
+		try 
+		{
+			search(dataName, dataType, res);
+		}
+		catch (err)
+		{
+			res.write(dataType + " " + dataName + " not found.");
+			res.end("info: " + err + "\n");
+		}
 		res.end();
 	}
 );
 
 server.listen(8080, "localhost");
 
-function search(pokemon, res)
+function tutorial(res)
 {
-	pkmn = require('../data/v3.0/Pokedex/' + pokemon + ".json");
+	let msg = "\
+locations list:\n\
+/: show this message\n\
+/Abilities: show Abilities info\n\
+/Items: show Items info\n\
+/Moves: show Moves info\n\
+/Natures: show Natures info\n\
+/Pokedex: show pokemon info\n\
+\n\
+Example: http://localhost:8080/Pokedex/Absol\n\
+";
+	res.end(msg);
+}
+
+function search(dataName, dataType, res)
+{
+	pkmn = require('../data/v3.0/' + dataType + '/' + dataName + ".json");
+	let special = false;
 	for (let key in pkmn)
 	{
-		printKey(key, res);
+		if (includesOneOf(key, "Ability", "Name", "Type", "Evolutions", "Move") != "")
+			special = true;
+		printData(pkmn[key], key, special, res);
+		special = false;
 		res.write("\n");
 	}
 }
@@ -39,12 +75,26 @@ function includesOneOf(str)
     return ("");
 }
 
-function printKey(key, res)
+function printData(data, key, special, res)
 {
-    if (includesOneOf(key, "Ability", "Name", "Type", "Evolutions", "Move") != "")
-		res.write("special!!" + "key" + key + ":" + pkmn[key]);
+	if (typeof(data) != "object")
+	{
+		let output = "";
+
+		if (special == true)
+			output = "\033[32m" + data + "\033[0m";
+		else
+			output = data;
+		res.write(key + ":" + output);
+	}
 	else
-		res.write("key" + key + ":" + pkmn[key]);
+	{
+		for (let x in data)
+		{
+			printData(data[x], x, special, res);
+			res.write("|");
+		}
+	}
 }
 
 //document.getElementById("list")
