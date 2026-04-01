@@ -1,42 +1,60 @@
 const lib = require('./lib.js');
 const dataPath = '../data/v3.0/';
+let out = "";
 
-let server = lib.http.createServer((req, res) => 
-	{
-		let isCurl = false;
-		if (req.headers['user-agent'].includes("curl") == true)
-			isCurl = true;
-		if (isCurl == false)
-			res.write("<html><head><meta charset='utf-8'></head><body>");
-		console.log(req.headers['user-agent']);
-		let url = lib.url.parse(req.url).pathname;
-		let dir = lib.utils.urlDir(url);
-		let arg = lib.utils.urlArg(url);
-		let dataName = arg.replaceAll("/", "");
-		let dataType = dir.replaceAll("/", "");
-		res.write(dir + "\n");
-		if (dir == "/")
-			return (tutorial(res));
-		res.write(dataName + "\n");
-		try 
-		{
-			search(dataName, dataType, res);
-		}
-		catch (err)
-		{
-			res.write(dataType + " " + dataName + " not found.");
-			res.end("info: " + err + "\n");
-		}
-		if (isCurl == false)
-			res.write("</body></html>");
-		res.end();
-	}
-);
-
-server.listen(8080, "localhost");
-
-function tutorial(res)
+function getHtml (path) 
 {
+	const fd = lib.fs.readFileSync(path);
+	const dom = new lib.JSDOM(fd);
+	return (dom);
+}
+
+lib.app.listen(8080, "0.0.0.0");
+
+lib.app.get("/", tutorial);
+
+lib.app.get("/*splat", (req, res) =>
+{
+	out = "";
+	const dom = getHtml("./code/index.html");
+	const doc = dom.window.document;
+	let isCurl = false;
+	if (req.headers['user-agent'].includes("curl") == true)
+		isCurl = true;
+	console.log(req.headers['user-agent']);
+	let url = lib.url.parse(req.url).pathname;
+	let dir = lib.utils.urlDir(url);
+	let arg = lib.utils.urlArg(url);
+	let dataName = arg.replaceAll("/", "");
+	let dataType = dir.replaceAll("/", "");
+	write(dir + "\n", isCurl, res);
+	write(dataName + "\n", isCurl, res);
+	try 
+	{
+		search(dataName, dataType, isCurl);
+	}
+	catch (err)
+	{
+		write(dataType + " " + dataName + " not found.");
+		return (res.status(404).end("info: " + err + "\n"));
+	}
+	if (isCurl == true)
+		res.end(out);
+	else
+	{
+		doc.getElementById("test").innerHTML = out;
+		console.log(out);
+		res.send(dom.serialize());
+	}
+});
+
+
+function tutorial(req, res)
+{
+	out = "";
+	const dom = getHtml("./code/index.html");
+	const doc = dom.window.document;
+	let isCurl = req.headers['user-agent'].includes("curl");
 	let msg = "\
 locations list:\n\
 /: show this message\n\
@@ -48,10 +66,17 @@ locations list:\n\
 \n\
 Example: http://localhost:8080/Pokedex/Absol\n\
 ";
-	res.end(msg);
+	write(msg);
+	if (isCurl)
+		res.send(msg);
+	else
+	{
+		doc.getElementById("test").innerHTML = msg;
+		res.send(dom.serialize());
+	}
 }
 
-function search(dataName, dataType, res)
+function search(dataName, dataType, isCurl)
 {
 	pkmn = require('../data/v3.0/' + dataType + '/' + dataName + ".json");
 	let special = "";
@@ -59,13 +84,13 @@ function search(dataName, dataType, res)
 	{
 		if (includesOneOf(key, "Ability", "Name", "Type", "Evolutions", "Move") != "")
 			special = key;
-		printData(pkmn[key], key, special, res);
+		printData(pkmn[key], key, special, isCurl);
 		special = "";
-		res.write("\n");
+		write("\n");
 	}
 }
 
-//document.getElementById("output").innerHTML = "";
+//doc.getElementById("output").innerHTML = "";
 
 /**
  * checks if one on the strings is present in the source string
@@ -83,7 +108,7 @@ function includesOneOf(str)
     return ("");
 }
 
-function printData(data, key, special, res)
+function printData(data, key, special, isCurl)
 {
 	if (typeof(data) != "object")
 	{
@@ -93,16 +118,20 @@ function printData(data, key, special, res)
 			output = "\033[32m" + data + "\033[0m";
 		else
 			output = data;
-		res.write(key + ":" + output);
+		write(key + ":" + output);
 	}
 	else
 	{
 		for (let x in data)
 		{
-			printData(data[x], x, special, res);
-			res.write("|");
+			printData(data[x], x, special, isCurl);
+			write("|");
 		}
 	}
 }
 
-//document.getElementById("list")
+function write(msg)
+{
+	out += msg;
+}
+//doc.getElementById("list")
