@@ -2,6 +2,7 @@ function urlArg(url)
 {
 	if (url.includes("/") == false)
 		return ("");
+	url = url.replaceAll("%20", " ");
 	return (url.substring(url.lastIndexOf("/"), url.length));
 }
 

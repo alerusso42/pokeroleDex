@@ -26,6 +26,7 @@ lib.app.get("/*splat", (req, res) =>
 	let arg = lib.utils.urlArg(url);
 	let dataName = arg.replaceAll("/", "");
 	let dataType = dir.replaceAll("/", "");
+	dataName = dataName[0].toUpperCase() + dataName.substring(1, dataName.length);
 	write(dir + "\n");
 	write(dataName + "\n");
 	try 
@@ -37,7 +38,7 @@ lib.app.get("/*splat", (req, res) =>
 		write(dataType + " " + dataName + " not found.");
 		return (res.status(404).end("info: " + err + "\n"));
 	}
-	doc.getElementById("test").innerHTML = out;
+	doc.getElementById("test").innerHTML += out;
 	res.send(dom.serialize());
 });
 
@@ -73,8 +74,9 @@ function search(dataName, dataType)
 	let special = "";
 	for (let key in pkmn)
 	{
-		if (includesOneOf(key, "Ability", "Name", "Type", "Evolutions", "Move") != "")
-			special = key;
+		special = includesOneOf(key, "Ability", "Pokemon", "Name", "Type", "Evolutions", "Move");
+		if (special == "Evolutions" || special == "Name")
+			special = "Pokemon";
 		printData(pkmn[key], key, special);
 		special = "";
 		write("<br>");
@@ -107,7 +109,11 @@ function printData(data, key, special)
 
 		if (special != "")
 		{
-			output = data;
+			if (key == "Item")
+				output = `<a href="/${key}/${data}">${data}</a>`;
+			else
+				output = `<a href="/${special}/${data}">${data}</a>`;
+				
 		}
 		else
 			output = data;
