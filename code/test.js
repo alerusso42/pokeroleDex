@@ -3,6 +3,12 @@ const dataPath = '../data/v3.0/';
 
 let server = lib.http.createServer((req, res) => 
 	{
+		let isCurl = false;
+		if (req.headers['user-agent'].includes("curl") == true)
+			isCurl = true;
+		if (isCurl == false)
+			res.write("<html><head><meta charset='utf-8'></head><body>");
+		console.log(req.headers['user-agent']);
 		let url = lib.url.parse(req.url).pathname;
 		let dir = lib.utils.urlDir(url);
 		let arg = lib.utils.urlArg(url);
@@ -21,6 +27,8 @@ let server = lib.http.createServer((req, res) =>
 			res.write(dataType + " " + dataName + " not found.");
 			res.end("info: " + err + "\n");
 		}
+		if (isCurl == false)
+			res.write("</body></html>");
 		res.end();
 	}
 );
@@ -46,13 +54,13 @@ Example: http://localhost:8080/Pokedex/Absol\n\
 function search(dataName, dataType, res)
 {
 	pkmn = require('../data/v3.0/' + dataType + '/' + dataName + ".json");
-	let special = false;
+	let special = "";
 	for (let key in pkmn)
 	{
 		if (includesOneOf(key, "Ability", "Name", "Type", "Evolutions", "Move") != "")
-			special = true;
+			special = key;
 		printData(pkmn[key], key, special, res);
-		special = false;
+		special = "";
 		res.write("\n");
 	}
 }
@@ -81,7 +89,7 @@ function printData(data, key, special, res)
 	{
 		let output = "";
 
-		if (special == true)
+		if (special != "")
 			output = "\033[32m" + data + "\033[0m";
 		else
 			output = data;
