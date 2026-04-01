@@ -18,33 +18,27 @@ lib.app.get("/*splat", (req, res) =>
 	out = "";
 	const dom = getHtml("./code/index.html");
 	const doc = dom.window.document;
-	let isCurl = false;
 	if (req.headers['user-agent'].includes("curl") == true)
-		isCurl = true;
+		res.end("");
 	console.log(req.headers['user-agent']);
 	let url = lib.url.parse(req.url).pathname;
 	let dir = lib.utils.urlDir(url);
 	let arg = lib.utils.urlArg(url);
 	let dataName = arg.replaceAll("/", "");
 	let dataType = dir.replaceAll("/", "");
-	write(dir + "\n", isCurl, res);
-	write(dataName + "\n", isCurl, res);
+	write(dir + "\n");
+	write(dataName + "\n");
 	try 
 	{
-		search(dataName, dataType, isCurl);
+		search(dataName, dataType);
 	}
 	catch (err)
 	{
 		write(dataType + " " + dataName + " not found.");
 		return (res.status(404).end("info: " + err + "\n"));
 	}
-	if (isCurl == true)
-		res.end(out);
-	else
-	{
-		doc.getElementById("test").innerHTML = out;
-		res.send(dom.serialize());
-	}
+	doc.getElementById("test").innerHTML = out;
+	res.send(dom.serialize());
 });
 
 
@@ -53,18 +47,6 @@ function tutorial(req, res)
 	out = "";
 	const dom = getHtml("./code/index.html");
 	const doc = dom.window.document;
-	let isCurl = req.headers['user-agent'].includes("curl");
-	let msgCurl = "\
-locations list:\n\
-/: show this message\n\
-/Abilities: show Abilities info\n\
-/Items: show Items info\n\
-/Moves: show Moves info\n\
-/Natures: show Natures info\n\
-/Pokedex: show pokemon info\n\
-\n\
-Example: http://localhost:8080/Pokedex/Absol\n\
-";
 	let msgHtml = "\
 locations list:<br>\
 /: show this message<br>\
@@ -76,8 +58,8 @@ locations list:<br>\
 <br>\
 Example: http://localhost:8080/Pokedex/Absol<br>\
 ";
-	if (isCurl)
-		res.send(msgCurl);
+	if (req.headers['user-agent'].includes("curl") == true)
+		res.end("no.");
 	else
 	{
 		doc.getElementById("test").innerHTML = msgHtml;
@@ -85,7 +67,7 @@ Example: http://localhost:8080/Pokedex/Absol<br>\
 	}
 }
 
-function search(dataName, dataType, isCurl)
+function search(dataName, dataType)
 {
 	pkmn = require('../data/v3.0/' + dataType + '/' + dataName + ".json");
 	let special = "";
@@ -93,12 +75,9 @@ function search(dataName, dataType, isCurl)
 	{
 		if (includesOneOf(key, "Ability", "Name", "Type", "Evolutions", "Move") != "")
 			special = key;
-		printData(pkmn[key], key, special, isCurl);
+		printData(pkmn[key], key, special);
 		special = "";
-		if (isCurl)
-			write("\n");
-		else
-			write("<br>");
+		write("<br>");
 	}
 }
 
@@ -120,7 +99,7 @@ function includesOneOf(str)
     return ("");
 }
 
-function printData(data, key, special, isCurl)
+function printData(data, key, special)
 {
 	if (typeof(data) != "object")
 	{
@@ -128,10 +107,7 @@ function printData(data, key, special, isCurl)
 
 		if (special != "")
 		{
-			if (isCurl)
-				output = "\033[32m" + data + "\033[0m";
-			else
-				output = data;
+			output = data;
 		}
 		else
 			output = data;
@@ -141,7 +117,7 @@ function printData(data, key, special, isCurl)
 	{
 		for (let x in data)
 		{
-			printData(data[x], x, special, isCurl);
+			printData(data[x], x, special);
 			write("|");
 		}
 	}
