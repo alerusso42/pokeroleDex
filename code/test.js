@@ -27,8 +27,6 @@ lib.app.get("/*splat", (req, res) =>
 	let dataName = arg.replaceAll("/", "");
 	let dataType = dir.replaceAll("/", "");
 	dataName = dataName[0].toUpperCase() + dataName.substring(1, dataName.length);
-	write(dir + "\n");
-	write(dataName + "\n");
 	try 
 	{
 		search(dataName, dataType);
@@ -77,6 +75,8 @@ function search(dataName, dataType)
 		special = includesOneOf(key, "Ability", "Pokemon", "Name", "Type", "Evolutions", "Move");
 		if (special == "Evolutions" || special == "Name")
 			special = "Pokemon";
+		if (special == "Move")
+			printMove(pkmn[key], key);
 		printData(pkmn[key], key, special);
 		special = "";
 		write("<br>");
@@ -105,19 +105,19 @@ function printData(data, key, special)
 {
 	if (typeof(data) != "object")
 	{
-		let output = "";
-
-		if (special != "")
+		if (special != "" && key == "Item")
+			write(`<a href="/${key}/${data}">${data}</a>`);
+		else if (special != "")
 		{
-			if (key == "Item")
-				output = `<a href="/${key}/${data}">${data}</a>`;
-			else
-				output = `<a href="/${special}/${data}">${data}</a>`;
-				
+			write(`<a class="data-row" href="/${special}/${data}">${key}:${data}</a>`);
 		}
 		else
-			output = data;
-		write(key + ":" + output);
+		{
+			write(`<div class="data-row">
+			<span class="key">${key}:</span> 
+			<span class="value">${data}</span>
+			</div>`);
+		}
 	}
 	else
 	{
@@ -128,6 +128,18 @@ function printData(data, key, special)
 		}
 	}
 }
+
+function printMove(data, key)
+{
+	let starter = new Array();
+	let rookie = new Array();
+	let standard = new Array();
+	let advanced = new Array();
+	let expert = new Array();
+	let ace = new Array();
+}
+
+//function printSingleMov()
 
 function write(msg)
 {
