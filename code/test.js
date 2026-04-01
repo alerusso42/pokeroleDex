@@ -43,7 +43,6 @@ lib.app.get("/*splat", (req, res) =>
 	else
 	{
 		doc.getElementById("test").innerHTML = out;
-		console.log(out);
 		res.send(dom.serialize());
 	}
 });
@@ -55,7 +54,7 @@ function tutorial(req, res)
 	const dom = getHtml("./code/index.html");
 	const doc = dom.window.document;
 	let isCurl = req.headers['user-agent'].includes("curl");
-	let msg = "\
+	let msgCurl = "\
 locations list:\n\
 /: show this message\n\
 /Abilities: show Abilities info\n\
@@ -66,12 +65,22 @@ locations list:\n\
 \n\
 Example: http://localhost:8080/Pokedex/Absol\n\
 ";
-	write(msg);
+	let msgHtml = "\
+locations list:<br>\
+/: show this message<br>\
+/Abilities: show Abilities info<br>\
+/Items: show Items info<br>\
+/Moves: show Moves info<br>\
+/Natures: show Natures info<br>\
+/Pokedex: show pokemon info<br>\
+<br>\
+Example: http://localhost:8080/Pokedex/Absol<br>\
+";
 	if (isCurl)
-		res.send(msg);
+		res.send(msgCurl);
 	else
 	{
-		doc.getElementById("test").innerHTML = msg;
+		doc.getElementById("test").innerHTML = msgHtml;
 		res.send(dom.serialize());
 	}
 }
@@ -86,7 +95,10 @@ function search(dataName, dataType, isCurl)
 			special = key;
 		printData(pkmn[key], key, special, isCurl);
 		special = "";
-		write("\n");
+		if (isCurl)
+			write("\n");
+		else
+			write("<br>");
 	}
 }
 
@@ -115,7 +127,12 @@ function printData(data, key, special, isCurl)
 		let output = "";
 
 		if (special != "")
-			output = "\033[32m" + data + "\033[0m";
+		{
+			if (isCurl)
+				output = "\033[32m" + data + "\033[0m";
+			else
+				output = data;
+		}
 		else
 			output = data;
 		write(key + ":" + output);
