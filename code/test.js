@@ -97,7 +97,7 @@ async function getMetaData(metaData, res)
 {
 	if (metaData == "css")
 		return (res.send(lib.fs.readFileSync("html/pokemon.css")));
-	let url = imgBox + "kyogre.png";
+	let url = imgBox + "rayquaza.png";
 	let binary = await lib.utils.fetchBinary(url);
 	res.send(binary);
 }
@@ -108,7 +108,7 @@ async function getData(dataName, dataType, doc)
 	{
 		console.log("searching in " + types.at(curr_type) + "\n");
 		await search(dataName, dataType);
-		console.log("found\n\n\n\n\n");
+		console.log("found.");
 		let url = "";
 		if (dataType == "Pokemon")
 			url = imgHome;
@@ -138,7 +138,6 @@ function loadImgUrl(doc, path, name)
 	if (name != "")
 		imgTag.src += lib.utils.urlNormalize(name) + ".png";
 	imgTag.alt = name;
-	console.log(imgTag.src);
 }
 
 function search(dataName, dataType)
