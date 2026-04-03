@@ -2,6 +2,8 @@ const lib = require('./lib.js');
 const dataPath = '../data/v3.0/';
 let out = "";
 let curr_type = 0;
+let imgBox = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/BoxSprites/";
+let imgHome = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/HomeSprites/";
 let types = new Array("Pokemon", "Nature", "Ability", "Item");
 
 function getHtml (path)
@@ -35,14 +37,14 @@ lib.app.get("/*splat", (req, res) =>
 	const dom = getHtml("./html/result.html");
 	const doc = dom.window.document;
 	let url = lib.url.parse(req.url).pathname;
+	let metaData = includesOneOf(url, "css", "favicon");
+	if (metaData != "")
+		return getMetaData(metaData, res);
 	let dir = lib.utils.urlDir(url);
 	let arg = lib.utils.urlArg(url);
 	let dataName = arg.replaceAll("/", "");
 	let dataType = dir.replaceAll("/", "");
 	dataName = dataName[0].toUpperCase() + dataName.substring(1, dataName.length);
-	let metaData = includesOneOf(dataType, "css", "favicon");
-	if (metaData != "")
-		return getMetaData(dataType);
 	if (dataType == "")
 		dataType = types[0];
 	curr_type = 0;
@@ -69,6 +71,15 @@ function tutorial(req, res)
 	out = "";
 	const dom = getHtml("./html/index.html");
 	res.send(dom.serialize());
+}
+
+async function getMetaData(metaData, res)
+{
+	if (metaData == "css")
+		return (res.send(lib.fs.readFileSync("html/pokemon.css")));
+	let url = imgBox + "kyogre.png";
+	let binary = await lib.utils.fetchBinary(url);
+	res.send(binary);
 }
 
 async function getData(dataName, dataType)

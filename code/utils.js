@@ -13,4 +13,34 @@ function urlDir(url)
 	return (url.substring(0, url.lastIndexOf("/") + 1));
 }
 
-module.exports = {urlArg, urlDir}
+async function fetchBinary(url)
+{
+	try 
+	{
+		let data = await fetch(url);
+		let buffer = Buffer.from(await data.arrayBuffer());
+		return (buffer);
+	}
+	catch (err)
+	{
+		console.log("fetchBinary exception:" + err);
+		return ("fetchBinary exception:" + err);
+	}
+}
+
+async function fetchText(url)
+{
+	try 
+	{
+		let data = await fetch(url);
+		let buffer = Buffer.from(await data.text());
+		return (buffer);
+	}
+	catch (err)
+	{
+		console.log("fetchBinary exception:" + err);
+		return ("fetchText exception:" + err);
+	}
+}
+
+module.exports = {urlArg, urlDir, fetchBinary, fetchText}
