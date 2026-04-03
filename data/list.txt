@@ -1,4 +1,4 @@
---Ability--
+--- Ability ---
 Adaptability
 Aerilate
 Aftermath
@@ -304,7 +304,7 @@ Wonder Guard
 Wonder Skin
 Zen Mode
 Zero to Hero
---Item--
+--- Item ---
 Abomasite
 Absolite
 Aerodactylite
@@ -541,7 +541,7 @@ White Herb
 Wide Lens
 Zinc
 Zoom Lens
---Move--
+--- Move ---
 Absorb
 Accelerock
 Acid Armor
@@ -1436,7 +1436,7 @@ Zap Cannon
 Zen Headbutt
 Zing Zap
 Zippy Zap
---Nature--
+--- Nature ---
 Adamant
 Bashful
 Bold
@@ -1462,7 +1462,7 @@ Relaxed
 Sassy
 Serious
 Timid
---Pokemon--
+--- Pokemon ---
 Abomasnow (Mega Form)
 Abomasnow
 Abra
