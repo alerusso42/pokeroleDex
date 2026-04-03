@@ -2,8 +2,11 @@ const lib = require('./lib.js');
 const dataPath = '../data/v3.0/';
 let out = "";
 let curr_type = 0;
+let imgMissingno = "https://media.pokemoncentral.it/wiki/0/02/Sprrz0000.png";
+let imgPkmnType = "https://raw.githubusercontent.com/partywhale/pokemon-type-icons/master/icons/{ID}.svg"
 let imgBox = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/BoxSprites/";
 let imgHome = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/HomeSprites/";
+let imgItem = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/ItemSprites/";
 let types = new Array("Pokemon", "Nature", "Ability", "Item");
 
 function getHtml (path)
@@ -44,15 +47,15 @@ lib.app.get("/*splat", (req, res) =>
 	let arg = lib.utils.urlArg(url);
 	let dataName = arg.replaceAll("/", "");
 	let dataType = dir.replaceAll("/", "");
-	dataName = dataName[0].toUpperCase() + dataName.substring(1, dataName.length);
+	dataName = dataNormalize(dataName);
 	if (dataType == "")
 		dataType = types[0];
 	curr_type = 0;
+	console.log("Searching \"" + dataName + "\"");
 	getData(dataName, dataType, doc)
 	.then(() => 
 	{
 		doc.getElementById("test").innerHTML += out;
-		doc.getElementById("title").innerHTML = dataType + ": " + dataName; 
 		res.send(dom.serialize());
 	}
 	).catch((err) => 
@@ -63,6 +66,22 @@ lib.app.get("/*splat", (req, res) =>
 	}
 	);
 });
+
+function dataNormalize(data)
+{
+	data = data[0].toUpperCase() + data.substring(1, data.length);
+	if (data.startsWith("Mega ") == true)
+		data = dataNormalize(data.substring(5, data.length) + " (Mega Form)");
+	let i = 0;
+	while (i != data.length)
+	{
+		if (data[i] == ' ' || data[i] == '(')
+			data = data.substring(0, i + 1) + data[i + 1].toUpperCase() + data.substring(i + 2, data.length);
+		++i;
+	}
+	console.log(data);
+	return (data);
+}
 
 
 function tutorial(req, res)
@@ -87,24 +106,39 @@ async function getData(dataName, dataType, doc)
 {
 	try 
 	{
-		search(dataName, dataType);
-		const imgTag = doc.getElementById("data-img");
-		if (imgTag)
-		{
-            imgTag.src = imgHome + lib.utils.urlNormalize(dataName) + ".png";
-            imgTag.alt = dataName;
-            console.log("Immagine impostata: " + imgTag.src);
-		}
+		console.log("searching in " + types.at(curr_type) + "\n");
+		await search(dataName, dataType);
+		console.log("found\n\n\n\n\n");
+		let url = "";
+		if (dataType == "Pokemon")
+			url = imgHome;
+		else if (dataType == "Item")
+			url = imgItem;
+		loadImgUrl(doc, url, dataName);
+		doc.getElementById("title").innerHTML = dataType + ": " + dataName; 
 	}
 	catch (err)
 	{
 		curr_type += 1;
-		console.log("searching in " + types.at(curr_type) + "\n");
 		if (dataType == types.at(-1))
+		{
+			loadImgUrl(doc, imgMissingno, "");
+			doc.getElementById("title").innerHTML = dataName + " non trovato."; 
 			return (err);
+		}
 		else
 			await getData(dataName, types.at(curr_type), doc);
 	}
+}
+
+function loadImgUrl(doc, path, name)
+{
+	const imgTag = doc.getElementById("data-img");
+	imgTag.src = path;
+	if (name != "")
+		imgTag.src += lib.utils.urlNormalize(name) + ".png";
+	imgTag.alt = name;
+	console.log(imgTag.src);
 }
 
 function search(dataName, dataType)
@@ -190,11 +224,13 @@ function printMove(data, key)
 	movesMap.set("Advanced", []);
 	movesMap.set("Expert", []);
 	movesMap.set("Ace", []);
+	movesMap.set("Master", []);
 	movesMap.set("Champion", []);
 	for (let i in data)
 	{
 		let rank = data[i]["Learned"];
 		let move = data[i]["Name"];
+		console.log(rank, move);
 		movesMap.get(rank).push(move);
 	}
 	write(`<h3 class="section-title">Moveset per Grado</h3>`);
