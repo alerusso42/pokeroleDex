@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokéDex API</title>
+    <style>
+        :root {
+            --poke-red: #d32f2f;
+            --poke-dark: #2c3e50;
+            --poke-light: #f5f5f5;
+            --white: #ffffff;
+            --black: #000000;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(
+                to bottom,
+                var(--poke-red) 0%,
+                var(--poke-red) 48%,
+                var(--black) 48%,
+                var(--black) 52%,
+                var(--poke-light) 52%,
+                var(--poke-light) 100%
+            );
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 100px auto 40px auto; 
+            background: var(--white);
+            border-radius: 15px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .image-wrapper {
+            width: 160px;
+            height: 160px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 50%;
+            border: 8px solid var(--black);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: -85px;
+            left: 0;
+            right: 0;
+            z-index: 10;
+        }
+
+        .image-wrapper img {
+            max-width: 85%;
+            max-height: 85%;
+            object-fit: contain;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--poke-red);
+            margin-top: 60px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* --- STILE BARRA DI RICERCA --- */
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: #eee;
+            padding: 10px;
+            border-radius: 50px;
+            border: 2px solid var(--poke-dark);
+        }
+
+        .search-input {
+            flex: 2;
+            border: none;
+            background: transparent;
+            padding: 10px 20px;
+            font-size: 1em;
+            outline: none;
+        }
+
+        .search-select {
+            flex: 1;
+            border: none;
+            background: var(--white);
+            border-radius: 50px;
+            padding: 5px 15px;
+            font-weight: bold;
+            color: var(--poke-dark);
+            cursor: pointer;
+        }
+
+        .search-button {
+            background: var(--poke-red);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .search-button:hover { background: #b71c1c; }
+
+        /* --- MENU NAVIGAZIONE --- */
+        .nav-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+        }
+
+        .nav-button {
+            background: var(--poke-light);
+            border: 2px solid var(--poke-dark);
+            color: var(--poke-dark);
+            padding: 10px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            font-size: 0.8em;
+        }
+
+        .nav-button:hover {
+            background: var(--poke-dark);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        #test {
+            margin-top: 30px;
+            border-top: 2px dashed #eee;
+            padding-top: 20px;
+        }
+
+        .data-row { display: flex; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .key { font-weight: bold; min-width: 120px; color: var(--poke-red); }
+        .value { flex: 1; }
+
+        @media (max-width: 500px) {
+            .search-container { flex-direction: column; border-radius: 15px; }
+            .nav-menu { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="image-wrapper">
+        <img src="" id="img" alt="">
+    </div>
+
+    <div class="container">
+        <h1>PokéDex Database</h1>
+
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Cerca nome (es. Absol)...">
+            <select id="searchType" class="search-select">
+                <option value="Pokemon">Pokémon</option>
+                <option value="Ability">Abilità</option>
+                <option value="Move">Mossa</option>
+                <option value="Item">Oggetto</option>
+                <option value="Nature">Natura</option>
+            </select>
+            <button onclick="executeSearch()" class="search-button">VAI</button>
+        </div>
+        
+        <div class="nav-menu">
+            <a href="/Pokemon" class="nav-button">Pokémon</a>
+            <a href="/Ability" class="nav-button">Abilità</a>
+            <a href="/Move" class="nav-button">Mosse</a>
+            <a href="/Item" class="nav-button">Oggetti</a>
+            <a href="/Nature" class="nav-button">Nature</a>
+            <a href="/" class="nav-button" style="border-color: var(--poke-red);">Home</a>
+        </div>
+
+        <div id="test">
+            <p style="text-align:center; color:#666; font-style:italic;">Utilizza la barra sopra o i bottoni per navigare.</p>
+        </div>
+    </div>
+
+    <script>
+        // Funzione per navigare all'URL desiderato
+        function executeSearch() {
+            const name = document.getElementById('searchInput').value.trim();
+            const type = document.getElementById('searchType').value;
+            
+            if (name) {
+                // Esempio: reindirizza a /Pokemon/Absol
+                window.location.href = `/${type}/${name}`;
+            } else {
+                // Se il campo è vuoto, va alla lista generale della categoria
+                window.location.href = `/${type}`;
+            }
+        }
+
+        // Ascolta il tasto "Invio" nel campo di testo
+        document.getElementById('searchInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                executeSearch();
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,6 +1,8 @@
 const lib = require('./lib.js');
 const dataPath = '../data/v3.0/';
 let out = "";
+let curr_type = 0;
+let types = new Array("Pokemon", "Nature", "Ability", "Item");
 
 function getHtml (path) 
 {
@@ -15,59 +17,88 @@ lib.app.get("/", tutorial);
 
 lib.app.get("/*splat", (req, res) =>
 {
-	out = "";
-	const dom = getHtml("./code/index.html");
-	const doc = dom.window.document;
+	console.log(req.headers['user-agent']);
 	if (req.headers['user-agent'].includes("curl") == true)
 		res.end("");
-	console.log(req.headers['user-agent']);
+	out = "";
+	const dom = getHtml("./html/result.html");
+	const doc = dom.window.document;
 	let url = lib.url.parse(req.url).pathname;
 	let dir = lib.utils.urlDir(url);
 	let arg = lib.utils.urlArg(url);
 	let dataName = arg.replaceAll("/", "");
 	let dataType = dir.replaceAll("/", "");
 	dataName = dataName[0].toUpperCase() + dataName.substring(1, dataName.length);
+	let metaData = includesOneOf(dataType, "css", "favicon");
+	if (metaData != "")
+		return getMetaData(dataType);
+	if (dataType == "")
+		dataType = types[0];
+	curr_type = 0;
+	getData(dataName, dataType)
+	.then(() => 
+	{
+		doc.getElementById("test").innerHTML += out;
+		res.send(dom.serialize());
+	}
+	).catch((err) => 
+	{
+		write(dataType + " " + dataName + " not found.");
+		console.log(err);
+		return (res.status(404).end("info: " + err + "\n"));
+	}
+	);
+});
+
+
+function tutorial(req, res)
+{
+	if (req.headers['user-agent'].includes("curl") == true)
+		res.end("no.");
+	out = "";
+	const dom = getHtml("./html/index.html");
+	res.send(dom.serialize());
+}
+
+async function getData(dataName, dataType)
+{
 	try 
 	{
 		search(dataName, dataType);
 	}
 	catch (err)
 	{
-		write(dataType + " " + dataName + " not found.");
-		return (res.status(404).end("info: " + err + "\n"));
+		curr_type += 1;
+		console.log("searching in " + types.at(curr_type) + "\n");
+		if (dataType == types.at(-1))
+			return (err);
+		else
+			getData(dataName, types.at(curr_type));
 	}
-	doc.getElementById("test").innerHTML += out;
-	res.send(dom.serialize());
-});
-
-
-function tutorial(req, res)
-{
-	out = "";
-	const dom = getHtml("./code/index.html");
-	const doc = dom.window.document;
-	let msgHtml = "\
-locations list:<br>\
-/: show this message<br>\
-/Abilities: show Abilities info<br>\
-/Items: show Items info<br>\
-/Moves: show Moves info<br>\
-/Natures: show Natures info<br>\
-/Pokedex: show pokemon info<br>\
-<br>\
-Example: http://localhost:8080/Pokedex/Absol<br>\
-";
-	if (req.headers['user-agent'].includes("curl") == true)
-		res.end("no.");
-	else
+	try 
 	{
-		doc.getElementById("test").innerHTML = msgHtml;
-		res.send(dom.serialize());
+		let search = dataName.toLowerCase();
+		let url = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/";
+		if (dataType == "Pokemon")
+			url += `HomeSprites/${search}.png`;
+		else if (dataType == "Item")
+			url += `HomeSprites/${search}.png`;
+		else
+			url = "test";
+		console.log(`risultato: ${url}`);
 	}
+	catch (error)
+	{
+		console.log(`errore ${error}`);
+		return (error);
+	}
+	return ("");
 }
 
 function search(dataName, dataType)
 {
+	if (dataType.includes("..") || dataName.includes(".."))
+		throw ("Searching .. or similar not allowed.\n");
 	pkmn = require('../data/v3.0/' + dataType + '/' + dataName + ".json");
 	let special = "";
 	for (let key in pkmn)
@@ -124,7 +155,7 @@ function printData(data, key, special)
 		for (let x in data)
 		{
 			printData(data[x], x, special);
-			write("|");
+			write(`<span class="separator">"|"</span>`);
 		}
 	}
 }

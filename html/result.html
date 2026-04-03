@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>PokéDex API</title>
+<style>
+    :root {
+        --poke-red: #d32f2f;
+        --poke-dark: #2c3e50;
+        --poke-light: #f5f5f5;
+        --white: #ffffff;
+    }
+
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(
+            to bottom,
+            var(--poke-red) 0%,
+            var(--poke-red) 48%,
+            #000 48%,
+            #000 52%,
+            var(--poke-light) 52%,
+            var(--poke-light) 100%
+        );
+        background-attachment: fixed;
+        min-height: 100vh;
+        color: #333;
+        padding: 20px;
+    }
+
+    /* Contenitore principale */
+    #test, .container {
+        max-width: 800px;
+        margin: 80px auto 40px auto; /* Spazio per l'immagine che spunta */
+        background: var(--white);
+        border-radius: 15px;
+        padding: 40px 30px 30px 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        position: relative;
+        z-index: 1;
+    }
+
+    h1 {
+        text-align: center;
+        color: var(--poke-red);
+        font-size: 2.2em;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    /* Wrapper Immagine stile Pokéball */
+    .image-wrapper {
+        width: 180px;
+        height: 180px;
+        margin: 0 auto -90px auto; /* Metà fuori dal contenitore */
+        background: var(--white);
+        border-radius: 50%;
+        border: 8px solid #000;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        top: -120px; /* Alza l'immagine sopra il box */
+        z-index: 10;
+        overflow: hidden;
+    }
+
+    .image-wrapper img {
+        max-width: 85%;
+        filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.1));
+        transition: transform 0.3s ease;
+    }
+    
+    .image-wrapper:hover img {
+        transform: scale(1.1);
+    }
+
+    /* Righe di dati (stile Pokédex) */
+    .data-row {
+        display: flex;
+        padding: 12px 0;
+        border-bottom: 1px solid #eee;
+        align-items: center;
+    }
+
+    .data-row:last-child {
+        border-bottom: none;
+    }
+
+    .key {
+        font-weight: bold;
+        color: var(--poke-dark);
+        min-width: 140px;
+        text-transform: uppercase;
+        font-size: 0.85em;
+        letter-spacing: 1px;
+    }
+
+    .value {
+        color: #555;
+        flex-grow: 1;
+    }
+
+    /* Link stilizzati come "Badge" o pulsanti */
+    a {
+        color: var(--poke-red);
+        text-decoration: none;
+        font-weight: 600;
+        background: #fdf2f2;
+        padding: 4px 10px;
+        border-radius: 6px;
+        border: 1px solid transparent;
+        transition: all 0.2s ease;
+        display: inline-block;
+        margin: 2px;
+    }
+
+    a:hover {
+        background: var(--poke-red);
+        color: var(--white);
+        box-shadow: 0 2px 8px rgba(211, 47, 47, 0.3);
+        transform: translateY(-1px);
+    }
+
+    /* Sezioni bonus */
+    .box {
+        background: #f9f9f9;
+        border-left: 5px solid var(--poke-red);
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 0 8px 8px 0;
+    }
+
+    .separator { 
+        color: #ccc; 
+        margin: 0 8px; 
+        font-weight: lighter;
+    }
+
+    /* Ottimizzazione per Mobile */
+    @media (max-width: 600px) {
+        .data-row {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .key {
+            margin-bottom: 5px;
+        }
+    }
+</style>
+</head>
+<body>
+	<img src="" id="">
+    <div id="test">
+        </div>
+</body>
+</html>
