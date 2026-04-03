@@ -15,6 +15,17 @@ lib.app.listen(8080, "0.0.0.0");
 
 lib.app.get("/", tutorial);
 
+lib.app.get("/keyPressed*splat", (req, res) =>
+{
+	let url = lib.url.parse(req.url).pathname;
+	let arg = lib.utils.urlArg(url);
+	if (arg == "")
+		return ("");
+	console.log("key pressed->" + arg);
+	res.send("key pressed->" + arg);
+}
+);
+
 lib.app.get("/*splat", (req, res) =>
 {
 	console.log(req.headers['user-agent']);
