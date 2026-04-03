@@ -230,7 +230,6 @@ function printMove(data, key)
 	{
 		let rank = data[i]["Learned"];
 		let move = data[i]["Name"];
-		console.log(rank, move);
 		movesMap.get(rank).push(move);
 	}
 	write(`<h3 class="section-title">Moveset per Grado</h3>`);
