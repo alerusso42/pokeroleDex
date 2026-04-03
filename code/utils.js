@@ -13,6 +13,11 @@ function urlDir(url)
 	return (url.substring(0, url.lastIndexOf("/") + 1));
 }
 
+function urlNormalize(url)
+{
+	return (url.toLowerCase().replaceAll(" ", "-").replaceAll("(", "").replaceAll(")", ""));
+}
+
 async function fetchBinary(url)
 {
 	try 
@@ -43,4 +48,4 @@ async function fetchText(url)
 	}
 }
 
-module.exports = {urlArg, urlDir, fetchBinary, fetchText}
+module.exports = {urlArg, urlDir, urlNormalize, fetchBinary, fetchText}

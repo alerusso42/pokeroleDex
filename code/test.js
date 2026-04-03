@@ -48,7 +48,7 @@ lib.app.get("/*splat", (req, res) =>
 	if (dataType == "")
 		dataType = types[0];
 	curr_type = 0;
-	getData(dataName, dataType)
+	getData(dataName, dataType, doc)
 	.then(() => 
 	{
 		doc.getElementById("test").innerHTML += out;
@@ -82,11 +82,18 @@ async function getMetaData(metaData, res)
 	res.send(binary);
 }
 
-async function getData(dataName, dataType)
+async function getData(dataName, dataType, doc)
 {
 	try 
 	{
 		search(dataName, dataType);
+		const imgTag = doc.getElementById("data-img");
+		if (imgTag)
+		{
+            imgTag.src = imgHome + lib.utils.urlNormalize(dataName) + ".png";
+            imgTag.alt = dataName;
+            console.log("Immagine impostata: " + imgTag.src);
+		}
 	}
 	catch (err)
 	{
@@ -95,26 +102,8 @@ async function getData(dataName, dataType)
 		if (dataType == types.at(-1))
 			return (err);
 		else
-			getData(dataName, types.at(curr_type));
+			await getData(dataName, types.at(curr_type), doc);
 	}
-	try 
-	{
-		let search = dataName.toLowerCase();
-		let url = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/";
-		if (dataType == "Pokemon")
-			url += `HomeSprites/${search}.png`;
-		else if (dataType == "Item")
-			url += `HomeSprites/${search}.png`;
-		else
-			url = "test";
-		console.log(`risultato: ${url}`);
-	}
-	catch (error)
-	{
-		console.log(`errore ${error}`);
-		return (error);
-	}
-	return ("");
 }
 
 function search(dataName, dataType)
@@ -128,9 +117,12 @@ function search(dataName, dataType)
 		special = includesOneOf(key, "Ability", "Pokemon", "Name", "Type", "Evolutions", "Move");
 		if (special == "Evolutions" || special == "Name")
 			special = "Pokemon";
+		else if (key == "GenderType")
+			special = "";
 		if (special == "Move")
 			printMove(pkmn[key], key);
-		printData(pkmn[key], key, special);
+		else
+			printData(pkmn[key], key, special);
 		special = "";
 		write("<br>");
 	}
@@ -158,19 +150,25 @@ function printData(data, key, special)
 {
 	if (typeof(data) != "object")
 	{
-		if (special != "" && key == "Item")
-			write(`<a href="/${key}/${data}">${data}</a>`);
+		write(`<div class="data-row">`);
+		write(`<span class="key">${key}:</span>`);
+		if (data == "")
+			write(`<span class="value">NULL</span>`);
+		else if (special != "" && key == "Item")
+		{
+			write(`<a class="badge" `);
+			write(`href="/${key}/${data}">${data}</a>`);
+		}
 		else if (special != "")
 		{
-			write(`<a class="data-row" href="/${special}/${data}">${key}:${data}</a>`);
+			write(`<a class="badge" `);
+			write(`href="/${special}/${data}">${data}</a>`);
 		}
 		else
 		{
-			write(`<div class="data-row">
-			<span class="key">${key}:</span> 
-			<span class="value">${data}</span>
-			</div>`);
+			write(`<span class="value">${data}</span>`);
 		}
+		write(`</div>`);
 	}
 	else
 	{
@@ -184,12 +182,31 @@ function printData(data, key, special)
 
 function printMove(data, key)
 {
-	let starter = new Array();
-	let rookie = new Array();
-	let standard = new Array();
-	let advanced = new Array();
-	let expert = new Array();
-	let ace = new Array();
+	let movesMap = new Map();
+	movesMap.set("Starter", []);
+	movesMap.set("Rookie", []);
+	movesMap.set("Standard", []);
+	movesMap.set("Advanced", []);
+	movesMap.set("Expert", []);
+	movesMap.set("Ace", []);
+	movesMap.set("Champion", []);
+	for (let i in data)
+	{
+		let rank = data[i]["Learned"];
+		let move = data[i]["Name"];
+		movesMap.get(rank).push(move);
+	}
+	write(`<h3 class="section-title">Moveset per Grado</h3>`);
+	for (let [rank, moves] of movesMap)
+	{
+		console.log(rank);
+		write(`<div class="rank-header">${rank}</div>`);
+		for (let move of moves)
+		{
+			write(`<a href="/Move/${move}" class="badge">${move}</a>`);
+		}
+		write(`</div>`);
+	}
 }
 
 //function printSingleMov()
@@ -198,4 +215,3 @@ function write(msg)
 {
 	out += msg;
 }
-//doc.getElementById("list")
