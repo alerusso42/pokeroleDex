@@ -52,6 +52,7 @@ lib.app.get("/*splat", (req, res) =>
 	.then(() => 
 	{
 		doc.getElementById("test").innerHTML += out;
+		doc.getElementById("title").innerHTML = dataType + ": " + dataName; 
 		res.send(dom.serialize());
 	}
 	).catch((err) => 
