@@ -145,7 +145,12 @@ function search(dataName, dataType)
 {
 	if (dataType.includes("..") || dataName.includes(".."))
 		throw ("Searching .. or similar not allowed.\n");
-	pkmn = require('../data/v3.0/' + dataType + '/' + dataName + ".json");
+	let path = 'data/v3.0/' + dataType + '/' + dataName + '.json';
+	if (lib.fs.existsSync(path) == false)
+	{
+		throw ("file does not exist");
+	}
+	pkmn = JSON.parse(lib.fs.readFileSync(path, 'utf8'));
 	let special = "";
 	for (let key in pkmn)
 	{
@@ -235,7 +240,6 @@ function printMove(data, key)
 	write(`<h3 class="section-title">Moveset per Grado</h3>`);
 	for (let [rank, moves] of movesMap)
 	{
-		console.log(rank);
 		write(`<div class="rank-header">${rank}</div>`);
 		for (let move of moves)
 		{
