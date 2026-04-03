@@ -4,7 +4,7 @@ let out = "";
 let curr_type = 0;
 let types = new Array("Pokemon", "Nature", "Ability", "Item");
 
-function getHtml (path) 
+function getHtml (path)
 {
 	const fd = lib.fs.readFileSync(path);
 	const dom = new lib.JSDOM(fd);
