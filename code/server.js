@@ -9,7 +9,6 @@ let types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
 let out = "";
 let currType = 0;
 
-
 lib.app.listen(8080, "0.0.0.0");
 
 lib.app.get("/", tutorial);
@@ -36,64 +35,27 @@ lib.app.get("/*splat", (req, res) =>
 {
 	out = "";
 	currType = 0;
-	const dom = getHtml("./html/result.html");
-	const doc = dom.window.document;
-	let url = lib.url.parse(req.url).pathname;
-	let metaData = lib.utils.includesOneOf(url, "css", "favicon");
+	let client = new lib.types.Client(req, "./html/result.html");
+	let metaData = lib.utils.includesOneOf(client.url, "css", "favicon");
+	if (client.dirName == "")
+		client.dirName = types[0];
 	if (metaData != "")
 		return getMetaData(metaData, res);
-	let dir = lib.utils.urlDir(url);
-	let arg = lib.utils.urlArg(url);
-	let dataName = arg.replaceAll("/", "");
-	let dataType = dir.replaceAll("/", "");
-	dataName = dataNormalize(dataName);
-	if (dataType == "")
-		dataType = types[0];
-	let client = new lib.types.Client(dataName, dataType, doc);
-	currType = 0;
-	console.log("Searching \"" + dataName + "\"");
-	getData(dataName, dataType, doc)
+	console.table(client);
+	getData(client.dataName, client.dirName, client.doc)
 	.then(() => 
 	{
-		doc.getElementById("test").innerHTML += out;
-		res.send(dom.serialize());
+		client.doc.getElementById("test").innerHTML += out;
+		res.send(client.dom.serialize());
 	}
 	).catch((err) => 
 	{
-		write(dataType + " " + dataName + " not found.");
+		write(client.dirName + " " + client.dataName + " not found.");
 		console.log(err);
 		return (res.status(404).end("info: " + err + "\n"));
 	}
 	);
 });
-
-/**
- * 
- * @param {String} dataName
- * @param {Client} client
- * @returns {String}
- */
-function dataNormalize(dataName, client)
-{
-	dataName = dataName[0].toUpperCase() + dataName.substring(1, dataName.length);
-	if (dataName.startsWith("Mega ") == true && dataName.includes("drain") == false)
-		dataName = dataNormalize(dataName.substring(5, dataName.length) + " (Mega Form)");
-	let i = 0;
-	while (i != dataName.length)
-	{
-		if (dataName[i] == ' ' || dataName[i] == '(')
-			dataName = dataName.substring(0, i + 1) + dataName[i + 1].toUpperCase() + dataName.substring(i + 2, dataName.length);
-		++i;
-	}
-	return (dataName);
-}
-
-function getHtml (path)
-{
-	const fd = lib.fs.readFileSync(path);
-	const dom = new lib.JSDOM(fd);
-	return (dom);
-}
 
 function loadImgUrl(doc, path, name)
 {
