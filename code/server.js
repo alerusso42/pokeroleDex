@@ -36,7 +36,6 @@ lib.app.get("/*splat", (req, res) =>
 {
 	out = "";
 	currType = 0;
-	let client = {out, currType};
 	const dom = getHtml("./html/result.html");
 	const doc = dom.window.document;
 	let url = lib.url.parse(req.url).pathname;
@@ -67,7 +66,13 @@ lib.app.get("/*splat", (req, res) =>
 	);
 });
 
-function dataNormalize(dataName)
+/**
+ * 
+ * @param {String} dataName
+ * @param {Client} client
+ * @returns {String}
+ */
+function dataNormalize(dataName, client)
 {
 	dataName = dataName[0].toUpperCase() + dataName.substring(1, dataName.length);
 	if (dataName.startsWith("Mega ") == true && dataName.includes("drain") == false)

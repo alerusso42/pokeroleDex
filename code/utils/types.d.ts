@@ -1,9 +1,11 @@
 /** Every request, one client (keep alive off) */
-interface Client {
+interface Client 
+{
 	buff: string;
-	type: number;
-	//config: Map<string, any>;
-	// history: string[];
+	dataName: string;
+	dirName: string;
+	dirIndex: number;
+	doc: Document;
 }
 
 /**
