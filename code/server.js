@@ -51,12 +51,12 @@ lib.app.get("/*splat", (req, res) =>
 	getData(client)
 	.then(() => 
 	{
-		client.doc.getElementById("test").innerHTML += out;
+		client.doc.getElementById("test").innerHTML += client.buff;
 		res.send(client.dom.serialize());
 	}
 	).catch((err) => 
 	{
-		write(client.dirName + " " + client.dataName + " not found.");
+		write(client, client.dirName + " " + client.dataName + " not found.");
 		console.log(err);
 		return (res.status(404).end("info: " + err + "\n"));
 	}
@@ -146,82 +146,91 @@ function search(client)
 		else if (key == "GenderType")
 			special = "";
 		if (special == "Move")
-			printMove(pkmn[key], key);
+			printMove(client, pkmn[key]);
 		else
-			printData(pkmn[key], key, special);
+			printData(client, pkmn[key], key, special);
 		special = "";
-		write("<br>");
+		write(client, "<br>");
 	}
 }
 
-//doc.getElementById("output").innerHTML = "";
-
-function printData(dataName, key, special)
+/**
+ * 
+ * @param {lib.types.Client} client 
+ * @param {String} key 
+ * @param {String} special 
+ * @returns 
+ */
+function printData(client, data, key, special)
 {
-	if (typeof(dataName) != "object")
+	if (typeof(data) != "object")
 	{
 		if (lib.utils.includesOneOf(key, "Kind", "Value", "Stat") != "")
 			return ;
-		write(`<div class="data-row">`);
-		write(`<span class="key">${key}:</span>`);
-		if (dataName == "")
-			write(`<span class="value">NULL</span>`);
+		write(client, `<div class="data-row">`);
+		write(client, `<span class="key">${key}:</span>`);
+		if (data == "")
+			write(client, `<span class="value">NULL</span>`);
 		else if (special != "" && key == "Item")
 		{
-			write(`<a class="badge" `);
-			write(`href="/${key}/${dataName}">${dataName}</a>`);
+			write(client, `<a class="badge" `);
+			write(client, `href="/${key}/${data}">${data}</a>`);
 		}
 		else if (special != "")
 		{
-			write(`<a class="badge" `);
-			write(`href="/${special}/${dataName}">${dataName}</a>`);
+			write(client, `<a class="badge" `);
+			write(client, `href="/${special}/${data}">${data}</a>`);
 		}
 		else
 		{
-			write(`<span class="value">${dataName}</span>`);
+			write(client, `<span class="value">${data}</span>`);
 		}
-		write(`</div>`);
+		write(client, `</div>`);
 	}
 	else
 	{
-		for (let x in dataName)
+		for (let x in data)
 		{
-			printData(dataName[x], x, special);
-			write(`<span class="separator">"|"</span>`);
+			printData(client, data[x], x, special);
+			write(client, `<span class="separator">"|"</span>`);
 		}
 	}
 }
 
-function printMove(dataName, key)
+function printMove(client, moveData)
 {
 	let movesMap = new Map();
+
 	movesMap.set("Starter", []);
 	movesMap.set("Beginner", []);
 	movesMap.set("Amateur", []);
 	movesMap.set("Ace", []);
 	movesMap.set("Pro", []);
 	movesMap.set("Master", []);
-	for (let i in dataName)
+	for (let i in moveData)
 	{
-		let rank = dataName[i]["Learned"];
-		let move = dataName[i]["Name"];
+		let rank = moveData[i]["Learned"];
+		let move = moveData[i]["Name"];
 		movesMap.get(rank).push(move);
 	}
-	write(`<h3 class="section-title">Moveset per Grado</h3>`);
+	write(client, `<h3 class="section-title">Moveset per Grado</h3>`);
 	for (let [rank, moves] of movesMap)
 	{
-		write(`<div class="rank-header">${rank}</div>`);
+		write(client, `<div class="rank-header">${rank}</div>`);
 		for (let move of moves)
 		{
-			write(`<a href="/Move/${move}" class="badge">${move}</a>`);
+			write(client, `<a href="/Move/${move}" class="badge">${move}</a>`);
 		}
-		write(`</div>`);
+		write(client, `</div>`);
 	}
 }
 
-//function printSingleMov()
-
-function write(msg)
+/**
+ * 
+ * @param {lib.types.Client} client 
+ * @param {String} msg 
+ */
+function write(client, msg)
 {
-	out += msg;
+	client.buff += msg;
 }
