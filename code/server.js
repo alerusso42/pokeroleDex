@@ -1,13 +1,13 @@
 const lib = require('./utils/lib.js');
 const dataPath = 'data/v2.0/';
-let imgMissingno = "https://media.pokemoncentral.it/wiki/0/02/Sprrz0000.png";
-let imgPkmnType = "https://raw.githubusercontent.com/partywhale/pokemon-type-icons/master/icons/{ID}.svg"
-let imgBox = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/BoxSprites/";
-let imgHome = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/HomeSprites/";
-let imgItem = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/ItemSprites/";
-let types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
-let out = "";
-let currType = 0;
+const imgMissingno = "https://media.pokemoncentral.it/wiki/0/02/Sprrz0000.png";
+const imgPkmnType = "https://raw.githubusercontent.com/partywhale/pokemon-type-icons/master/icons/{ID}.svg"
+const imgBox = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/BoxSprites/";
+const imgHome = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/HomeSprites/";
+const imgItem = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/ItemSprites/";
+const types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
+const linkSpecial = new Array("Ability", "Pokemon", "Name", "Type", "Evolutions", "Move");
+const linkIgnored = new Array("Kind", "Value", "Stat");
 
 lib.app.listen(8080, "0.0.0.0");
 
@@ -15,7 +15,6 @@ lib.app.get("/", tutorial);
 
 function tutorial(req, res)
 {
-	out = "";
 	const dom = getHtml("./html/index.html");
 	res.send(dom.serialize());
 }
@@ -40,14 +39,12 @@ lib.app.get("/keyPressed*splat", (req, res) =>
 
 lib.app.get("/*splat", (req, res) =>
 {
-	out = "";
-	currType = 0;
 	let client = new lib.types.Client(req, "./html/result.html");
-	let metaData = lib.utils.includesOneOf(client.url, "css", "favicon");
+	let contentType = lib.utils.includesOneOf(client.url, "css", "favicon");
+	if (contentType != "")
+		return getMetaData(contentType, res);
 	if (client.dirName == "")
 		client.dirName = types[0];
-	if (metaData != "")
-		return getMetaData(metaData, res);
 	getData(client)
 	.then(() => 
 	{
@@ -63,9 +60,15 @@ lib.app.get("/*splat", (req, res) =>
 	);
 });
 
+/**
+ * fills href id data-img with the resource to get
+ * @param {Document} doc 
+ * @param {String} path 
+ * @param {String} name 
+ */
 function loadImgUrl(doc, path, name)
 {
-	const imgTag = doc.getElementById("data-img");
+	let imgTag = doc.getElementById("data-img");
 	imgTag.src = path;
 	if (name != null && name != "")
 		imgTag.src += lib.utils.urlNormalize(name) + ".png";
@@ -73,16 +76,15 @@ function loadImgUrl(doc, path, name)
 }
 
 /**
- * 
- * @param {String} metaData 
+ * @description handles static files serving
+ * @param {String} contentType  
  * @param {Response} res 
- * @returns 
  */
-async function getMetaData(metaData, res)
+async function getMetaData(contentType, res)
 {
-	if (metaData.includes("png") == true)
+	if (contentType.includes("png") == true)
 		return (res.send(""));
-	if (metaData == "css")
+	if (contentType == "css")
 		return (res.send(lib.fs.readFileSync("html/pokemon.css")));
 	let url = imgBox + "rayquaza.png";
 	let binary = await lib.utils.fetchBinary(url);
@@ -90,7 +92,8 @@ async function getMetaData(metaData, res)
 }
 
 /**
- * 
+ * @description tries to open every possible data directory at the same time.
+ * client buffer is updated, regarding of the outcome.
  * @param {lib.types.Client} client 
  * @returns {String} "" if success, else string with error
  */
@@ -123,7 +126,8 @@ async function getData(client)
 }
 
 /**
- * 
+ * @description prints on the client buffer the data html.
+ * @throws on error, returns to getData try catch block.
  * @param {lib.types.Client} client 
  */
 function search(client)
@@ -140,7 +144,7 @@ function search(client)
 	let special = "";
 	for (let key in pkmn)
 	{
-		special = lib.utils.includesOneOf(key, "Ability", "Pokemon", "Name", "Type", "Evolutions", "Move");
+		special = lib.utils.includesOneOf(key, linkSpecial);
 		if (special == "Evolutions" || special == "Name")
 			special = "Pokemon";
 		else if (key == "GenderType")
@@ -165,7 +169,7 @@ function printData(client, data, key, special)
 {
 	if (typeof(data) != "object")
 	{
-		if (lib.utils.includesOneOf(key, "Kind", "Value", "Stat") != "")
+		if (lib.utils.includesOneOf(key, linkIgnored) != "")
 			return ;
 		write(client, `<div class="data-row">`);
 		write(client, `<span class="key">${key}:</span>`);

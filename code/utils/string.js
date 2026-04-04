@@ -1,15 +1,24 @@
 /**
  * checks if one on the strings is present in the source string
  * @param {String} str  the source string 
- * @param {String} ... one or more string to compare
+ * @param {String/Array} ... one or more string to compare, OR an Array
  * @returns {number} the first string found if a match exists, else ""
  */
 function includesOneOf(str)
 {
-    for (let i = 1; i != arguments.length; i++)
+	let list = arguments;
+	let i = 0;
+
+	if (list[1] == "")
+		return ("");
+	if (typeof(list[1]) != "string")
+		list = list[1];
+	else
+		i = 1;
+    for (; i != list.length; i++)
     {
-        if (str.includes(arguments[i]) == true)
-            return (arguments[i]);
+        if (str.includes(list[i]) == true)
+            return (list[i]);
     }
     return ("");
 }
