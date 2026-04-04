@@ -1,8 +1,8 @@
 const lib = require('./utils/lib.js');
+const html = require('./html.js');
 const dataPath = 'data/v2.0/';
 const imgMissingno = "https://media.pokemoncentral.it/wiki/0/02/Sprrz0000.png";
 const imgPkmnType = "https://raw.githubusercontent.com/partywhale/pokemon-type-icons/master/icons/{ID}.svg"
-const imgBox = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/BoxSprites/";
 const imgHome = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/HomeSprites/";
 const imgItem = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/ItemSprites/";
 const types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
@@ -15,15 +15,8 @@ lib.app.get("/", tutorial);
 
 function tutorial(req, res)
 {
-	const dom = getHtml("./html/index.html");
+	const dom = html.getHtml("./html/index.html");
 	res.send(dom.serialize());
-}
-
-function getHtml (path)
-{
-	const fd = lib.fs.readFileSync(path);
-	const dom = new lib.JSDOM(fd);
-	return (dom);
 }
 
 lib.app.get("/keyPressed*splat", (req, res) =>
@@ -42,7 +35,7 @@ lib.app.get("/*splat", (req, res) =>
 	let client = new lib.types.Client(req, "./html/result.html");
 	let contentType = lib.utils.includesOneOf(client.url, "css", "favicon");
 	if (contentType != "")
-		return getMetaData(contentType, res);
+		return html.getMetaData(contentType, res);
 	if (client.dirName == "")
 		client.dirName = types[0];
 	getData(client)
@@ -61,37 +54,6 @@ lib.app.get("/*splat", (req, res) =>
 });
 
 /**
- * fills href id data-img with the resource to get
- * @param {Document} doc 
- * @param {String} path 
- * @param {String} name 
- */
-function loadImgUrl(doc, path, name)
-{
-	let imgTag = doc.getElementById("data-img");
-	imgTag.src = path;
-	if (name != null && name != "")
-		imgTag.src += lib.utils.urlNormalize(name) + ".png";
-	imgTag.alt = name;
-}
-
-/**
- * @description handles static files serving
- * @param {String} contentType  
- * @param {Response} res 
- */
-async function getMetaData(contentType, res)
-{
-	if (contentType.includes("png") == true)
-		return (res.send(""));
-	if (contentType == "css")
-		return (res.send(lib.fs.readFileSync("html/pokemon.css")));
-	let url = imgBox + "rayquaza.png";
-	let binary = await lib.utils.fetchBinary(url);
-	res.send(binary);
-}
-
-/**
  * @description tries to open every possible data directory at the same time.
  * client buffer is updated, regarding of the outcome.
  * @param {lib.types.Client} client 
@@ -105,9 +67,9 @@ async function getData(client)
 		await search(client);
 		console.log("found.");
 		if (client.dirName == "Pokemon")
-			loadImgUrl(client.doc, imgHome, client.dataName);
+			html.loadImgUrl(client.doc, imgHome, client.dataName);
 		else if (client.dirName == "Item")
-			loadImgUrl(client.doc, imgItem, client.dataName);
+			html.loadImgUrl(client.doc, imgItem, client.dataName);
 		client.doc.getElementById("title").innerHTML = client.dirName + ": " + client.dataName; 
 	}
 	catch (err)
@@ -115,7 +77,7 @@ async function getData(client)
 		console.log(err);
 		if (client.dirName == types.at(-1))
 		{
-			loadImgUrl(client.doc, imgMissingno, "");
+			html.loadImgUrl(client.doc, imgMissingno, "");
 			client.doc.getElementById("title").innerHTML = client.dataName + " non trovato."; 
 			return (err);
 		}
