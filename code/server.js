@@ -20,6 +20,13 @@ function tutorial(req, res)
 	res.send(dom.serialize());
 }
 
+function getHtml (path)
+{
+	const fd = lib.fs.readFileSync(path);
+	const dom = new lib.JSDOM(fd);
+	return (dom);
+}
+
 lib.app.get("/keyPressed*splat", (req, res) =>
 {
 	let url = lib.url.parse(req.url).pathname;
@@ -41,8 +48,7 @@ lib.app.get("/*splat", (req, res) =>
 		client.dirName = types[0];
 	if (metaData != "")
 		return getMetaData(metaData, res);
-	console.table(client);
-	getData(client.dataName, client.dirName, client.doc)
+	getData(client)
 	.then(() => 
 	{
 		client.doc.getElementById("test").innerHTML += out;
@@ -66,8 +72,16 @@ function loadImgUrl(doc, path, name)
 	imgTag.alt = name;
 }
 
+/**
+ * 
+ * @param {String} metaData 
+ * @param {Response} res 
+ * @returns 
+ */
 async function getMetaData(metaData, res)
 {
+	if (metaData.includes("png") == true)
+		return (res.send(""));
 	if (metaData == "css")
 		return (res.send(lib.fs.readFileSync("html/pokemon.css")));
 	let url = imgBox + "rayquaza.png";
@@ -75,41 +89,48 @@ async function getMetaData(metaData, res)
 	res.send(binary);
 }
 
-async function getData(dataName, dataType, doc)
+/**
+ * 
+ * @param {lib.types.Client} client 
+ * @returns {String} "" if success, else string with error
+ */
+async function getData(client)
 {
 	try 
 	{
-		console.log("searching in " + types.at(currType));
-		await search(dataName, dataType);
+		console.log("searching in " + types.at(client.dirIndex));
+		await search(client);
 		console.log("found.");
-		let url = "";
-		if (dataType == "Pokemon")
-			url = imgHome;
-		else if (dataType == "Item")
-			url = imgItem;
-		loadImgUrl(doc, url, dataName);
-		doc.getElementById("title").innerHTML = dataType + ": " + dataName; 
+		if (client.dirName == "Pokemon")
+			loadImgUrl(client.doc, imgHome, client.dataName);
+		else if (client.dirName == "Item")
+			loadImgUrl(client.doc, imgItem, client.dataName);
+		client.doc.getElementById("title").innerHTML = client.dirName + ": " + client.dataName; 
 	}
 	catch (err)
 	{
 		console.log(err);
-		currType += 1;
-		if (dataType == types.at(-1))
+		if (client.dirName == types.at(-1))
 		{
-			loadImgUrl(doc, imgMissingno, "");
-			doc.getElementById("title").innerHTML = dataName + " non trovato."; 
+			loadImgUrl(client.doc, imgMissingno, "");
+			client.doc.getElementById("title").innerHTML = client.dataName + " non trovato."; 
 			return (err);
 		}
-		else
-			await getData(dataName, types.at(currType), doc);
+		client.dirIndex += 1;
+		client.dirName = types.at(client.dirIndex);
+		await getData(client);
 	}
 }
 
-function search(dataName, dataType)
+/**
+ * 
+ * @param {lib.types.Client} client 
+ */
+function search(client)
 {
-	if (dataType.includes("..") || dataName.includes(".."))
+	if (client.dirName.includes("..") || client.dataName.includes(".."))
 		throw ("Searching .. or similar not allowed.\n");
-	let path = dataPath + dataType + '/' + dataName + '.json';
+	let path = dataPath + client.dirName + '/' + client.dataName + '.json';
 	if (lib.fs.existsSync(path) == false)
 	{
 		console.log(path);
