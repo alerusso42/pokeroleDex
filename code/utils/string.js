@@ -1,3 +1,5 @@
+let types = require("./types.ts");
+
 /**
  * checks if one on the strings is present in the source string
  * @param {str} str  the source string 

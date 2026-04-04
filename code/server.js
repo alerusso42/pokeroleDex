@@ -1,7 +1,5 @@
 const lib = require('./utils/lib.js');
 const dataPath = 'data/v2.0/';
-let out = "";
-let curr_type = 0;
 let imgMissingno = "https://media.pokemoncentral.it/wiki/0/02/Sprrz0000.png";
 let imgPkmnType = "https://raw.githubusercontent.com/partywhale/pokemon-type-icons/master/icons/{ID}.svg"
 let imgBox = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/BoxSprites/";
@@ -33,7 +31,9 @@ lib.app.get("/keyPressed*splat", (req, res) =>
 
 lib.app.get("/*splat", (req, res) =>
 {
-	out = "";
+	let out = "";
+	let currType = 0;
+	let client = {out, currType};
 	const dom = getHtml("./html/result.html");
 	const doc = dom.window.document;
 	let url = lib.url.parse(req.url).pathname;
@@ -47,7 +47,7 @@ lib.app.get("/*splat", (req, res) =>
 	dataName = dataNormalize(dataName);
 	if (dataType == "")
 		dataType = types[0];
-	curr_type = 0;
+	currType = 0;
 	console.log("Searching \"" + dataName + "\"");
 	getData(dataName, dataType, doc)
 	.then(() => 
@@ -108,7 +108,7 @@ async function getData(dataName, dataType, doc)
 {
 	try 
 	{
-		console.log("searching in " + types.at(curr_type));
+		console.log("searching in " + types.at(currType));
 		await search(dataName, dataType);
 		console.log("found.");
 		let url = "";
@@ -122,7 +122,7 @@ async function getData(dataName, dataType, doc)
 	catch (err)
 	{
 		console.log(err);
-		curr_type += 1;
+		currType += 1;
 		if (dataType == types.at(-1))
 		{
 			loadImgUrl(doc, imgMissingno, "");
@@ -130,7 +130,7 @@ async function getData(dataName, dataType, doc)
 			return (err);
 		}
 		else
-			await getData(dataName, types.at(curr_type), doc);
+			await getData(dataName, types.at(currType), doc);
 	}
 }
 
