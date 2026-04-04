@@ -6,6 +6,9 @@ let imgBox = "https://raw.githubusercontent.com/Pokerole-Software-Development/Po
 let imgHome = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/HomeSprites/";
 let imgItem = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/ItemSprites/";
 let types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
+let out = "";
+let currType = 0;
+
 
 lib.app.listen(8080, "0.0.0.0");
 
@@ -31,8 +34,8 @@ lib.app.get("/keyPressed*splat", (req, res) =>
 
 lib.app.get("/*splat", (req, res) =>
 {
-	let out = "";
-	let currType = 0;
+	out = "";
+	currType = 0;
 	let client = {out, currType};
 	const dom = getHtml("./html/result.html");
 	const doc = dom.window.document;
@@ -64,19 +67,19 @@ lib.app.get("/*splat", (req, res) =>
 	);
 });
 
-function dataNormalize(data)
+function dataNormalize(dataName)
 {
-	data = data[0].toUpperCase() + data.substring(1, data.length);
-	if (data.startsWith("Mega ") == true && data.includes("drain") == false)
-		data = dataNormalize(data.substring(5, data.length) + " (Mega Form)");
+	dataName = dataName[0].toUpperCase() + dataName.substring(1, dataName.length);
+	if (dataName.startsWith("Mega ") == true && dataName.includes("drain") == false)
+		dataName = dataNormalize(dataName.substring(5, dataName.length) + " (Mega Form)");
 	let i = 0;
-	while (i != data.length)
+	while (i != dataName.length)
 	{
-		if (data[i] == ' ' || data[i] == '(')
-			data = data.substring(0, i + 1) + data[i + 1].toUpperCase() + data.substring(i + 2, data.length);
+		if (dataName[i] == ' ' || dataName[i] == '(')
+			dataName = dataName.substring(0, i + 1) + dataName[i + 1].toUpperCase() + dataName.substring(i + 2, dataName.length);
 		++i;
 	}
-	return (data);
+	return (dataName);
 }
 
 function getHtml (path)
@@ -90,7 +93,7 @@ function loadImgUrl(doc, path, name)
 {
 	const imgTag = doc.getElementById("data-img");
 	imgTag.src = path;
-	if (name != "")
+	if (name != null && name != "")
 		imgTag.src += lib.utils.urlNormalize(name) + ".png";
 	imgTag.alt = name;
 }
@@ -141,6 +144,7 @@ function search(dataName, dataType)
 	let path = dataPath + dataType + '/' + dataName + '.json';
 	if (lib.fs.existsSync(path) == false)
 	{
+		console.log(path);
 		throw ("file does not exist");
 	}
 	pkmn = JSON.parse(lib.fs.readFileSync(path, 'utf8'));
@@ -163,43 +167,43 @@ function search(dataName, dataType)
 
 //doc.getElementById("output").innerHTML = "";
 
-function printData(data, key, special)
+function printData(dataName, key, special)
 {
-	if (typeof(data) != "object")
+	if (typeof(dataName) != "object")
 	{
 		if (lib.utils.includesOneOf(key, "Kind", "Value", "Stat") != "")
 			return ;
 		write(`<div class="data-row">`);
 		write(`<span class="key">${key}:</span>`);
-		if (data == "")
+		if (dataName == "")
 			write(`<span class="value">NULL</span>`);
 		else if (special != "" && key == "Item")
 		{
 			write(`<a class="badge" `);
-			write(`href="/${key}/${data}">${data}</a>`);
+			write(`href="/${key}/${dataName}">${dataName}</a>`);
 		}
 		else if (special != "")
 		{
 			write(`<a class="badge" `);
-			write(`href="/${special}/${data}">${data}</a>`);
+			write(`href="/${special}/${dataName}">${dataName}</a>`);
 		}
 		else
 		{
-			write(`<span class="value">${data}</span>`);
+			write(`<span class="value">${dataName}</span>`);
 		}
 		write(`</div>`);
 	}
 	else
 	{
-		for (let x in data)
+		for (let x in dataName)
 		{
-			printData(data[x], x, special);
+			printData(dataName[x], x, special);
 			write(`<span class="separator">"|"</span>`);
 		}
 	}
 }
 
-function printMove(data, key)
+function printMove(dataName, key)
 {
 	let movesMap = new Map();
 	movesMap.set("Starter", []);
@@ -208,10 +212,10 @@ function printMove(data, key)
 	movesMap.set("Ace", []);
 	movesMap.set("Pro", []);
 	movesMap.set("Master", []);
-	for (let i in data)
+	for (let i in dataName)
 	{
-		let rank = data[i]["Learned"];
-		let move = data[i]["Name"];
+		let rank = dataName[i]["Learned"];
+		let move = dataName[i]["Name"];
 		movesMap.get(rank).push(move);
 	}
 	write(`<h3 class="section-title">Moveset per Grado</h3>`);

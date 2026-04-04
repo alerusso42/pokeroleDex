@@ -1,8 +1,6 @@
-let types = require("./types.ts");
-
 /**
  * checks if one on the strings is present in the source string
- * @param {str} str  the source string 
+ * @param {String} str  the source string 
  * @param {str} ... one or more string to compare
  * @returns {number} the first string found if a match exists, else ""
  */
