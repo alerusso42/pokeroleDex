@@ -49,6 +49,7 @@ lib.app.get("/*splat", (req, res) =>
 	dataName = dataNormalize(dataName);
 	if (dataType == "")
 		dataType = types[0];
+	let client = new lib.types.Client(dataName, dataType, doc);
 	currType = 0;
 	console.log("Searching \"" + dataName + "\"");
 	getData(dataName, dataType, doc)
