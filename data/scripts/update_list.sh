@@ -1,11 +1,14 @@
 #!/bin/bash
 
 dirs=("Ability" "Item" "Move" "Nature" "Pokemon");
-list="../list.txt";
+list="../list";
+version="2.0"
 
-rm -f $list
+mkdir -p $list
 for dir in "${dirs[@]}"; do
-	echo "--- $dir ---" >> $list
-	path="../v3.0/"$dir
-	ls -1 "$path" | sed "s/\.json//g" >> $list
+	file="$list/$dir"".txt";
+	rm -f file
+	echo "--- $dir ---" > "$file"
+	path="../v$version/"$dir
+	ls -1 "$path" | sed "s/\.json//g" > "$file"
 done
