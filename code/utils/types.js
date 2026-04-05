@@ -3,6 +3,59 @@ const fs = require("fs");
 const url = require("url");
 const net = require('./net.js');
 
+//SECTION - Server class definition
+
+class Server
+{
+	/**
+	 * 
+	 * @param {string} trainerDataPath the path to the trainer data directory 
+	 */
+	constructor(trainerDataPath = "")
+	{
+		/** @type {Map<string, string>} */	this.cookieMap = new Map();
+
+		console.log("trainer path =", trainerDataPath);
+	}
+}
+
+//SECTION - Client class definition
+
+class Client
+{
+	/**
+	 * 
+	 * @param {Server} server 
+	 * @param {Request} req 
+	 * @param {String} res_html 
+	 */
+	constructor(server, req, res_html)
+	{
+		/** @type {JSDOM} */	this.dom = getHtml(res_html);
+
+		/** @type {Document} */	this.doc = this.dom.window.document;
+
+		/** @type {string} */	this.buff = "";
+
+		/** @type {string} */	this.url = url.parse(req.url).pathname;
+
+		/** @type {string} */	this.cookieId = getCookieId(server, req);
+
+		/** @type {string} */	this.cookieName = url.parse(req.url).pathname;
+
+		/** @type {string} */	this.dataName = net.urlArg(this.url).replaceAll("/", "");
+								this.dataName = dataNormalize(this.dataName);
+
+		/** @type {string} */	this.dirName = net.urlDir(this.url).replaceAll("/", "");
+		
+		/** @type {number} */	this.dirIndex = 0;
+
+		console.log("Client searching for \"" + this.dataName + "\"")
+	}
+}
+
+//SECTION - Client class methods/utils
+
 function getHtml (path)
 {
 	const fd = fs.readFileSync(path);
@@ -25,32 +78,14 @@ function dataNormalize(dataName)
 	return (dataName);
 }
 
-class Client
+/**
+ * 
+ * @param {Server} server 
+ * @param {Request} req 
+ */
+function getCookieId(server, req)
 {
-	/**
-	 * 
-	 * @param {Request} req 
-	 * @param {String} res_html 
-	 */
-	constructor(req, res_html)
-	{
-		/** @type {JSDOM} */	this.dom = getHtml(res_html);
-
-		/** @type {Document} */	this.doc = this.dom.window.document;
-
-		/** @type {string} */	this.buff = "";
-
-		/** @type {string} */	this.url = url.parse(req.url).pathname;
-
-		/** @type {string} */	this.dataName = net.urlArg(this.url).replaceAll("/", "");
-								this.dataName = dataNormalize(this.dataName);
-
-		/** @type {string} */	this.dirName = net.urlDir(this.url).replaceAll("/", "");
-		
-		/** @type {number} */	this.dirIndex = 0;
-
-		console.log("Client searching for \"" + this.dataName + "\"")
-	}
+	//console.table(req.headers);
 }
 
-module.exports = {Client};
+module.exports = {Server, Client};
