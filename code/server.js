@@ -30,9 +30,10 @@ lib.app.get("/keyPressed*splat", (req, res) =>
 }
 );
 
-lib.app.get("/*splat", (req, res) =>
+lib.app.get("/search/*splat", (req, res) =>
 {
 	let client = new lib.types.Client(req, "./html/result.html");
+	client.dirName = client.dirName.replace("search", "");
 	let contentType = lib.utils.includesOneOf(client.url, "css", "favicon");
 	if (contentType != "")
 		return html.getMetaData(contentType, res);
