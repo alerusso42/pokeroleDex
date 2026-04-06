@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon">
+    <title>Indice Risorse</title>
+<style>
+        :root {
+            --poke-red: #d32f2f;
+            --poke-dark: #2c3e50;
+            --poke-light: #f5f5f5;
+            --white: #ffffff;
+            --ball-size: 250px;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(
+                to bottom,
+                var(--poke-red) 0%,
+                var(--poke-red) 48%,
+                #000 48%,
+                #000 52%,
+                var(--poke-light) 52%,
+                var(--poke-light) 100%
+            );
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- NUOVO STILE PULSANTE HOME --- */
+        .btn-home {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--poke-dark);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            border: 4px solid #000;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+            z-index: 100;
+            transition: 0.2s;
+        }
+
+        .btn-home:hover {
+            background: var(--poke-red);
+            transform: scale(1.05);
+        }
+
+        /* Contenitore principale */
+        #test {
+            max-width: 800px;
+            width: 90%;
+            margin: 150px auto 40px auto; /* Aumentato per non coprire il pulsante home */
+            background: var(--white);
+            border-radius: 15px;
+            padding: 110px 30px 30px 30px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Wrapper Pokéball */
+        .image-wrapper {
+            width: var(--ball-size);
+            height: var(--ball-size);
+            background: linear-gradient(
+                var(--poke-red) 45%, 
+                #000 45%, 
+                #000 55%, 
+                var(--white) 55%
+            );
+            border-radius: 50%;
+            border: 10px solid #000;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: calc(var(--ball-size) / -2);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .image-wrapper::after {
+            content: '';
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            background: var(--white);
+            border: 8px solid #000;
+            border-radius: 50%;
+            z-index: 1;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        .image-wrapper img {
+            max-width: 85%;
+            max-height: 85%;
+            object-fit: contain;
+            z-index: 5;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+            transition: transform 0.3s ease;
+        }
+        
+        .image-wrapper:hover img {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--poke-dark);
+            font-size: 2.2em;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 3px solid var(--poke-red);
+            padding-bottom: 10px;
+        }
+
+        /* Righe di dati */
+        .data-row {
+            display: flex;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+
+        .data-row:last-child { border-bottom: none; }
+
+        .key {
+            font-weight: bold;
+            color: var(--poke-red);
+            min-width: 150px;
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+
+        .value {
+            color: var(--poke-dark);
+            flex-grow: 1;
+            font-weight: 500;
+        }
+
+        /* Badge/Link (Quelli creati dalla tua funzione JS) */
+        a.badge {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 600;
+            background: var(--poke-dark);
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid #000;
+            transition: all 0.2s ease;
+            margin: 2px;
+            display: inline-block;
+        }
+
+        a.badge:hover {
+            background: var(--poke-red);
+            transform: translateY(-2px);
+        }
+
+        .separator { color: #ccc; margin: 0 5px; }
+
+/* Forza il valore a distribuire i badge in orizzontale e andare a capo */
+.value {
+    display: flex;
+    flex-wrap: wrap; /* Fondamentale: permette ai badge di andare a capo */
+    gap: 8px;       /* Distanza tra i badge */
+    justify-content: flex-start;
+    align-items: center;
+}
+
+/* Evita che il box bianco si restringa troppo se ci sono molte mosse */
+#test {
+    min-width: 350px;
+    overflow-wrap: break-word;
+}
+
+/* Titolo principale "Moveset" */
+.section-title {
+    color: var(--poke-dark);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 1.1em;
+    margin-top: 40px;
+    margin-bottom: 15px;
+    border-left: 5px solid var(--poke-red);
+    padding-left: 10px;
+}
+
+/* Il divisore per ogni Rank (Starter, Rookie, ecc.) */
+.rank-header {
+    background: var(--poke-light);
+    color: var(--poke-red);
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.8em;
+    padding: 5px 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #ddd;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Contenitore flessibile per i badge delle mosse */
+.moves-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 0 20px 0;
+}
+
+/* Assicurati che i badge abbiano un po' di ombra per risaltare sul bianco */
+a.badge {
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+
+        @media (max-width: 600px) {
+            #test { margin-top: 150px; }
+            .data-row { flex-direction: column; align-items: flex-start; }
+            .key { margin-bottom: 5px; }
+            :root { --ball-size: 180px; }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="/" class="btn-home">🏠 HOME</a>
+
+    <div id="test">
+        <div class="image-wrapper">
+            <img src="https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/ItemSprites/Explorer%20Kit.png" id="data-img" alt="Indice">
+        </div>
+
+        <h1 id="title">Indice Risorse</h1>
+        
+        <div id="list-container" class="moves-container">
+            </div>
+    </div>
+
+</body>
+</html>

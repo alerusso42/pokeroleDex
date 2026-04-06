@@ -7,6 +7,7 @@ const { JSDOM } = doc;
 const url = require('url');
 const fs = require('fs');
 const path = require('path');
+const crypt = require('bcrypt');
 
 //SECTION - libft
 let net = require('./net.js');
@@ -16,4 +17,4 @@ let utils = Object.assign({}, net, string);
 //SECTION - custom data structures
 const types = require('./types.js');
 
-module.exports = {http, url, fs, path, express, app, JSDOM, utils, types};
+module.exports = {http, url, fs, path, crypt, express, app, JSDOM, utils, types};

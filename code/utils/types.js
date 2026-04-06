@@ -2,21 +2,59 @@ const { JSDOM } = require("jsdom");
 const fs = require("fs");
 const url = require("url");
 const net = require('./net.js');
+const stringUtils = require('./string.js');
+
+const dataPath = "data/";
+
+/** @typedef {typeof import("express").Request} ExpressRequest */
+/** @typedef {typeof import("../../data/template/user.json")} User */
+/** @typedef {typeof import("../../data/template/trainer.json")} Trainer */
+/** @typedef {typeof import("../../data/template/pokemon.json")} Pokemon */
 
 //SECTION - Server class definition
 
 class Server
 {
-	/**
-	 * 
-	 * @param {string} trainerDataPath the path to the trainer data directory 
-	 */
-	constructor(trainerDataPath = "")
+	constructor()
 	{
-		/** @type {Map<string, string>} */	this.cookieMap = new Map();
-
-		console.log("trainer path =", trainerDataPath);
+		/** @type {Map<number, User>} */
+		this.userMap = getDataMap("users/", true, true);
+		/** @type {number} */
+		this.userNum = this.userMap.size;
+		/** @type {number} */
+		this.cryptSalt = 10;
 	}
+}
+
+//SECTION - Server class methods/utils
+
+/**
+ * 
+ * @param {string} typePath the data type path 
+ * @param {boolean} readFileBool the data type path 
+ * @returns {Map}
+ */
+function getDataMap(typePath, readFileBool = false, useIdBool = false)
+{
+	let map = new Map();
+	let dirName = dataPath + typePath;
+	let dir = fs.readdirSync(dirName);
+
+	for (let file of dir)
+	{
+		let fileNoExt = file.replace(".json", "");
+		if (readFileBool)
+		{
+			let json = JSON.parse(fs.readFileSync(dirName + file, 'utf-8'));
+			if (useIdBool)
+				map.set(json.Id, json);
+			else
+				map.set(fileNoExt, json);
+		}
+		else
+			map.set(fileNoExt, file);
+	}
+	return (map);
 }
 
 //SECTION - Client class definition
@@ -35,13 +73,15 @@ class Client
 
 		/** @type {Document} */	this.doc = this.dom.window.document;
 
+		/** @type {Request} */	this.req = req;
+
+		/** @type {string} */	this.body = req.body;
+
 		/** @type {string} */	this.buff = "";
 
 		/** @type {string} */	this.url = url.parse(req.url).pathname;
 
-		/** @type {string} */	this.cookieId = getCookieId(server, req);
-
-		/** @type {string} */	this.cookieName = url.parse(req.url).pathname;
+		/** @type {User} */		this.user = getUser(server, req);
 
 		/** @type {string} */	this.dataName = net.urlArg(this.url).replaceAll("/", "");
 								this.dataName = dataNormalize(this.dataName);
@@ -50,7 +90,18 @@ class Client
 		
 		/** @type {number} */	this.dirIndex = 0;
 
-		console.log("Client searching for \"" + this.dataName + "\"")
+		/** @type {boolean} */	this.isAdmin = isAdmin(req);
+
+		/** @type {boolean} */	this.isLogged = this.user != null;
+
+		if (this.isAdmin == true && this.isLogged == true)
+			console.log("Admin", this.user.Name, "searching for \"" + this.dataName + "\"");
+		else if (this.isAdmin == true)
+			console.log("Admin searching for \"" + this.dataName + "\"");
+		else if (this.isLogged)
+			console.log("Client", this.user.Name, "searching for \"" + this.dataName + "\"");
+		else
+			console.log("Unrecognized Client searching for \"" + this.dataName + "\"");
 	}
 }
 
@@ -65,6 +116,8 @@ function getHtml (path)
 
 function dataNormalize(dataName)
 {
+	if (dataName == "")
+		return ("");
 	dataName = dataName[0].toUpperCase() + dataName.substring(1, dataName.length);
 	if (dataName.startsWith("Mega ") == true && dataName.includes("drain") == false)
 		dataName = dataNormalize(dataName.substring(5, dataName.length) + " (Mega Form)");
@@ -82,10 +135,36 @@ function dataNormalize(dataName)
  * 
  * @param {Server} server 
  * @param {Request} req 
+ * @returns {User} 
  */
-function getCookieId(server, req)
+function getUser(server, req)
 {
-	//console.table(req.headers);
+	let cookie = req.headers.cookie;
+	if (cookie == undefined)
+		return (null);
+	cookie = cookie.replace("userId=", "");
+	let user = server.userMap.get(parseInt(cookie));
+	if (user == undefined)
+	{
+		console.warn("illegal cookie", cookie);
+		return (null);
+	}
+	return (user);
+}
+
+/**
+ * 
+ * @param {ExpressRequest} req 
+ * @param {User} user 
+ */
+function isAdmin(req, user)
+{
+	if (stringUtils.includesOneOf(req.ip, "127.0.0.1", "localhost", "::1") != "" || 
+		(user != null && user.isAdmin == true))
+	{
+		return (true);
+	}
+	return (false);
 }
 
 module.exports = {Server, Client};

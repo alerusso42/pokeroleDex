@@ -1,2 +1,2 @@
 echo download delle dipendenze...
-.\node-v24.14.1-win-x64\npm.cmd install express jsdom
+.\node-v24.14.1-win-x64\npm.cmd install express bcrypt jsdom@22.1.0

@@ -1,6 +1,8 @@
 {
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "ejs": "^5.0.1",
+    "esm": "^3.2.25",
     "express": "^5.2.1",
     "jsdom": "^22.1.0"
   }

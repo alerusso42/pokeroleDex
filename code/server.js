@@ -1,10 +1,13 @@
 const lib = require('./utils/lib.js');
 const html = require('./html.js');
 const locationSearch = require('./search.js');
+const locationLogin = require('./login.js');
 const types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
 const server = new lib.types.Server("data/trainers/");
 
 lib.app.listen(8080, "0.0.0.0", );
+// interpreta il body
+lib.app.use(lib.express.text());
 
 lib.app.get("/", tutorial);
 
@@ -47,4 +50,39 @@ lib.app.get("/search/*splat", (req, res) =>
 		return (res.status(404).end("info: " + err + "\n"));
 	}
 	);
+});
+
+lib.app.post("/login/:user", async (req, res) => 
+{
+	return (locationLogin.login(server, req, res));
+});
+
+lib.app.get("/auth", (req, res) => 
+{
+	let client = new lib.types.Client(server, req, "./html/login.html");
+	res.send(client.dom.serialize());
+});
+
+lib.app.get("/trainers", (req, res) => 
+{
+	let client = new lib.types.Client(server, req, "./html/autoindex.html");
+	if (client.isLogged == false)
+		res.redirect("/loginpage");
+	res.send("autoindex di ogni trainer " + client);
+});
+
+lib.app.get("/trainers/:trName/", (req, res) => 
+{
+	let client = new lib.types.Client(server, req, "./html/autoindex.html");
+	if (client.isLogged == false)
+		res.redirect("/loginpage");
+	res.send("pokemon posseduti da " + client.req.params.trName);
+});
+
+lib.app.get("/trainers/:trName/:pkName", (req, res) => 
+{
+	let client = new lib.types.Client(server, req, "./html/pokemon.html");
+	if (client.isLogged == false)
+		res.redirect("/loginpage");
+	res.send("dati pokemon " + client.req.params.pkName + " di allenatore " + client.req.params.trName);
 });
