@@ -4,7 +4,7 @@ const url = require("url");
 const net = require('./net.js');
 const stringUtils = require('./string.js');
 
-const dataPath = "data/";
+const dataPath = "data/questData";
 
 /** @typedef {typeof import("express").Request} ExpressRequest */
 /** @typedef {typeof import("../../data/template/user.json")} User */

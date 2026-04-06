@@ -1,15 +1,16 @@
 const lib = require("./utils/lib.js");
 
-const dataPath = "data/";
+const dataPath = "data/questData";
 
 /**
  * 
  * @param {lib.types.Server} server 
  * @param {typeof import("express").Request} req
  * @param {typeof import("express").Response} res
+ * @param {boolean} createUserBool
  * @returns 
  */
-function login(server, req, res)
+function login(server, req, res, loginBool)
 {
 	let client = new lib.types.Client(server, req, "./html/login.html");
 
@@ -17,13 +18,17 @@ function login(server, req, res)
 	{
 		if (user.Name == client.dataName)
 		{
+			if (loginBool == false)
+				return (res.status(403).end("Esiste gia"));
 			if (lib.crypt.compareSync(client.body, user.Password) == false)
-				res.status(401).end("Wrong password nigga");
+				return (res.status(401).end("Wrong password nigga"));
 			client.isAdmin = user.isAdmin;
 			addUser(server, client, res, user);
 			return (res.redirect("/"));
 		}
 	}
+	if (loginBool == true)
+		return (res.status(404).end("Not found"));
 	addUser(server, client, res);
 	res.redirect("/");
 }

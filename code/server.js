@@ -3,7 +3,7 @@ const html = require('./html.js');
 const locationSearch = require('./search.js');
 const locationLogin = require('./login.js');
 const types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
-const server = new lib.types.Server("data/trainers/");
+const server = new lib.types.Server();
 
 lib.app.listen(8080, "0.0.0.0", );
 // interpreta il body
@@ -52,15 +52,20 @@ lib.app.get("/search/*splat", (req, res) =>
 	);
 });
 
-lib.app.post("/login/:user", async (req, res) => 
-{
-	return (locationLogin.login(server, req, res));
-});
-
 lib.app.get("/auth", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/login.html");
 	res.send(client.dom.serialize());
+});
+
+lib.app.post("/login/:user", async (req, res) => 
+{
+	return (locationLogin.login(server, req, res, true));
+});
+
+lib.app.post("/register/:user", async (req, res) => 
+{
+	return (locationLogin.login(server, req, res, false));
 });
 
 lib.app.get("/trainers", (req, res) => 
