@@ -1,6 +1,6 @@
 const lib = require("./utils/lib.js");
 
-const dataPath = "data/questData";
+const dataPath = "data/questData/";
 
 /**
  * 
