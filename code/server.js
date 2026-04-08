@@ -27,14 +27,20 @@ lib.app.get("/keyPressed/search*splat", (req, res) =>
 		return (res.end(""));
 	arg = arg.slice(1, arg.length);// elimina lo /
 	let match = locationSearch.searchByKey(arg, server.data);
-	for (let data in match)
+	for (let category in match)
 	{
-		if (match[data].length == 0)
+		if (match[category].length == 0)
 			continue ;
-		res.write(`<h3 class="a.badge">${data}</h3>`);
-		for (let i = 0; i != match[data].length; i++)
+		res.write(`<div class="search-category-title">${category}</div>`);
+		res.write(`<div class="search-results-list">`);
+		for (let name of match[category])
 		{
-			res.write(match[data][i]);
+				res.write(`
+				<a href="/search/${category}/${name}" class="search-item">
+					<span class="item-name">${name}</span>
+					<span class="item-type-label">${category}</span>
+				</a>
+				`);
 		}
 	}
 	res.end();

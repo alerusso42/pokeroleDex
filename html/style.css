@@ -267,3 +267,65 @@ h1 {
     
     h1 { font-size: 1.6em; }
 }
+
+/* =========================================
+   7. STILE RICERCA SHOWDOWN
+   ========================================= */
+
+/* Titolo della categoria (Pokemon, Move, ecc.) */
+.search-category-title {
+    background: #555;
+    color: white;
+    padding: 3px 10px;
+    font-size: 0.75em;
+    font-weight: bold;
+    margin-top: 10px;
+    border-radius: 4px 4px 0 0;
+}
+
+.search-results-list {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    border-top: none;
+    margin-bottom: 10px;
+    overflow: hidden;
+    border-radius: 0 0 4px 4px;
+}
+
+/* Il singolo elemento della lista */
+.search-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 15px;
+    text-decoration: none;
+    color: #333;
+    background: white;
+    border-bottom: 1px solid #eee;
+    transition: background 0.1s;
+}
+
+.search-item:last-child {
+    border-bottom: none;
+}
+
+/* Effetto Hover stile Showdown */
+.search-item:hover {
+    background: #eef4fa; /* Un blu molto leggero */
+    color: var(--poke-red);
+}
+
+.item-name {
+    font-weight: 500;
+}
+
+/* Etichetta piccola a destra (es. "Pokemon" o "Move") */
+.item-type-label {
+    font-size: 0.7em;
+    color: #888;
+    text-transform: uppercase;
+    background: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 3px;
+}

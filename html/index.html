@@ -29,12 +29,12 @@
         function executeSearch()
 		{
             const query = document.getElementById('searchInput').value.trim();
-            if (query) {
-                // Invia la query direttamente (es: /Absol o /Pikachu)
-                // Il tuo server gestirà la ricerca ricorsiva tra le cartelle
+            if (query) 
+			{
                 window.location.href = `/search/${query}`;
             }
         }
+
 		function executeTip()
 		{
 			const query = document.getElementById('searchInput').value.trim();

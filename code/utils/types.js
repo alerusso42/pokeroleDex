@@ -182,14 +182,14 @@ class dataList
 	 */
 	constructor(fill)
 	{
-		/** @type {Array<string>} */	this.pokedex = fillDataListArray(fill, dataPath + "Pokemon/");
-		/** @type {Array<string>} */	this.nature = fillDataListArray(fill, dataPath + "Nature/");
-		/** @type {Array<string>} */	this.move = fillDataListArray(fill, dataPath + "Move/");
-		/** @type {Array<string>} */	this.item = fillDataListArray(fill, dataPath + "Item/");
-		/** @type {Array<string>} */	this.ability = fillDataListArray(fill, dataPath + "Ability/");
-		/** @type {Array<string>} */	this.users = fillDataListArray(fill, questDataPath + "users/");
-		/** @type {Array<string>} */	this.trainers = fillDataListArray(fill, questDataPath + "trainers/");
-		/** @type {Array<string>} */	this.pokemon = fillDataListArray(fill, questDataPath + "pokemon/");
+		/** @type {Array<string>} */	this.pokedex = fillDataListArray(fill, "pokedex");
+		/** @type {Array<string>} */	this.nature = fillDataListArray(fill, "nature");
+		/** @type {Array<string>} */	this.move = fillDataListArray(fill, "move");
+		/** @type {Array<string>} */	this.item = fillDataListArray(fill, "item");
+		/** @type {Array<string>} */	this.ability = fillDataListArray(fill, "ability");
+		/** @type {Array<string>} */	this.users = fillDataListArray(fill, "users");
+		/** @type {Array<string>} */	this.trainers = fillDataListArray(fill, "trainers");
+		/** @type {Array<string>} */	this.pokemon = fillDataListArray(fill, "pokemon");
 	}
 	/**
 	 * 
@@ -203,19 +203,39 @@ class dataList
 			console.log(this[ar]);
 		}
 	}
+
+	/** @param {string} dataName */
+	getDataPath(dataName)
+	{
+		return (dataListPath[dataName]);
+	}
 }
 
 //SECTION - dataList class methods/utils
 
+/** @enum {string} */
+const dataListPath = 
+{
+	"pokedex" : dataPath + "Pokemon/",
+	"nature" : dataPath + "Nature/",
+	"move" : dataPath + "Move/",
+	"item" : dataPath + "Item/",
+	"ability" : dataPath + "Ability/",
+	"users" : questDataPath + "users/",
+	"trainers" : questDataPath + "trainers/",
+	"pokemon" : questDataPath + "pokemon/"
+};
+
 /**
  * 
  * @param {boolean} fill
- * @param {string} path 
+ * @param {string} type 
  * @returns {Array<string>} the array filled with all files in that directory
  */
-function fillDataListArray(fill, path)
+function fillDataListArray(fill, type)
 {
 	let array = new Array();
+	let path = dataListPath[type];
 
 	if (fill == false)
 		return (array);
