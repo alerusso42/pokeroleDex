@@ -274,13 +274,15 @@ h1 {
 
 /* Titolo della categoria (Pokemon, Move, ecc.) */
 .search-category-title {
-    background: #555;
+    background: #777;
     color: white;
-    padding: 3px 10px;
-    font-size: 0.75em;
-    font-weight: bold;
-    margin-top: 10px;
-    border-radius: 4px 4px 0 0;
+    padding: 6px 12px;
+    font-size: 0.9em;
+    font-weight: 700;
+    margin-top: 15px;
+    border-radius: 6px 6px 0 0;
+	text-transform: uppercase;
+	letter-spacing: 1px;
 }
 
 .search-results-list {

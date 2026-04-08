@@ -205,13 +205,32 @@ class dataList
 	}
 
 	/** @param {string} dataName */
-	getDataPath(dataName)
+	GetPath(dataName)
 	{
 		return (dataListPath[dataName]);
+	}
+
+	/** @param {string} dirName */
+	GetDirName(dirName)
+	{
+		return (dataListDirName[dirName]);
 	}
 }
 
 //SECTION - dataList class methods/utils
+
+/** @enum {string} */
+const dataListDirName = 
+{
+	"pokedex" : "Pokemon",
+	"nature" : "Nature",
+	"move" : "Move",
+	"item" : "Item",
+	"ability" : "Ability",
+	"users" : "users",
+	"trainers" : "trainers",
+	"pokemon" : "pokemon"
+};
 
 /** @enum {string} */
 const dataListPath = 

@@ -31,17 +31,19 @@ lib.app.get("/keyPressed/search*splat", (req, res) =>
 	{
 		if (match[category].length == 0)
 			continue ;
+		let path = server.data.GetDirName(`${category}`);
 		res.write(`<div class="search-category-title">${category}</div>`);
 		res.write(`<div class="search-results-list">`);
 		for (let name of match[category])
 		{
 				res.write(`
-				<a href="/search/${category}/${name}" class="search-item">
+				<a href="/search/${path}/${name}" class="search-item">
 					<span class="item-name">${name}</span>
 					<span class="item-type-label">${category}</span>
 				</a>
 				`);
 		}
+		res.write(`</div>`);
 	}
 	res.end();
 }
