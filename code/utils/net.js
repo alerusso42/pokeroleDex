@@ -1,3 +1,9 @@
+// @ts-check
+/**
+ * 
+ * @param {string} url 
+ * @returns 
+ */
 function urlArg(url)
 {
 	if (url.includes("/") == false)
@@ -6,6 +12,11 @@ function urlArg(url)
 	return (url.substring(url.lastIndexOf("/"), url.length));
 }
 
+/**
+ * 
+ * @param {string} url 
+ * @returns 
+ */
 function urlDir(url)
 {
 	if (url.includes("/") == false)

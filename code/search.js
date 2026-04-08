@@ -158,4 +158,58 @@ function write(client, msg)
 	client.buff += msg;
 }
 
-module.exports = {getData};
+/**
+ * 
+ * @param {string} key 
+ * @param {lib.types.dataList} data 
+ * @param {Array<string>} validArray 
+ * @returns {lib.types.dataList}
+ */
+function searchByKey(key, data, validArray = [])
+{
+	let match = new lib.types.dataList(false);
+
+	key = dataNormalize(key);
+	for (const dataName in data)
+	{
+		if (validArray.length == 0 || validArray.includes(dataName) == true)
+			addMatchByKey(key, data[dataName], match[dataName]);
+	}
+	return (match);
+}
+
+/**
+ * 
+ * @param {string} key 
+ * @param {Array<string>} array 
+ * @param {Array<string>} match 
+ */
+function addMatchByKey(key, array, match = [])
+{
+	for (let x of array)
+	{
+		if (x.startsWith(key) == true)
+		{
+			match.push(x);
+		}
+	}
+}
+
+function dataNormalize(dataName)
+{
+	if (dataName == "")
+		return ("");
+	dataName = dataName[0].toUpperCase() + dataName.substring(1, dataName.length);
+	if (dataName.startsWith("Mega ") == true && dataName.includes("drain") == false)
+		dataName = dataNormalize(dataName.substring(5, dataName.length) + " (Mega Form)");
+	let i = 0;
+	while (i != dataName.length)
+	{
+		if (dataName[i] == ' ' || dataName[i] == '(')
+			dataName = dataName.substring(0, i + 1) + dataName[i + 1].toUpperCase() + dataName.substring(i + 2, dataName.length);
+		++i;
+	}
+	return (dataName);
+}
+
+module.exports = {getData, searchByKey};

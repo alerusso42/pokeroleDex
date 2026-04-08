@@ -23,8 +23,10 @@ lib.app.get("/keyPressed*splat", (req, res) =>
 	let arg = lib.utils.urlArg(url);
 	if (arg == "")
 		return ("");
+	arg = arg.slice(1, arg.length);// elimina lo /
 	console.log("key pressed->" + arg);
-	res.send("key pressed->" + arg);
+	let match = locationSearch.searchByKey(arg, server.data);
+	res.send("found->" + match.move.flat());
 }
 );
 

@@ -19,7 +19,7 @@ class Server
 	constructor()
 	{
 		/** @type {dataList} */
-		this.data = new dataList();
+		this.data = new dataList(true);
 		/** @type {Map<number, User>} */
 		this.userMap = getDataMap("users/", true, true);
 		/** @type {number} */
@@ -27,7 +27,7 @@ class Server
 		/** @type {number} */
 		this.cryptSalt = 10;
 
-		this.data.Print();
+		//this.data.Print();
 	}
 }
 
@@ -176,16 +176,20 @@ function isAdmin(req, user)
 
 class dataList
 {
-	constructor()
+	/**
+	 * 
+	 * @param {boolean} fill
+	 */
+	constructor(fill)
 	{
-		/** @type {Array<string>} */	this.pokedex = fillDataListArray(dataPath + "Pokemon/");
-		/** @type {Array<string>} */	this.nature = fillDataListArray(dataPath + "Nature/");
-		/** @type {Array<string>} */	this.move = fillDataListArray(dataPath + "Move/");
-		/** @type {Array<string>} */	this.item = fillDataListArray(dataPath + "Item/");
-		/** @type {Array<string>} */	this.ability = fillDataListArray(dataPath + "Ability/");
-		/** @type {Array<string>} */	this.users = fillDataListArray(questDataPath + "users/");
-		/** @type {Array<string>} */	this.trainers = fillDataListArray(questDataPath + "trainers/");
-		/** @type {Array<string>} */	this.pokemon = fillDataListArray(questDataPath + "pokemon/");
+		/** @type {Array<string>} */	this.pokedex = fillDataListArray(fill, dataPath + "Pokemon/");
+		/** @type {Array<string>} */	this.nature = fillDataListArray(fill, dataPath + "Nature/");
+		/** @type {Array<string>} */	this.move = fillDataListArray(fill, dataPath + "Move/");
+		/** @type {Array<string>} */	this.item = fillDataListArray(fill, dataPath + "Item/");
+		/** @type {Array<string>} */	this.ability = fillDataListArray(fill, dataPath + "Ability/");
+		/** @type {Array<string>} */	this.users = fillDataListArray(fill, questDataPath + "users/");
+		/** @type {Array<string>} */	this.trainers = fillDataListArray(fill, questDataPath + "trainers/");
+		/** @type {Array<string>} */	this.pokemon = fillDataListArray(fill, questDataPath + "pokemon/");
 	}
 	/**
 	 * 
@@ -205,14 +209,16 @@ class dataList
 
 /**
  * 
- * @param {Array<string>} array 
+ * @param {boolean} fill
  * @param {string} path 
  * @returns {Array<string>} the array filled with all files in that directory
  */
-function fillDataListArray(path)
+function fillDataListArray(fill, path)
 {
 	let array = new Array();
 
+	if (fill == false)
+		return (array);
 	for (let file of fs.readdirSync(path))
 	{
 		file = file.replace(".json", "");
@@ -221,4 +227,4 @@ function fillDataListArray(path)
 	return (array);
 }
 
-module.exports = {Server, Client};
+module.exports = {Server, Client, dataList};
