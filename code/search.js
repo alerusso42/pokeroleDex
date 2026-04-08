@@ -17,6 +17,7 @@ const linkIgnored = new Array("Kind", "Value", "Stat");
  */
 async function getData(client)
 {
+	
 	try 
 	{
 		console.log("searching in " + types.at(client.dirIndex));

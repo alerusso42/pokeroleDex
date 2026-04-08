@@ -5,7 +5,7 @@ const locationLogin = require('./login.js');
 const types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
 const server = new lib.types.Server();
 
-lib.app.listen(8080, "0.0.0.0", );
+lib.app.listen(8080, "0.0.0.0");
 // interpreta il body
 lib.app.use(lib.express.text());
 

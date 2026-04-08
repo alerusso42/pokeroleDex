@@ -4,7 +4,8 @@ const url = require("url");
 const net = require('./net.js');
 const stringUtils = require('./string.js');
 
-const dataPath = "data/questData/";
+const questDataPath = "data/questData/";
+const dataPath = "data/v2.0/";
 
 /** @typedef {typeof import("express").Request} ExpressRequest */
 /** @typedef {typeof import("../../data/template/user.json")} User */
@@ -37,7 +38,7 @@ class Server
 function getDataMap(typePath, readFileBool = false, useIdBool = false)
 {
 	let map = new Map();
-	let dirName = dataPath + typePath;
+	let dirName = questDataPath + typePath;
 	let dir = fs.readdirSync(dirName);
 
 	for (let file of dir)
@@ -166,5 +167,43 @@ function isAdmin(req, user)
 	}
 	return (false);
 }
+
+//SECTION - dataList class definition
+
+class dataList
+{
+	constructor()
+	{
+		/** @type {Array<string>} */	this.pokedex = fillDataListArray(dataPath + "Pokemon/");
+		/** @type {Array<string>} */	this.nature = fillDataListArray(dataPath + "Nature/");
+		/** @type {Array<string>} */	this.move = fillDataListArray(dataPath + "Move/");
+		/** @type {Array<string>} */	this.item = fillDataListArray(dataPath + "Nature/");
+		/** @type {Array<string>} */	this.ability = fillDataListArray(dataPath + "Ability/");
+		/** @type {Array<string>} */	this.users = fillDataListArray(questDataPath + "users/");
+		/** @type {Array<string>} */	this.trainers = fillDataListArray(questDataPath + "trainers/");
+		/** @type {Array<string>} */	this.pokemon = fillDataListArray(questDataPath + "pokemon/");	
+	}
+}
+
+//SECTION - dataList class methods/utils
+
+/**
+ * 
+ * @param {Array<string>} array 
+ * @param {string} path 
+ * @returns {Array<string>} the array filled with all files in that directory
+ */
+function fillDataListArray(path)
+{
+	let array = new Array();
+
+	for (let file of fs.readdirSync(path))
+	{
+		file.replace(".json", "");
+		array.push(file);
+	}
+	return (array);
+}
+
 
 module.exports = {Server, Client};
