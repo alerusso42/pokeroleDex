@@ -18,12 +18,16 @@ class Server
 {
 	constructor()
 	{
+		/** @type {dataList} */
+		this.data = new dataList();
 		/** @type {Map<number, User>} */
 		this.userMap = getDataMap("users/", true, true);
 		/** @type {number} */
 		this.userNum = this.userMap.size;
 		/** @type {number} */
 		this.cryptSalt = 10;
+
+		this.data.Print();
 	}
 }
 
@@ -177,11 +181,23 @@ class dataList
 		/** @type {Array<string>} */	this.pokedex = fillDataListArray(dataPath + "Pokemon/");
 		/** @type {Array<string>} */	this.nature = fillDataListArray(dataPath + "Nature/");
 		/** @type {Array<string>} */	this.move = fillDataListArray(dataPath + "Move/");
-		/** @type {Array<string>} */	this.item = fillDataListArray(dataPath + "Nature/");
+		/** @type {Array<string>} */	this.item = fillDataListArray(dataPath + "Item/");
 		/** @type {Array<string>} */	this.ability = fillDataListArray(dataPath + "Ability/");
 		/** @type {Array<string>} */	this.users = fillDataListArray(questDataPath + "users/");
 		/** @type {Array<string>} */	this.trainers = fillDataListArray(questDataPath + "trainers/");
-		/** @type {Array<string>} */	this.pokemon = fillDataListArray(questDataPath + "pokemon/");	
+		/** @type {Array<string>} */	this.pokemon = fillDataListArray(questDataPath + "pokemon/");
+	}
+	/**
+	 * 
+	 * @param {dataList} dt 
+	 */
+	Print()
+	{
+		for (let ar in this)
+		{
+			console.log("\x1b[32m", ar, "print:\x1b[0m");
+			console.log(this[ar]);
+		}
 	}
 }
 
@@ -199,11 +215,10 @@ function fillDataListArray(path)
 
 	for (let file of fs.readdirSync(path))
 	{
-		file.replace(".json", "");
+		file = file.replace(".json", "");
 		array.push(file);
 	}
 	return (array);
 }
-
 
 module.exports = {Server, Client};
