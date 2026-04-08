@@ -9,6 +9,8 @@ lib.app.listen(8080, "0.0.0.0");
 // interpreta il body
 lib.app.use(lib.express.text());
 
+lib.app.use("/html", lib.express.static("html/"));
+
 lib.app.get("/", tutorial);
 
 function tutorial(req, res)
@@ -17,16 +19,25 @@ function tutorial(req, res)
 	res.send(dom.serialize());
 }
 
-lib.app.get("/keyPressed*splat", (req, res) =>
+lib.app.get("/keyPressed/search*splat", (req, res) =>
 {
 	let url = lib.url.parse(req.url).pathname;
 	let arg = lib.utils.urlArg(url);
-	if (arg == "")
-		return ("");
+	if (arg.length <= 1)
+		return (res.end(""));
 	arg = arg.slice(1, arg.length);// elimina lo /
-	console.log("key pressed->" + arg);
 	let match = locationSearch.searchByKey(arg, server.data);
-	res.send("found->" + match.move.flat());
+	for (let data in match)
+	{
+		if (match[data].length == 0)
+			continue ;
+		res.write(`<h3 class="a.badge">${data}</h3>`);
+		for (let i = 0; i != match[data].length; i++)
+		{
+			res.write(match[data][i]);
+		}
+	}
+	res.end();
 }
 );
 

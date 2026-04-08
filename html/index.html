@@ -3,153 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="/html/style.css">
     <title>PokéDex API</title>
-    <style>
-        :root {
-            --poke-red: #d32f2f;
-            --poke-dark: #2c3e50;
-            --poke-light: #f5f5f5;
-            --white: #ffffff;
-            --black: #000000;
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(
-                to bottom,
-                var(--poke-red) 0%,
-                var(--poke-red) 48%,
-                var(--black) 48%,
-                var(--black) 52%,
-                var(--poke-light) 52%,
-                var(--poke-light) 100%
-            );
-            background-attachment: fixed;
-            min-height: 100vh;
-            color: #333;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 100px auto 40px auto; 
-            background: var(--white);
-            border-radius: 15px;
-            padding: 40px 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            position: relative;
-        }
-
-        .image-wrapper {
-            width: 160px;
-            height: 160px;
-            margin: 0 auto;
-            background: var(--white);
-            border-radius: 50%;
-            border: 8px solid var(--black);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: absolute;
-            top: -85px;
-            left: 0;
-            right: 0;
-            z-index: 10;
-        }
-
-        .image-wrapper img {
-            max-width: 85%;
-            max-height: 85%;
-            object-fit: contain;
-        }
-
-        h1 {
-            text-align: center;
-            color: var(--poke-red);
-            margin-top: 60px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        /* --- BARRA DI RICERCA SEMPLIFICATA --- */
-        .search-container {
-            display: flex;
-            margin-bottom: 25px;
-            background: #eee;
-            padding: 5px;
-            border-radius: 50px;
-            border: 2px solid var(--poke-dark);
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .search-input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            padding: 12px 25px;
-            font-size: 1.1em;
-            outline: none;
-            color: var(--poke-dark);
-        }
-
-        .search-button {
-            background: var(--poke-red);
-            color: white;
-            border: none;
-            padding: 10px 30px;
-            border-radius: 50px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-transform: uppercase;
-        }
-
-        .search-button:hover { 
-            background: var(--poke-dark);
-            transform: scale(1.05);
-        }
-
-        /* --- NAVIGAZIONE --- */
-        .nav-menu {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 10px;
-        }
-
-        .nav-button {
-            background: var(--poke-light);
-            border: 2px solid var(--poke-dark);
-            color: var(--poke-dark);
-            padding: 10px;
-            text-align: center;
-            text-decoration: none;
-            font-weight: bold;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-            text-transform: uppercase;
-            font-size: 0.8em;
-        }
-
-        .nav-button:hover {
-            background: var(--poke-dark);
-            color: var(--white);
-            transform: translateY(-2px);
-        }
-
-        #test {
-            margin-top: 30px;
-            border-top: 2px dashed #eee;
-            padding-top: 20px;
-        }
-        
-        .data-row { display: flex; padding: 10px 0; border-bottom: 1px solid #eee; }
-        .key { font-weight: bold; min-width: 120px; color: var(--poke-red); }
-        .value { flex: 1; }
-        .separator { color: var(--poke-red); font-weight: bold; margin: 0 5px; }
-
-    </style>
 </head>
 <body>
 
@@ -171,7 +26,7 @@
     </div>
 
     <script>
-        function executeSearch() 
+        function executeSearch()
 		{
             const query = document.getElementById('searchInput').value.trim();
             if (query) {
@@ -184,11 +39,11 @@
 		{
 			const query = document.getElementById('searchInput').value.trim();
 			console.log("query:" + query + "\n");
-			fetch(`/keyPressed/${query}`)
+			fetch(`/keyPressed/search/${query}`)
 			.then((output) => output.text())
 			.then ((output) =>  
 			{
-				document.getElementById("test").innerText = output;
+				document.getElementById("test").innerHTML = output;
 			}
 			).catch((err) => 
 			{
