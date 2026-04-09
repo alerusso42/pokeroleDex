@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/html/style.css">
+    <title>400 - Richiesta Incomprensibile!</title>
+    <style>
+        .error-code {
+            font-size: 5em;
+            font-weight: 800;
+            color: var(--poke-red);
+            margin: 0;
+            line-height: 1;
+        }
+        .error-message {
+            font-size: 1.2em;
+            color: var(--poke-dark);
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        .rotom-text {
+            font-style: italic;
+            color: #888;
+            margin-top: 20px;
+        }
+
+        /* Effetto glitch elettrico per Rotom */
+        @keyframes shock {
+            0% { transform: translate(0); filter: hue-rotate(0deg); }
+            20% { transform: translate(-2px, 2px); filter: hue-rotate(90deg); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); filter: hue-rotate(180deg); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); filter: hue-rotate(360deg); }
+        }
+
+        #img {
+            animation: shock 0.2s ease-in-out infinite;
+            animation-play-state: paused;
+        }
+
+        .image-wrapper:hover #img {
+            animation-play-state: running;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="/" class="btn-home">TORNA ALLA HOME</a>
+
+    <div id="test">
+        <div class="image-wrapper">
+            <img src="https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/BookSprites/rotom.png" 
+                 alt="Rotom dispettoso" 
+                 id="img">
+        </div>
+
+        <br><br><br><br>
+        <div style="text-align: center;">
+            <p class="error-code">400</p>
+            <h1>Bzzzt! Cortocircuito!</h1>
+            <p class="error-message">Il server non ha capito cosa volevi fare.</p>
+            
+            <div class="data-row" style="justify-content: center; border-bottom: none;">
+                <p class="value" style="text-align: center; justify-content: center;">
+                    La richiesta inviata è malformata o contiene errori.<br>
+                    Sembra che Rotom sia entrato nel sistema e abbia incasinato i dati!
+                </p>
+            </div>
+
+            <div style="margin-top: 30px; display: flex; gap: 10px; justify-content: center;">
+                <a href="/" class="badge">Riprova</a>
+                <a href="/" class="badge" style="background: var(--poke-red);">Torna alla Home</a>
+            </div>
+
+            <p class="rotom-text">"Rotom ride guardando i cavi bruciati..."</p>
+        </div>
+    </div>
+
+</body>
+</html>

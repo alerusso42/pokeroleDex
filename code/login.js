@@ -78,6 +78,12 @@ function addUser(server, client, res, user = null)
  */
 function loginCheck (client, res, searchBool = false)
 {
+	if (client.dirName == "")
+	{
+		res.status(400);
+		res.end(getHtml("./html/error/400.html").serialize());
+		return (1);
+	}
 	if (client.isAdmin == true)
 		client.authLevel = lib.types.enumAuth.ADMIN;
 	else if (searchBool == true)
