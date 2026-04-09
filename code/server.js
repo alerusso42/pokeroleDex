@@ -23,6 +23,8 @@ lib.app.get("/keyPressed/search*splat", (req, res) =>
 {
 	let url = lib.url.parse(req.url).pathname;
 	let arg = lib.utils.urlArg(url);
+	console.table(req.query);
+	console.table(req.params);
 	if (arg.length <= 1)
 		return (res.end(""));
 	arg = arg.slice(1, arg.length);// elimina lo /
