@@ -99,6 +99,8 @@ class Client
 
 		/** @type {boolean} */	this.isLogged = this.user != null;
 
+		/** @type {number} */	this.authLevel = enumAuth.UNKNOWN;
+
 		if (this.isAdmin == true && this.isLogged == true)
 			console.log("Admin", this.user.Name, "searching for \"" + this.dataName + "\"");
 		else if (this.isAdmin == true)
