@@ -169,6 +169,8 @@ function searchByKey(key, data, validArray = [])
 {
 	let match = new lib.types.dataList(false);
 
+	if (validArray == undefined)
+		validArray = [];
 	key = dataNormalize(key);
 	for (const dataName in data)
 	{
