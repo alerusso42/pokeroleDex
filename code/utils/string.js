@@ -23,4 +23,20 @@ function includesOneOf(str)
     return ("");
 }
 
-module.exports = {includesOneOf};
+/**
+ * Mega Charizard X -> charizard-x-mega-form
+ * @param {string} name 
+ */
+function pokemonToSnakeCase(name)
+{
+	if (name.includes("mega ") == true && name.includes("drain") == false)
+	{
+		name = name.replace("mega-", "");
+		name = name + "-mega-form";
+	}
+	name = name.replace(" (", "-").replace(")", "");
+	name = name.toLowerCase().replaceAll(" ", "-");
+	return (name);
+}
+
+module.exports = {includesOneOf, pokemonToSnakeCase};

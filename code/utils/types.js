@@ -189,8 +189,8 @@ class dataList
 		/** @type {Array<string>} */	this.move = fillDataListArray(fill, "move");
 		/** @type {Array<string>} */	this.item = fillDataListArray(fill, "item");
 		/** @type {Array<string>} */	this.ability = fillDataListArray(fill, "ability");
-		/** @type {Array<string>} */	this.users = fillDataListArray(fill, "users");
-		/** @type {Array<string>} */	this.trainers = fillDataListArray(fill, "trainers");
+		/** @type {Array<string>} */	this.user = fillDataListArray(fill, "user");
+		/** @type {Array<string>} */	this.trainer = fillDataListArray(fill, "trainer");
 		/** @type {Array<string>} */	this.pokemon = fillDataListArray(fill, "pokemon");
 	}
 	/**
@@ -229,8 +229,8 @@ const dataListDirName =
 	"move" : "Move",
 	"item" : "Item",
 	"ability" : "Ability",
-	"users" : "users",
-	"trainers" : "trainers",
+	"user" : "users",
+	"trainer" : "trainers",
 	"pokemon" : "pokemon"
 };
 
@@ -242,8 +242,8 @@ const dataListPath =
 	"move" : dataPath + "Move/",
 	"item" : dataPath + "Item/",
 	"ability" : dataPath + "Ability/",
-	"users" : questDataPath + "users/",
-	"trainers" : questDataPath + "trainers/",
+	"user" : questDataPath + "users/",
+	"trainer" : questDataPath + "trainers/",
 	"pokemon" : questDataPath + "pokemon/"
 };
 

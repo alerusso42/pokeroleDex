@@ -2,6 +2,8 @@ const lib = require('./utils/lib.js');
 const html = require('./html.js');
 const locationSearch = require('./search.js');
 const locationLogin = require('./login.js');
+const locationAutoIndex = require('./autoindex.js');
+const { name } = require('ejs');
 const types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
 const server = new lib.types.Server();
 
@@ -38,8 +40,13 @@ lib.app.get("/keyPressed/search*splat", (req, res) =>
 		res.write(`<div class="search-results-list">`);
 		for (let name of match[category])
 		{
+			let img = lib.utils.pokemonToSnakeCase(name) + ".png";
+				res.write(`<a href="/search/${path}/${name}" class="search-item">`);
+				if (category == "pokedex")
+				{
+					res.write(`<img src="https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/BoxSprites/${img}" class="item-icon">`);
+				}
 				res.write(`
-				<a href="/search/${path}/${name}" class="search-item">
 					<span class="item-name">${name}</span>
 					<span class="item-type-label">${category}</span>
 				</a>
@@ -91,15 +98,15 @@ lib.app.post("/register/:user", async (req, res) =>
 	return (locationLogin.login(server, req, res, false));
 });
 
-lib.app.get("/users/", (req, res) => 
+lib.app.get("/user/", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/autoindex.html");
-	if (client.isLogged == false)
-		res.redirect("/loginpage");
-	res.send("autoindex di ogni trainer " + client);
+	if (locationLogin.loginCheck(client, res) == 1)
+		return ;
+	return (locationAutoIndex.autoIndex(server, client, res));
 });
 
-lib.app.get("/trainers", (req, res) => 
+lib.app.get("/trainer", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/autoindex.html");
 	if (client.isLogged == false && client.isAdmin == false)
@@ -107,7 +114,7 @@ lib.app.get("/trainers", (req, res) =>
 	res.send("autoindex di ogni trainer " + client);
 });
 
-lib.app.get("/trainers/:trName/", (req, res) => 
+lib.app.get("/trainer/:trName/", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/autoindex.html");
 	if (client.isLogged == false)
@@ -115,7 +122,7 @@ lib.app.get("/trainers/:trName/", (req, res) =>
 	res.send("pokemon posseduti da " + client.req.params.trName);
 });
 
-lib.app.get("/trainers/:trName/:pkName", (req, res) => 
+lib.app.get("/trainer/:trName/:pkName", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon.html");
 	if (client.isLogged == false)

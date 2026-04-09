@@ -1,3 +1,4 @@
+const { getHtml } = require("./html.js");
 const lib = require("./utils/lib.js");
 
 /** @typedef {typeof import("../data/template/user.json")} User */
@@ -70,25 +71,35 @@ function addUser(server, client, res, user = null)
 
 /**
  * 
- * @param {lib.types.Server} server 
  * @param {lib.types.Client} client 
+ * @param {Response} res 
  * @param {bool} searchBool 
- * @returns {number} from enum enumAuth
+ * @returns {number} 0 on success, 1 on failure
  */
-function loginCheck (server, client, searchBool = false)
+function loginCheck (client, res, searchBool = false)
 {
 	if (client.isAdmin == true)
-		return (lib.types.enumAuth.ADMIN);
+		client.authLevel = lib.types.enumAuth.ADMIN;
 	else if (searchBool == true)
 	{
 		if (client.Name == client.dataName)
-			return (lib.types.enumAuth.CORRECT_LOGIN);
+			client.authLevel = lib.types.enumAuth.CORRECT_LOGIN;
 		else
-			return (lib.types.enumAuth.WRONG_LOGIN);
+		{
+			res.status(401);
+			res.end(getHtml("./html/error/401.html").serialize());
+			return (1);
+		}
 	}
 	else if (client.isLogged == true)
-		return (lib.types.enumAuth.LOGIN);
-	return (lib.types.enumAuth.UNKNOWN);
+		client.authLevel = lib.types.enumAuth.LOGIN;
+	else
+	{
+		res.status(401);
+		res.end(getHtml("./html/error/401.html").serialize());
+		return (1);
+	}
+	return (0);
 }
 
-module.exports = {login};
+module.exports = {login, loginCheck};

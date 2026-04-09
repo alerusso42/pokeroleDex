@@ -336,3 +336,44 @@ h1 {
     padding: 2px 6px;
     border-radius: 3px;
 }
+
+/* Contenitore della lista */
+.trainer-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Spazio tra un allenatore e l'altro */
+    margin-top: 15px;
+}
+
+/* Il singolo elemento della lista */
+.trainer-item {
+    display: flex;
+    align-items: center; /* Allinea verticalmente icona e testo al centro */
+    background: var(--white);
+    padding: 8px 15px;
+    border-radius: 50px; /* Stile a "pillola" come i tuoi badge */
+    border: 2px solid var(--poke-dark);
+    transition: 0.2s;
+}
+
+.trainer-item:hover {
+    border-color: var(--poke-red);
+    background: var(--poke-light);
+    transform: translateX(5px); /* Piccolo effetto movimento al passaggio del mouse */
+}
+
+/* L'icona dell'allenatore */
+.trainer-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 12px; /* Spazio tra icona e nome */
+    object-fit: contain;
+    filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.1));
+}
+
+.trainer-name {
+    font-weight: bold;
+    color: var(--poke-dark);
+    text-transform: uppercase;
+    font-size: 0.9em;
+}
