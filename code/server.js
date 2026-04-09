@@ -125,7 +125,7 @@ lib.app.get("/trainers/:trName/:pkName", (req, res) =>
 
 lib.app.get("/*splat", (req, res) =>
 {
-	let client = new lib.types.Client(server, req, "./html/error/401.html");
+	let client = new lib.types.Client(server, req, "./html/error/404.html");
 	res.status(404);
 	res.end(client.dom.serialize());
 });
