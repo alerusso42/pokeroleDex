@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/html/style.css">
+    <title>401 - Accesso Negato!</title>
+    <style>
+        .error-code {
+            font-size: 5em;
+            font-weight: 800;
+            color: var(--poke-red);
+            margin: 0;
+            line-height: 1;
+        }
+        .error-message {
+            font-size: 1.2em;
+            color: var(--poke-dark);
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        .snorlax-text {
+            font-style: italic;
+            color: #888;
+            margin-top: 20px;
+        }
+        /* Effetto "sonno" per l'immagine */
+        @keyframes sleep {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        #img {
+            animation: sleep 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="/" class="btn-home">TORNA ALLA HOME</a>
+
+    <div id="test">
+        <div class="image-wrapper">
+            <img src="https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/BookSprites/snorlax.png" 
+                 alt="Snorlax dormiente" 
+                 id="img">
+        </div>
+
+        <br><br><br><br>
+        <div style="text-align: center;">
+            <p class="error-code">401</p>
+            <h1>Zzzzz... Zzzzz...</h1>
+            <p class="error-message">Uno Snorlax selvatico blocca il passaggio!</p>
+            
+            <div class="data-row" style="justify-content: center; border-bottom: none;">
+                <p class="value" style="text-align: center; justify-content: center;">
+                    Non hai i permessi necessari o la tua sessione è scaduta.<br>
+                    Senza un Flauto Pokémon (o un Login valido), non si passa!
+                </p>
+            </div>
+
+            <div style="margin-top: 30px; display: flex; gap: 10px; justify-content: center;">
+                <a href="/auth" class="badge">Effettua il Login</a>
+                <a href="/" class="badge" style="background: var(--poke-red);">Torna alla Home</a>
+            </div>
+
+            <p class="snorlax-text">"Snorlax sta dormendo profondamente..."</p>
+        </div>
+    </div>
+
+</body>
+</html>

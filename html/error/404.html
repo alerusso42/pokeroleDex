@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/html/style.css">
+    <title>404 - Percorso smarrito!</title>
+    <style>
+        .error-code {
+            font-size: 5em;
+            font-weight: 800;
+            color: var(--poke-red);
+            margin: 0;
+            line-height: 1;
+        }
+        .error-message {
+            font-size: 1.2em;
+            color: var(--poke-dark);
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        .psyduck-text {
+            font-style: italic;
+            color: #888;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="/" class="btn-home">TORNA ALLA HOME</a>
+
+    <div id="test">
+    <div class="image-wrapper">
+        <img src="https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/BookSprites/psyduck.png" 
+             alt="Psyduck Confuso" 
+             id="img"></div>
+    </div>
+
+    <div id="test">
+        <div style="text-align: center;">
+            <p class="error-code">404</p>
+            <h1>PSYYY?!</h1>
+            <p class="error-message">Questa pagina è stata colpita da Inibitore!</p>
+            
+            <div class="data-row" style="justify-content: center; border-bottom: none;">
+                <p class="value" style="text-align: center; justify-content: center;">
+                </p>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <a href="/" class="badge">Prova a fare una nuova ricerca</a>
+            </div>
+
+            <p class="psyduck-text">"Psyduck... duck? (Ho mal di testa...)"</p>
+        </div>
+    </div>
+
+    <script>
+        // Un piccolo tocco extra: facciamo vibrare l'immagine ogni tanto 
+        // per simulare il mal di testa di Psyduck
+        const psyImg = document.getElementById('img');
+        setInterval(() => {
+            psyImg.style.transform = "translateX(2px) rotate(2deg)";
+            setTimeout(() => {
+                psyImg.style.transform = "translateX(-2px) rotate(-2deg)";
+            }, 100);
+            setTimeout(() => {
+                psyImg.style.transform = "none";
+            }, 200);
+        }, 3000);
+    </script>
+
+</body>
+</html>

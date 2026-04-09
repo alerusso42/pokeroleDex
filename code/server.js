@@ -10,6 +10,7 @@ lib.app.listen(8080, "0.0.0.0");
 lib.app.use(lib.express.text());
 
 lib.app.use("/html", lib.express.static("html/"));
+lib.app.use("/html/error", lib.express.static("html/error/"));
 
 lib.app.get("/", tutorial);
 
@@ -90,11 +91,19 @@ lib.app.post("/register/:user", async (req, res) =>
 	return (locationLogin.login(server, req, res, false));
 });
 
-lib.app.get("/trainers", (req, res) => 
+lib.app.get("/users/", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/autoindex.html");
 	if (client.isLogged == false)
 		res.redirect("/loginpage");
+	res.send("autoindex di ogni trainer " + client);
+});
+
+lib.app.get("/trainers", (req, res) => 
+{
+	let client = new lib.types.Client(server, req, "./html/autoindex.html");
+	if (client.isLogged == false && client.isAdmin == false)
+		res.redirect("/html/error/401.html");
 	res.send("autoindex di ogni trainer " + client);
 });
 
@@ -112,4 +121,11 @@ lib.app.get("/trainers/:trName/:pkName", (req, res) =>
 	if (client.isLogged == false)
 		res.redirect("/loginpage");
 	res.send("dati pokemon " + client.req.params.pkName + " di allenatore " + client.req.params.trName);
+});
+
+lib.app.get("/*splat", (req, res) =>
+{
+	let client = new lib.types.Client(server, req, "./html/error/401.html");
+	res.status(404);
+	res.end(client.dom.serialize());
 });

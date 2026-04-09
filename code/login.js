@@ -1,6 +1,10 @@
 const lib = require("./utils/lib.js");
 
+/** @typedef {typeof import("../data/template/user.json")} User */
+
 const dataPath = "data/questData/";
+
+//SECTION login function
 
 /**
  * 
@@ -60,6 +64,31 @@ function addUser(server, client, res, user = null)
 	server.userMap.set(id, newUser);
 	lib.fs.writeFileSync(newUser.File, JSON.stringify(newUser, null, 2), 'utf-8');
 	res.setHeader("Set-Cookie", `userId=${id}; Path=/; HttpOnly; Max-Age=31536000`);
+}
+
+//SECTION loginCheck function
+
+/**
+ * 
+ * @param {lib.types.Server} server 
+ * @param {lib.types.Client} client 
+ * @param {bool} searchBool 
+ * @returns {number} from enum enumAuth
+ */
+function loginCheck (server, client, searchBool = false)
+{
+	if (client.isAdmin == true)
+		return (lib.types.enumAuth.ADMIN);
+	else if (searchBool == true)
+	{
+		if (client.Name == client.dataName)
+			return (lib.types.enumAuth.CORRECT_LOGIN);
+		else
+			return (lib.types.enumAuth.WRONG_LOGIN);
+	}
+	else if (client.isLogged == true)
+		return (lib.types.enumAuth.LOGIN);
+	return (lib.types.enumAuth.UNKNOWN);
 }
 
 module.exports = {login};
