@@ -151,6 +151,14 @@ lib.app.get("/pokemon/:name", (req, res) =>
 lib.app.use(lib.express.json());
 lib.app.use(lib.express.urlencoded({ extended: true }));
 
+lib.app.get("/edit/trainer/:name", (req, res) => 
+{
+	let client = new lib.types.Client(server, req, "./html/trainer/edit.html");
+	if (locationLogin.loginCheck(client, res, true) == 1)
+		return ;
+	return (res.send(client.dom.serialize()));
+});
+
 lib.app.get("/edit/pokemon/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/edit.html");
@@ -173,6 +181,14 @@ lib.app.get("/api/trainer/:name", (req, res) =>
 	if (locationLogin.loginCheck(client, res) == 1)
 		return ;
 	return (view(server, client, res));
+});
+
+lib.app.post("/api/trainer/:name", (req, res) => 
+{
+	let client = new lib.types.Client(server, req, "./html/trainer/view.html");
+	if (locationLogin.loginCheck(client, res, true) == 1)
+		return ;
+	return (edit(server, client, res));
 });
 
 lib.app.get("/api/pokemon/:name", (req, res) => 

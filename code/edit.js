@@ -27,9 +27,21 @@ function edit(server, client, res)
 		return ;
 	}
 	let json = client.body;
+	if (client.dirName == "trainer")
+		createNewPokemon(server, client, json);
 	lib.fs.writeFileSync(filename, JSON.stringify(json, null, 2), 'utf-8');
 	res.status(200);
 	res.send(json);
+}
+
+/**
+ * @param {lib.types.Server} server
+ * @param {lib.types.Client} client
+ * @param {typeof import {"../../data/questData/template/pokemon.json"}} json
+ */
+function createNewPokemon(server, client, json)
+{
+	let pokemon = json
 }
 
 module.exports = {edit};

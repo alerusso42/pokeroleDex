@@ -4,7 +4,8 @@
     "Trainer": "ROCKY",
     "Type1": "Grass",
     "Type2": "Ice",
-    "HP": 5,
+    "HP": { "current": 3, "max": 7 },
+    "Will": { "current": 5, "max": 5 },
     "Strength": { "current": 3, "max": 7 },
     "Dexterity": { "current": 1, "max": 2 },
     "Vitality": { "current": 3, "max": 6 },
@@ -24,6 +25,8 @@
     "Athletics": 4,
     "Nature": 6,
     "Stealth": 1,
+    "Initiative": 6,
+    "void": 0,
     "Height": {
         "Meters": 2.7,
         "Feet": 8.9

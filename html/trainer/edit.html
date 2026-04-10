@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/html/style.css">
+    <title>Editor Allenatore</title>
+    <style>
+        .edit-container { display: flex; flex-direction: column; gap: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
+        label { font-weight: bold; color: var(--poke-red); text-transform: uppercase; font-size: 0.8em; }
+        
+        input, select { padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-family: inherit; }
+        
+        .pokemon-edit-card {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #fff; padding: 10px 15px; border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 8px;
+            border-left: 4px solid var(--poke-red);
+        }
+
+        .btn-remove { background: #e74c3c; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; }
+        
+        .add-pokemon-box {
+            background: #f0f0f0; padding: 15px; border-radius: 10px; border: 2px dashed #ccc;
+            display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end;
+        }
+
+        .btn-add { background: var(--poke-red); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        .btn-save {
+            background: #27ae60; color: white; border: none; padding: 15px;
+            border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 1.1em;
+            margin: 30px 0; transition: 0.3s;
+        }
+        .btn-save:hover { background: #219150; transform: translateY(-2px); }
+        .section-title { border-bottom: 2px solid var(--poke-red); padding-bottom: 5px; margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <a href="javascript:history.back()" class="btn-home">⬅️ ANNULLA</a>
+
+    <div id="test">
+        <h1>Modifica Allenatore</h1>
+        
+        <form id="trainer-form" class="edit-container">
+            <div class="section-title">Dati Generali</div>
+            <div class="form-group">
+                <label>Nome Allenatore</label>
+                <input type="text" id="t-name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Categoria (Sprite)</label>
+                <select id="t-category">
+                    <option value="team_black">Team Black</option>
+                    <option value="ace_trainer">Ace Trainer</option>
+                    <option value="beauty">Beauty</option>
+                    <option value="hiker">Hiker</option>
+                </select>
+            </div>
+
+            <div class="section-title">Squadra Pokémon</div>
+            <div id="pokemon-list-container">
+                </div>
+
+            <div class="section-title">Aggiungi Nuovo Pokémon</div>
+            <div class="add-pokemon-box">
+                <div class="form-group" style="margin:0">
+                    <label>Specie</label>
+                    <input type="text" id="new-pkmn-species" placeholder="Es: Pikachu">
+                </div>
+                <div class="form-group" style="margin:0">
+                    <label>Rank</label>
+                    <select id="new-pkmn-rank">
+                        <option value="Starter">Starter</option>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Amateur">Amateur</option>
+                        <option value="Ace">Ace</option>
+                        <option value="Pro">Pro</option>
+                        <option value="Master">Master</option>
+                    </select>
+                </div>
+                <button type="button" class="btn-add" onclick="addPokemonToList()">AGGIUNGI</button>
+            </div>
+
+            <button type="submit" class="btn-save">SALVA ALLENATORE</button>
+        </form>
+    </div>
+
+    <script>
+        let trainerData = null;
+        let currentPokemonList = [];
+
+        async function loadTrainerData() {
+            const pathParts = window.location.pathname.split('/');
+            const trainerName = pathParts[pathParts.length - 1];
+            
+            const response = await fetch(`/api/trainer/${trainerName}`);
+            trainerData = await response.json();
+
+            document.getElementById('t-name').value = trainerData.Name;
+            document.getElementById('t-category').value = trainerData.Category;
+            
+            currentPokemonList = [...trainerData.Pokemon];
+            renderPokemonList();
+        }
+
+        function renderPokemonList() {
+            const container = document.getElementById('pokemon-list-container');
+            container.innerHTML = '';
+
+            currentPokemonList.forEach((pkmn, index) => {
+                container.innerHTML += `
+                    <div class="pokemon-edit-card">
+                        <span><strong>${pkmn.replace("_", " ID: ")}</strong></span>
+                        <button type="button" class="btn-remove" onclick="removePokemon(${index})">Rimuovi</button>
+                    </div>
+                `;
+            });
+        }
+
+        function removePokemon(index) {
+            currentPokemonList.splice(index, 1);
+            renderPokemonList();
+        }
+
+        // Questa funzione NON comunica col server, aggiunge solo alla lista "temporanea" dell'editor
+        function addPokemonToList() {
+            const species = document.getElementById('new-pkmn-species').value.trim();
+            const rank = document.getElementById('new-pkmn-rank').value;
+
+            if (!species) return alert("Inserisci una specie!");
+
+            // Formato temporaneo che il backend dovrà riconoscere per creare il nuovo file
+            // Esempio: "NEW:Pikachu:Starter"
+            currentPokemonList.push(`NEW:${species}:${rank}`);
+            
+            // Pulisci input
+            document.getElementById('new-pkmn-species').value = '';
+            renderPokemonList();
+        }
+
+        document.getElementById('trainer-form').onsubmit = async (e) => {
+            e.preventDefault();
+
+            const updatedTrainer = {
+                ...trainerData,
+                Name: document.getElementById('t-name').value,
+                Category: document.getElementById('t-category').value,
+                Pokemon: currentPokemonList // La lista aggiornata (con NEW:... o ID esistenti)
+            };
+
+            const response = await fetch(`/api/trainer/${trainerData.Name}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedTrainer)
+            });
+
+            if (response.ok) {
+                alert("Allenatore salvato con successo!");
+                window.location.href = `/trainer/${updatedTrainer.Name}`;
+            } else {
+                alert("Errore durante il salvataggio.");
+            }
+        };
+
+        loadTrainerData();
+    </script>
+</body>
+</html>

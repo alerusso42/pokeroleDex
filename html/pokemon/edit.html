@@ -59,8 +59,16 @@
                     <input type="text" id="f-species" readonly style="background:#eee;">
                 </div>
                 <div class="form-group">
-                    <label>HP Totali</label>
-                    <input type="number" id="f-hp">
+                    <label>HP (Attuali / Max)</label>
+                    <div class="stat-input-group">
+                        <input type="number" id="f-hp-curr"> <span>/</span> <input type="number" id="f-hp-max">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Will (Attuali / Max)</label>
+                    <div class="stat-input-group">
+                        <input type="number" id="f-will-curr"> <span>/</span> <input type="number" id="f-will-max">
+                    </div>
                 </div>
             </div>
 
@@ -87,7 +95,8 @@
 
     <script>
         const attrNames = ["Strength", "Dexterity", "Vitality", "Special", "Insight"];
-        const skillNames = ["Brawl", "Channel", "Clash", "Evasion", "Alert", "Athletics", "Nature", "Stealth"];
+        // Ho aggiunto Initiative qui così lo gestisce in automatico nella griglia Skills
+        const skillNames = ["Brawl", "Channel", "Clash", "Evasion", "Alert", "Athletics", "Nature", "Stealth", "Initiative"];
         let originalData = null;
 
         // Inizializzazione UI statica
@@ -121,8 +130,13 @@
             // Popola Dati Base
             document.getElementById('f-name').value = originalData.Name;
             document.getElementById('f-species').value = originalData.Species;
-            document.getElementById('f-hp').value = originalData.HP;
             
+            // Gestione HP e Will (oggetti)
+            document.getElementById('f-hp-curr').value = originalData.HP.current || 0;
+            document.getElementById('f-hp-max').value = originalData.HP.max || 0;
+            document.getElementById('f-will-curr').value = originalData.Will ? originalData.Will.current : 0;
+            document.getElementById('f-will-max').value = originalData.Will ? originalData.Will.max : 0;
+
             // Popola Attributi
             attrNames.forEach(attr => {
                 document.getElementById(`curr-${attr}`).value = originalData[attr].current;
@@ -172,7 +186,14 @@
             
             // Sync Base
             updatedData.Name = document.getElementById('f-name').value;
-            updatedData.HP = parseInt(document.getElementById('f-hp').value);
+            updatedData.HP = {
+                current: parseInt(document.getElementById('f-hp-curr').value),
+                max: parseInt(document.getElementById('f-hp-max').value)
+            };
+            updatedData.Will = {
+                current: parseInt(document.getElementById('f-will-curr').value),
+                max: parseInt(document.getElementById('f-will-max').value)
+            };
 
             // Sync Attributi
             attrNames.forEach(attr => {

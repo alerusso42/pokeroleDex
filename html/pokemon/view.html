@@ -92,8 +92,8 @@
                 let html = `
                     <div class="section-title">Informazioni</div>
                     <div class="data-row"><span class="key">Allenatore:</span><span class="value">${data.Trainer}</span></div>
-                    <div class="data-row"><span class="key">HP:</span><span class="value"><strong>${data.HP}</strong></span></div>
-                    
+                    <div class="data-row"><span class="key">HP:</span><span class="value"><strong>${generateDots(data.HP.current, data.HP.max)}</strong></span></div>
+                    <div class="data-row"><span class="key">Will:</span><span class="value"><strong>${generateDots(data.Will.current, data.Will.max)}</strong></span></div>
                     <div class="section-title">Attributi</div>
                     <div class="data-row"><span class="key">Strength:</span><span class="value">${generateDots(data.Strength.current, data.Strength.max)}</span></div>
                     <div class="data-row"><span class="key">Dexterity:</span><span class="value">${generateDots(data.Dexterity.current, data.Dexterity.max)}</span></div>
@@ -111,7 +111,8 @@
                         <div class="skill-item"><span>Athletics:</span> <span class="skill-val">${data.Athletics || 0}</span></div>
                         <div class="skill-item"><span>Nature:</span> <span class="skill-val">${data.Nature || 0}</span></div>
                         <div class="skill-item"><span>Stealth:</span> <span class="skill-val">${data.Stealth || 0}</span></div>
-                    </div>
+                        <div class="skill-item"><span>Initiative:</span> <span class="skill-val">${data.Initiative || 0}</span></div>
+                        <div class="skill-item"><span>Initiative:</span> <span class="skill-val">${data.void || 0}</span></div>
 
                     <div class="section-title">Abilità: ${data.Ability.Name}</div>
                     <p style="font-size: 0.9em; color: #666; padding: 0 10px; line-height:1.4;">${data.Ability.Effect}</p>
