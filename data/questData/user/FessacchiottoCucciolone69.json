@@ -1,8 +1,8 @@
 {
-  "File": "data/questData/users/FessacchiottoCucciolone69.json",
+  "File": "data/questData/user/FessacchiottoCucciolone69.json",
   "IsAdmin": true,
   "Name": "FessacchiottoCucciolone69",
-  "Password": "$2b$10$FRB2MjfW8zTKdpt8hJFVjOnuI2gwz7z4UvbNd40Lt0POJ0uoOdUJK",
+  "Password": "$2b$10$JAskGebfOPyQ/KFwQpvO.eGy197yvGHh1UgawKz/KRPXuq.3uPrci",
   "Trainers": [],
-  "Id": 3
+  "Id": 4
 }

@@ -1,7 +1,6 @@
 {
-  "Species": "Abomasnow (Mega Form)",
-  "Id": "Tyranitar_4",
-  "Name": "Massimo Bosio",
+  "Species": "Pikachu",
+  "Name": "PiccoloPerry",
   "Trainer": "ROCKY",
   "Type1": "Grass",
   "Type2": "Ice",
@@ -14,7 +13,7 @@
     "max": 5
   },
   "Strength": {
-    "current": 40,
+    "current": 3,
     "max": 7
   },
   "Dexterity": {
@@ -22,7 +21,7 @@
     "max": 2
   },
   "Vitality": {
-    "current": 6,
+    "current": 3,
     "max": 6
   },
   "Special": {
@@ -34,7 +33,7 @@
     "max": 6
   },
   "Ability": {
-    "Name": "Snow Snow Snow sss",
+    "Name": "Snow Warning",
     "Effect": "When this Pokemon comes out, it automatically starts the effects of Hail Weather. The effects end when the Pokemon leaves the battle. (In case of stalemate the Pokemon with higher Will might keep the dominant weather)",
     "Description": "The Pokemon is able to call a terrible hailstorm at will. Snow will cover the battlefield and sharp ice shards will come plummeting from the sky."
   },
@@ -42,7 +41,7 @@
   "Channel": 6,
   "Clash": 4,
   "Evasion": 1,
-  "Alert": 10,
+  "Alert": 6,
   "Athletics": 4,
   "Nature": 6,
   "Stealth": 1,
@@ -66,9 +65,9 @@
   ],
   "Moves": [
     {
-      "Name": "Ice snow",
+      "Name": "Ice Punch",
       "Type": "Ice",
-      "Power": 241,
+      "Power": 2,
       "Damage1": "Strength",
       "Damage2": "",
       "Accuracy1": "Dexterity",
@@ -83,9 +82,9 @@
       "Category": "Physical"
     },
     {
-      "Name": "Razor snow",
-      "Type": "Grasso",
-      "Power": 22,
+      "Name": "Razor Leaf",
+      "Type": "Grass",
+      "Power": 2,
       "Damage1": "Strength",
       "Damage2": "",
       "Accuracy1": "Dexterity",
@@ -100,8 +99,8 @@
       "Category": "Physical"
     },
     {
-      "Name": "Rayquaza",
-      "Type": "Fire",
+      "Name": "Blizzard",
+      "Type": "Ice",
       "Power": 4,
       "Damage1": "Special",
       "Damage2": "",
@@ -155,5 +154,6 @@
       },
       "Category": "Special"
     }
-  ]
+  ],
+  "Id": "Pikachu_1775840528715_110"
 }

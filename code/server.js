@@ -204,7 +204,6 @@ lib.app.post("/api/pokemon/:name", (req, res) =>
 	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
 	if (locationLogin.loginCheck(client, res, true) == 1)
 		return ;
-	console.log("edit");
 	return (edit(server, client, res));
 });
 
