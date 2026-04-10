@@ -27,7 +27,7 @@ function edit(server, client, res)
 		return ;
 	}
 	let json = client.body;
-	lib.fs.writeFileSync(filename, JSON.stringify(json));
+	lib.fs.writeFileSync(filename, JSON.stringify(json, null, 2), 'utf-8');
 	res.status(200);
 	res.send(json);
 }
