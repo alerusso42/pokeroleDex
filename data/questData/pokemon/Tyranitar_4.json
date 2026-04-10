@@ -57,9 +57,9 @@
   ],
   "Moves": [
     {
-      "Name": "Ice Punch",
+      "Name": "Ice snow",
       "Type": "Ice",
-      "Power": 2,
+      "Power": 24,
       "Damage1": "Strength",
       "Damage2": "",
       "Accuracy1": "Dexterity",
@@ -74,9 +74,9 @@
       "Category": "Physical"
     },
     {
-      "Name": "Razor Leaf",
-      "Type": "Grass",
-      "Power": 2,
+      "Name": "Razor snow",
+      "Type": "Grasso",
+      "Power": 22,
       "Damage1": "Strength",
       "Damage2": "",
       "Accuracy1": "Dexterity",
@@ -91,7 +91,7 @@
       "Category": "Physical"
     },
     {
-      "Name": "Blizzard",
+      "Name": "Rayquaza",
       "Type": "Ice",
       "Power": 4,
       "Damage1": "Special",

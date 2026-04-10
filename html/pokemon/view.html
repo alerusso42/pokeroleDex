@@ -14,9 +14,11 @@
             text-transform: uppercase; padding: 5px 15px; border-radius: 5px;
             color: white; font-weight: bold; font-size: 0.8em; margin: 0 5px;
         }
-        /* Colori tipi Pokerole */
+        /* Colori tipi Pokerole (Aggiunti per completezza) */
         .type-grass { background-color: #78C850; }
         .type-ice { background-color: #98D8D8; color: #333; }
+        .type-fire { background-color: #F08030; }
+        .type-water { background-color: #6890F0; }
         
         .stat-dot {
             height: 12px; width: 12px; border-radius: 50%; display: inline-block;
@@ -29,6 +31,18 @@
             background: #f9f9f9; border: 1px solid #eee; padding: 15px;
             border-radius: 10px; margin-bottom: 10px;
         }
+
+        /* Layout per le Skills */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 8px;
+        }
+        .skill-item { font-size: 0.9em; display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; }
+        .skill-val { font-weight: bold; color: var(--poke-red); }
     </style>
 </head>
 <body>
@@ -60,8 +74,8 @@
         async function loadPokemon() {
             try {
                 const pathParts = window.location.pathname.split('/');
-                const pkmnName = pathParts[pathParts.length - 1];
-                const response = await fetch(`/api/pokemon/${pkmnName}`);
+                const pkmnId = pathParts[pathParts.length - 1];
+                const response = await fetch(`/api/pokemon/${pkmnId}`);
                 const data = await response.json();
 
                 // 1. Immagine e Titolo
@@ -74,11 +88,11 @@
                 if(data.Type2) typesHtml += `<span class="type-badge type-${data.Type2.toLowerCase()}">${data.Type2}</span>`;
                 document.getElementById('types').innerHTML = typesHtml;
 
-                // 3. Info Generali e Attributi
+                // 3. Info e Attributi
                 let html = `
                     <div class="section-title">Informazioni</div>
                     <div class="data-row"><span class="key">Allenatore:</span><span class="value">${data.Trainer}</span></div>
-                    <div class="data-row"><span class="key">HP:</span><span class="value">${data.HP}</span></div>
+                    <div class="data-row"><span class="key">HP:</span><span class="value"><strong>${data.HP}</strong></span></div>
                     
                     <div class="section-title">Attributi</div>
                     <div class="data-row"><span class="key">Strength:</span><span class="value">${generateDots(data.Strength.current, data.Strength.max)}</span></div>
@@ -87,8 +101,20 @@
                     <div class="data-row"><span class="key">Special:</span><span class="value">${generateDots(data.Special.current, data.Special.max)}</span></div>
                     <div class="data-row"><span class="key">Insight:</span><span class="value">${generateDots(data.Insight.current, data.Insight.max)}</span></div>
 
+                    <div class="section-title">Skills</div>
+                    <div class="skills-grid">
+                        <div class="skill-item"><span>Brawl:</span> <span class="skill-val">${data.Brawl || 0}</span></div>
+                        <div class="skill-item"><span>Channel:</span> <span class="skill-val">${data.Channel || 0}</span></div>
+                        <div class="skill-item"><span>Clash:</span> <span class="skill-val">${data.Clash || 0}</span></div>
+                        <div class="skill-item"><span>Evasion:</span> <span class="skill-val">${data.Evasion || 0}</span></div>
+                        <div class="skill-item"><span>Alert:</span> <span class="skill-val">${data.Alert || 0}</span></div>
+                        <div class="skill-item"><span>Athletics:</span> <span class="skill-val">${data.Athletics || 0}</span></div>
+                        <div class="skill-item"><span>Nature:</span> <span class="skill-val">${data.Nature || 0}</span></div>
+                        <div class="skill-item"><span>Stealth:</span> <span class="skill-val">${data.Stealth || 0}</span></div>
+                    </div>
+
                     <div class="section-title">Abilità: ${data.Ability.Name}</div>
-                    <p style="font-size: 0.9em; color: #666; padding: 0 10px;">${data.Ability.Effect}</p>
+                    <p style="font-size: 0.9em; color: #666; padding: 0 10px; line-height:1.4;">${data.Ability.Effect}</p>
 
                     <div class="section-title">Moveset</div>
                 `;
@@ -99,12 +125,13 @@
                         <div class="move-card">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <strong>${move.Name}</strong>
-                                <span class="badge" style="font-size:0.7em">${move.Category}</span>
+                                <span class="type-badge type-${move.Type.toLowerCase()}" style="font-size:0.6em">${move.Type}</span>
                             </div>
-                            <div style="font-size:0.8em; margin: 5px 0;">
-                                <em>Danni: ${move.Damage1} + ${move.Power} | Precisione: ${move.Accuracy1} + ${move.Accuracy2}</em>
+                            <div style="font-size:0.8em; margin: 8px 0; color: #444; background: #eee; padding: 4px; border-radius: 4px;">
+                                ⚔️ <strong>Danni:</strong> ${move.Damage1} + ${move.Power} 
+                                | 🎯 <strong>Acc:</strong> ${move.Accuracy1} + ${move.Accuracy2}
                             </div>
-                            <p style="font-size:0.85em; margin:0;">${move.Effect}</p>
+                            <p style="font-size:0.85em; margin:0; line-height:1.3;">${move.Effect}</p>
                         </div>
                     `;
                 });
