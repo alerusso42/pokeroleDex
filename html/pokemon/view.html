@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/html/style.css">
+    <title>Scheda Pokémon</title>
+    <style>
+        .edit-icon {
+            position: absolute; top: 20px; right: 20px; cursor: pointer;
+            width: 30px; height: 30px; transition: 0.2s; z-index: 100;
+        }
+        .type-badge {
+            text-transform: uppercase; padding: 5px 15px; border-radius: 5px;
+            color: white; font-weight: bold; font-size: 0.8em; margin: 0 5px;
+        }
+        /* Colori tipi Pokerole */
+        .type-grass { background-color: #78C850; }
+        .type-ice { background-color: #98D8D8; color: #333; }
+        
+        .stat-dot {
+            height: 12px; width: 12px; border-radius: 50%; display: inline-block;
+            margin-right: 4px; border: 1px solid #999;
+        }
+        .dot-filled { background-color: var(--poke-red); border-color: var(--poke-dark); }
+        .dot-max { background-color: #ddd; }
+        
+        .move-card {
+            background: #f9f9f9; border: 1px solid #eee; padding: 15px;
+            border-radius: 10px; margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="/" class="btn-home">🏠 HOME</a>
+
+    <div id="test">
+        <div class="image-wrapper">
+            <img src="" id="data-img" alt="Pokemon Sprite">
+        </div>
+
+        <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" class="edit-icon" onclick="requestEdit()">
+
+        <h1 id="title">Caricamento...</h1>
+        <div id="types" style="text-align: center; margin-bottom: 20px;"></div>
+        
+        <div id="content-anchor"></div>
+    </div>
+
+    <script>
+        function generateDots(current, max) {
+            let dots = '';
+            for (let i = 0; i < max; i++) {
+                dots += `<span class="stat-dot ${i < current ? 'dot-filled' : 'dot-max'}"></span>`;
+            }
+            return dots;
+        }
+
+        async function loadPokemon() {
+            try {
+                const pathParts = window.location.pathname.split('/');
+                const pkmnName = pathParts[pathParts.length - 1];
+                const response = await fetch(`/api/pokemon/${pkmnName}`);
+                const data = await response.json();
+
+                // 1. Immagine e Titolo
+                const spriteBase = data.Species.split(' ')[0].toLowerCase().replace("(", "").replace(")", "");
+                document.getElementById('data-img').src = `https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/BookSprites/${spriteBase}.png`;
+                document.getElementById('title').innerText = `${data.Name} (${data.Species})`;
+
+                // 2. Tipi
+                let typesHtml = `<span class="type-badge type-${data.Type1.toLowerCase()}">${data.Type1}</span>`;
+                if(data.Type2) typesHtml += `<span class="type-badge type-${data.Type2.toLowerCase()}">${data.Type2}</span>`;
+                document.getElementById('types').innerHTML = typesHtml;
+
+                // 3. Info Generali e Attributi
+                let html = `
+                    <div class="section-title">Informazioni</div>
+                    <div class="data-row"><span class="key">Allenatore:</span><span class="value">${data.Trainer}</span></div>
+                    <div class="data-row"><span class="key">HP:</span><span class="value">${data.HP}</span></div>
+                    
+                    <div class="section-title">Attributi</div>
+                    <div class="data-row"><span class="key">Strength:</span><span class="value">${generateDots(data.Strength.current, data.Strength.max)}</span></div>
+                    <div class="data-row"><span class="key">Dexterity:</span><span class="value">${generateDots(data.Dexterity.current, data.Dexterity.max)}</span></div>
+                    <div class="data-row"><span class="key">Vitality:</span><span class="value">${generateDots(data.Vitality.current, data.Vitality.max)}</span></div>
+                    <div class="data-row"><span class="key">Special:</span><span class="value">${generateDots(data.Special.current, data.Special.max)}</span></div>
+                    <div class="data-row"><span class="key">Insight:</span><span class="value">${generateDots(data.Insight.current, data.Insight.max)}</span></div>
+
+                    <div class="section-title">Abilità: ${data.Ability.Name}</div>
+                    <p style="font-size: 0.9em; color: #666; padding: 0 10px;">${data.Ability.Effect}</p>
+
+                    <div class="section-title">Moveset</div>
+                `;
+
+                // 4. Moveset
+                data.Moves.forEach(move => {
+                    html += `
+                        <div class="move-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <strong>${move.Name}</strong>
+                                <span class="badge" style="font-size:0.7em">${move.Category}</span>
+                            </div>
+                            <div style="font-size:0.8em; margin: 5px 0;">
+                                <em>Danni: ${move.Damage1} + ${move.Power} | Precisione: ${move.Accuracy1} + ${move.Accuracy2}</em>
+                            </div>
+                            <p style="font-size:0.85em; margin:0;">${move.Effect}</p>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('content-anchor').innerHTML = html;
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('content-anchor').innerHTML = "Errore nel caricamento del Pokémon.";
+            }
+        }
+
+        function requestEdit() { window.location.href = `/edit${window.location.pathname}`; }
+        loadPokemon();
+    </script>
+</body>
+</html>

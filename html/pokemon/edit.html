@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/html/style.css">
+    <title>Editor Pokémon</title>
+    <style>
+        .edit-container { display: flex; flex-direction: column; gap: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
+        label { font-weight: bold; color: var(--poke-red); text-transform: uppercase; font-size: 0.8em; }
+        input, select, textarea {
+            padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-family: inherit;
+        }
+        input:focus { border-color: var(--poke-red); outline: none; }
+        
+        .stats-grid { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; 
+            background: #f9f9f9; padding: 15px; border-radius: 10px;
+        }
+        .stat-input-group { display: flex; align-items: center; gap: 10px; }
+        .stat-input-group input { width: 60px; text-align: center; }
+
+        .btn-save {
+            background: #27ae60; color: white; border: none; padding: 15px;
+            border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 1.1em;
+            transition: 0.3s; margin-top: 20px;
+        }
+        .btn-save:hover { background: #219150; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+
+    <a href="javascript:history.back()" class="btn-home">⬅️ ANNULLA</a>
+
+    <div id="test">
+        <h1 id="edit-title">Modifica Pokémon</h1>
+        
+        <form id="pokemon-form" class="edit-container">
+            <div class="section-title">Dati Base</div>
+            <div class="form-group">
+                <label>Nome Soprannome</label>
+                <input type="text" name="Name" id="f-name" required>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="form-group">
+                    <label>Specie</label>
+                    <input type="text" name="Species" id="f-species" readonly style="background:#eee;">
+                </div>
+                <div class="form-group">
+                    <label>HP Totali</label>
+                    <input type="number" name="HP" id="f-hp">
+                </div>
+            </div>
+
+            <div class="section-title">Attributi (Attuale / Max)</div>
+            <div class="stats-grid" id="attributes-container">
+                </div>
+
+            <div class="section-title">Abilità</div>
+            <div class="form-group">
+                <label>Nome Abilità</label>
+                <input type="text" id="f-abil-name">
+                <label>Effetto</label>
+                <textarea id="f-abil-effect" rows="3"></textarea>
+            </div>
+
+            <button type="submit" class="btn-save">SALVA MODIFICHE</button>
+        </form>
+    </div>
+
+    <script>
+        const attrNames = ["Strength", "Dexterity", "Vitality", "Special", "Insight"];
+        let originalData = null;
+
+        // Inizializza i campi degli attributi
+        const attrContainer = document.getElementById('attributes-container');
+        attrNames.forEach(attr => {
+            attrContainer.innerHTML += `
+                <div class="form-group">
+                    <label>${attr}</label>
+                    <div class="stat-input-group">
+                        <input type="number" id="curr-${attr}" placeholder="Cur">
+                        <span>/</span>
+                        <input type="number" id="max-${attr}" placeholder="Max">
+                    </div>
+                </div>
+            `;
+        });
+
+        async function loadData() {
+            const pathParts = window.location.pathname.split('/');
+            const pkmnName = pathParts[pathParts.length - 1];
+            
+            const response = await fetch(`/api/pokemon/${pkmnName}`);
+            originalData = await response.json();
+
+            // Popola i campi
+            document.getElementById('f-name').value = originalData.Name;
+            document.getElementById('f-species').value = originalData.Species;
+            document.getElementById('f-hp').value = originalData.HP;
+            
+            attrNames.forEach(attr => {
+                document.getElementById(`curr-${attr}`).value = originalData[attr].current;
+                document.getElementById(`max-${attr}`).value = originalData[attr].max;
+            });
+
+            document.getElementById('f-abil-name').value = originalData.Ability.Name;
+            document.getElementById('f-abil-effect').value = originalData.Ability.Effect;
+        }
+
+        document.getElementById('pokemon-form').onsubmit = async (e) => {
+            e.preventDefault();
+
+            // Costruiamo il nuovo oggetto JSON partendo dall'originale
+            const updatedData = { ...originalData };
+            
+            updatedData.Name = document.getElementById('f-name').value;
+            updatedData.HP = parseInt(document.getElementById('f-hp').value);
+
+            attrNames.forEach(attr => {
+                updatedData[attr] = {
+                    current: parseInt(document.getElementById(`curr-${attr}`).value),
+                    max: parseInt(document.getElementById(`max-${attr}`).value)
+                };
+            });
+
+            updatedData.Ability.Name = document.getElementById('f-abil-name').value;
+            updatedData.Ability.Effect = document.getElementById('f-abil-effect').value;
+
+            // Invio al server
+            const response = await fetch(`/api/pokemon/${originalData.Id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedData)
+            });
+
+            if (response.ok) {
+                alert("Salvataggio completato!");
+                window.location.href = `/pokemon/${updatedData.Name}_${updatedData.Id}`;
+            } else {
+                alert("Errore durante il salvataggio.");
+            }
+        };
+
+        loadData();
+    </script>
+</body>
+</html>

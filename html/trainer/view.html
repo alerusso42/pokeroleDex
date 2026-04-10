@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon">
+    <link rel="stylesheet" href="/html/style.css">
+    <title>Scheda Allenatore</title>
+    <style>
+        .edit-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            transition: transform 0.2s;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+        .edit-icon:hover {
+            transform: scale(1.2) rotate(-10deg);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="/" class="btn-home">🏠 HOME</a>
+
+    <div id="test">
+        <div class="image-wrapper">
+            <img src="https://play.pokemonshowdown.com/sprites/trainers/lucas-gen4pt.png" id="data-img" alt="Trainer Sprite">
+        </div>
+
+        <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" 
+             class="edit-icon" 
+             onclick="requestEdit()" 
+             title="Modifica Allenatore">
+
+        <h1 id="title">Caricamento...</h1>
+        
+        <div id="content-anchor"></div>
+    </div>
+
+    <script>
+        async function loadTrainer() {
+            try {
+                // Prende il nome dell'allenatore dall'URL (es: /trainer/ROCKY)
+                const pathParts = window.location.pathname.split('/');
+                const trainerName = pathParts[pathParts.length - 1];
+
+                const response = await fetch(`/api/trainer/${trainerName}`);
+                const data = await response.json();
+
+                // 1. Titolo
+                document.getElementById('title').innerText = data.Name;
+
+                // 2. Costruzione Dati Allenatore
+                let html = `
+                    <div class="section-title">Dati Allenatore</div>
+                    <div class="data-row">
+                        <span class="key">ID Allenatore:</span>
+                        <span class="value">#${data.Id}</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="key">Categoria:</span>
+                        <span class="value"><span class="badge">${data.Category.replace("_", " ")}</span></span>
+                    </div>
+
+                    <div class="section-title">Squadra Pokémon</div>
+                    <div class="trainer-list">
+                `;
+
+                // 3. Lista Pokémon (utilizziamo la stessa classe trainer-list per coerenza visiva)
+                if (data.Pokemon && data.Pokemon.length > 0) {
+                    data.Pokemon.forEach(pkmn => {
+                        // Puliamo il nome per l'immagine (es: Tyranitar_4 -> Tyranitar)
+                        const spriteName = pkmn.split('_')[0].toLowerCase();
+                        
+                        html += `
+                            <a href="/pokemon/${pkmn}" class="trainer-item" style="text-decoration:none">
+                                <img src="https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/BoxSprites/${spriteName}.png" class="trainer-icon">
+                                <span class="trainer-name">${pkmn.replace("_", " ID: ")}</span>
+                            </a>
+                        `;
+                    });
+                } else {
+                    html += `<p style="padding:10px; color:#888;">Questo allenatore non ha ancora Pokémon.</p>`;
+                }
+
+                html += `</div>`;
+                document.getElementById('content-anchor').innerHTML = html;
+
+            } catch (err) {
+                console.error("Errore nel caricamento allenatore:", err);
+                document.getElementById('content-anchor').innerHTML = "<p>Errore nel recupero dati.</p>";
+            }
+        }
+
+        function requestEdit() {
+            window.location.href = `/edit${window.location.pathname}`;
+        }
+
+        loadTrainer();
+    </script>
+</body>
+</html>

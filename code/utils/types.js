@@ -21,7 +21,7 @@ class Server
 		/** @type {dataList} */
 		this.data = new dataList(true);
 		/** @type {Map<number, User>} */
-		this.userMap = getDataMap("users/", true, true);
+		this.userMap = getDataMap("user/", true, true);
 		/** @type {number} */
 		this.userNum = this.userMap.size;
 		/** @type {number} */
@@ -229,8 +229,8 @@ const dataListDirName =
 	"move" : "Move",
 	"item" : "Item",
 	"ability" : "Ability",
-	"user" : "users",
-	"trainer" : "trainers",
+	"user" : "user",
+	"trainer" : "trainer",
 	"pokemon" : "pokemon"
 };
 
@@ -242,8 +242,8 @@ const dataListPath =
 	"move" : dataPath + "Move/",
 	"item" : dataPath + "Item/",
 	"ability" : dataPath + "Ability/",
-	"user" : questDataPath + "users/",
-	"trainer" : questDataPath + "trainers/",
+	"user" : questDataPath + "user/",
+	"trainer" : questDataPath + "trainer/",
 	"pokemon" : questDataPath + "pokemon/"
 };
 

@@ -35,7 +35,7 @@ function login(server, req, res, loginBool)
 	if (loginBool == true)
 		return (res.status(404).end("Not found"));
 	addUser(server, client, res);
-	res.redirect("/");
+	res.redirect("/user/" + client.dataName);
 }
 
 /**
@@ -53,7 +53,7 @@ function addUser(server, client, res, user = null)
 
 	if (user == null)
 	{
-		newUser.File = dataPath + "users/" + client.dataName + ".json";
+		newUser.File = dataPath + "user/" + client.dataName + ".json";
 		newUser.IsAdmin = client.isAdmin;
 		newUser.Name = client.dataName;
 		newUser.Password = lib.crypt.hashSync(client.body, server.cryptSalt);
@@ -63,6 +63,7 @@ function addUser(server, client, res, user = null)
 		newUser = user;
 	newUser.Id = id;
 	server.userMap.set(id, newUser);
+	server.data["user"].push(client.dataName);
 	lib.fs.writeFileSync(newUser.File, JSON.stringify(newUser, null, 2), 'utf-8');
 	res.setHeader("Set-Cookie", `userId=${id}; Path=/; HttpOnly; Max-Age=31536000`);
 }
@@ -84,18 +85,15 @@ function loginCheck (client, res, searchBool = false)
 		res.end(getHtml("./html/error/400.html").serialize());
 		return (1);
 	}
-	if (client.isAdmin == true)
+	else if (client.isAdmin == true)
 		client.authLevel = lib.types.enumAuth.ADMIN;
+	else if (client.Name == client.dataName)
+		client.authLevel = lib.types.enumAuth.CORRECT_LOGIN;
 	else if (searchBool == true)
 	{
-		if (client.Name == client.dataName)
-			client.authLevel = lib.types.enumAuth.CORRECT_LOGIN;
-		else
-		{
-			res.status(401);
-			res.end(getHtml("./html/error/401.html").serialize());
-			return (1);
-		}
+		res.status(401);
+		res.end(getHtml("./html/error/401.html").serialize());
+		return (1);
 	}
 	else if (client.isLogged == true)
 		client.authLevel = lib.types.enumAuth.LOGIN;

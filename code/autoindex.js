@@ -11,17 +11,17 @@ const trainerUrl = "https://play.pokemonshowdown.com/sprites/trainers/lucas-gen4
  */
 function autoIndex(server, client, res)
 {
-	let listHtml = client.doc.getElementById("autoindex");
+	let list = client.doc.getElementById("autoindex");
 	let url = trainerUrl;
 
-	console.log(client.dirName);
 	client.dirName = client.dirName.toLowerCase().replaceAll("/", " ");
 	for (let file of server.data[client.dirName])
 	{
-		listHtml.innerHTML += `
+		file = file.replace(".json", "");
+		list.innerHTML += `
 			<div class="trainer-item">
 				<img src="${url}" class="trainer-icon"> 
-				<span class="trainer-name">${file.replace(".json", "")}</span>
+				<a href="/${client.dirName}/${file}" class="trainer-name">${file}</a>
 			</div>
 		`;
 	}

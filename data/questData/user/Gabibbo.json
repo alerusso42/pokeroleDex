@@ -3,6 +3,6 @@
   "IsAdmin": true,
   "Name": "Gabibbo",
   "Password": "$2b$10$iDxwoiYJOc0.YvvZXBHiCOZny2iTdVL1BJTcQiyCi6buETsQ/3486",
-  "Trainers": [],
+  "Trainers": ["ROCKY", "Devil Ryugi", "missigno"],
   "Id": 3
 }

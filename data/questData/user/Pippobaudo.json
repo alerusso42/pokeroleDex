@@ -1,8 +1,9 @@
+
 {
   "File": "data/questData/users/Pippobaudo.json",
   "IsAdmin": true,
   "Name": "Pippobaudo",
   "Password": "$2b$10$NHB74TvPhTM1cy8lwrXLous4KQV6lPpk2MH0nCQsM4IVvIwSehnCi",
-  "Trainers": [],
+  "Trainers": ["ROCKY", "Devil Ryugi", "missigno"],
   "Id": 2
 }

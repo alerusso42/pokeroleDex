@@ -3,6 +3,8 @@ const html = require('./html.js');
 const locationSearch = require('./search.js');
 const locationLogin = require('./login.js');
 const locationAutoIndex = require('./autoindex.js');
+const {view} = require('./view.js');
+const {edit} = require('./edit.js');
 const { name } = require('ejs');
 const types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
 const server = new lib.types.Server();
@@ -106,28 +108,88 @@ lib.app.get("/user/", (req, res) =>
 	return (locationAutoIndex.autoIndex(server, client, res));
 });
 
-lib.app.get("/trainer", (req, res) => 
+lib.app.get("/trainer/", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/autoindex.html");
-	if (client.isLogged == false && client.isAdmin == false)
-		res.redirect("/html/error/401.html");
-	res.send("autoindex di ogni trainer " + client);
+	if (locationLogin.loginCheck(client, res) == 1)
+		return ;
+	return (locationAutoIndex.autoIndex(server, client, res));
 });
 
-lib.app.get("/trainer/:trName/", (req, res) => 
+lib.app.get("/pokemon/", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/autoindex.html");
-	if (client.isLogged == false)
-		res.redirect("/loginpage");
-	res.send("pokemon posseduti da " + client.req.params.trName);
+	if (locationLogin.loginCheck(client, res) == 1)
+		return ;
+	return (locationAutoIndex.autoIndex(server, client, res));
 });
 
-lib.app.get("/trainer/:trName/:pkName", (req, res) => 
+lib.app.get("/user/:name", (req, res) => 
 {
-	let client = new lib.types.Client(server, req, "./html/pokemon.html");
-	if (client.isLogged == false)
-		res.redirect("/loginpage");
-	res.send("dati pokemon " + client.req.params.pkName + " di allenatore " + client.req.params.trName);
+	let client = new lib.types.Client(server, req, "./html/user/view.html");
+	if (locationLogin.loginCheck(client, res) == 1)
+		return ;
+	return (res.send(client.dom.serialize()));
+});
+
+lib.app.get("/trainer/:name", (req, res) => 
+{
+	let client = new lib.types.Client(server, req, "./html/trainer/view.html");
+	if (locationLogin.loginCheck(client, res) == 1)
+		return ;
+	return (res.send(client.dom.serialize()));
+});
+
+lib.app.get("/pokemon/:name", (req, res) => 
+{
+	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
+	if (locationLogin.loginCheck(client, res) == 1)
+		return ;
+	return (res.send(client.dom.serialize()));
+});
+
+lib.app.use(lib.express.json());
+lib.app.use(lib.express.urlencoded({ extended: true }));
+
+lib.app.get("/edit/pokemon/:name", (req, res) => 
+{
+	let client = new lib.types.Client(server, req, "./html/pokemon/edit.html");
+	if (locationLogin.loginCheck(client, res, true) == 1)
+		return ;
+	return (res.send(client.dom.serialize()));
+});
+
+lib.app.get("/api/user/:name", (req, res) => 
+{
+	let client = new lib.types.Client(server, req, "./html/user/view.html");
+	if (locationLogin.loginCheck(client, res) == 1)
+		return ;
+	return (view(server, client, res));
+});
+
+lib.app.get("/api/trainer/:name", (req, res) => 
+{
+	let client = new lib.types.Client(server, req, "./html/trainer/view.html");
+	if (locationLogin.loginCheck(client, res) == 1)
+		return ;
+	return (view(server, client, res));
+});
+
+lib.app.get("/api/pokemon/:name", (req, res) => 
+{
+	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
+	if (locationLogin.loginCheck(client, res) == 1)
+		return ;
+	return (view(server, client, res));
+});
+
+lib.app.post("/api/pokemon/:name", (req, res) => 
+{
+	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
+	if (locationLogin.loginCheck(client, res, true) == 1)
+		return ;
+	console.log("edit");
+	return (edit(server, client, res));
 });
 
 lib.app.get("/*splat", (req, res) =>
