@@ -1,6 +1,7 @@
+const { getHtml } = require("./html.js");
 const lib = require("./utils/lib.js");
 
-const questDataPath = "data/questData/";
+const questDataPath = "../data/questData/";
 
 /**
  * 
@@ -8,9 +9,8 @@ const questDataPath = "data/questData/";
  * @param {lib.types.Client} client 
  * @param {Response} res 
  */
-function edit(server, client, res)
+function view(server, client, res)
 {
-	//client.dataName = client.dataName.replace("", "");
 	client.dirName = client.dirName.replace("api", "");
 	let exists = server.data[client.dirName].find(name => name == client.dataName);
 	if (exists == null)
@@ -20,21 +20,16 @@ function edit(server, client, res)
 		return ;
 	}
 	let filename = questDataPath + client.dirName + "/" + client.dataName + ".json";
-	console.log("edit: filename ->", filename);
+	console.log("view filename ->", filename);
 	if (lib.fs.existsSync(filename) == false)
 	{
 		res.status(404);
 		res.end(getHtml("./html/error/404.html").serialize());
 		return ;
 	}
-	let json = client.body;
-	if (client.dirName == "trainer")
-		handleNewPokemonGeneration(server, json);
-	lib.fs.writeFileSync(filename, JSON.stringify(json, null, 2), 'utf-8');
-	res.status(200);
-	res.send(json);
+	let data = lib.fs.readFileSync(filename);
+	data = JSON.parse(data);
+	res.send(data);
 }
 
-
-
-module.exports = {edit};
+module.exports = {view};

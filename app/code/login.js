@@ -3,7 +3,7 @@ const lib = require("./utils/lib.js");
 
 /** @typedef {typeof import("../data/template/user.json")} User */
 
-const dataPath = "data/questData/";
+const dataPath = "../data/questData/";
 
 //SECTION login function
 
