@@ -5,7 +5,6 @@ const locationLogin = require('./login.js');
 const locationAutoIndex = require('./autoindex.js');
 const {view} = require('./view.js');
 const {edit} = require('./edit.js');
-const { name } = require('ejs');
 const types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
 const server = new lib.types.Server();
 
@@ -16,15 +15,19 @@ lib.app.use(lib.express.text());
 lib.app.use("/html", lib.express.static("html/"));
 lib.app.use("/html/error", lib.express.static("html/error/"));
 
-lib.app.get("/", tutorial);
-
-function tutorial(req, res)
+lib.app.get("/", (req, res) => 
 {
-	const dom = html.getHtml("./html/index.html");
+	const dom = html.getHtml("./html/home.html");
 	res.send(dom.serialize());
-}
+});
 
-lib.app.get("/keyPressed/search*splat", (req, res) =>
+lib.app.get("/search/", (req, res) => 
+{
+	const dom = html.getHtml("./html/search.html");
+	res.send(dom.serialize());
+});
+
+lib.app.get("/keyPressed/search*splat", (req, res) => 
 {
 	let url = lib.url.parse(req.url).pathname;
 	let arg = lib.utils.urlArg(url);

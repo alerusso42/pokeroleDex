@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/html/style.css">
-    <title>PokeRole Home</title>
+    <title>PokeRole Manager - Home</title>
     <style>
         /* Allineamento corpo per centrare il blocco principale */
         body {
@@ -116,7 +116,7 @@
             <img id="random-pkmn-img" src="" alt="Pokemon">
         </div>
 
-        <h1 id="greet"></h1>
+        <h1>PokeRole Dashboard</h1>
 
         <div class="icon-nav">
             <a href="/search" class="nav-item">
@@ -142,30 +142,53 @@
 
         <div class="footer-actions">
             <a href="/auth" class="badge">Accedi / Cambia Utente</a>
-            <a href="/" class="badge" style="background: #777">Credits</a>
+            <a class="badge" onclick="searchPokemonByid()" style="background: #777">Who's that pokemon?</a>
         </div>
     </div>
 
     <script>
-        function spawnRandomPkmn() {
-            // Genera un ID fino alla Gen 9
-            const id = Math.floor(Math.random() * 1010) + 1;
+		let json;
+
+        async function spawnRandomPkmn() 
+		{
+            // fino alla Gen 9
+            id = Math.floor(Math.random() * 1010) + 1;
             const img = document.getElementById('random-pkmn-img');
             
             img.style.opacity = '0';
             img.style.transform = 'scale(0.5) rotate(-20deg)';
-            
             setTimeout(() => {
                 img.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
                 img.onload = () => {
                     img.style.opacity = '1';
                     img.style.transform = 'scale(1) rotate(0deg)';
                 };
-            }, 200);
+            }, 50);
+			json = null;
+			let data = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+			json = await data.json();
+			playPkmnAudio();
         }
+
+		function playPkmnAudio()
+		{
+			let audio = new Audio(json.cries.latest);
+			audio.play();
+		}
 
         // Primo spawn all'avvio
         spawnRandomPkmn();
+
+		async function searchPokemonByid()
+		{
+			if (json == null)
+			{
+				let data = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+				json = await data.json();
+			}
+			let pokemonName = json.forms[0].name;
+			window.location.href = `/search/${pokemonName}`;
+		}
     </script>
 </body>
 </html>
