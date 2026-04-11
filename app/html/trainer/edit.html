@@ -181,13 +181,16 @@
 			let promise = [];
 			for (/** @type {Pkmn} */let pkmn of newPokemonList)
 			{
+                if (pkmn.mode == "")
+                    continue ;
 				promise.push(fetch(`/api/${pkmn.mode}/pokemon/${pkmn.name}`, 
                 {
 					method: 'POST'
 				}));
 			}
 			await Promise.all(promise);
-            const response = await fetch(`/api/trainer/${trainerData.Name}`, 
+            let newTrainer = JSON.stringify(newPokemonList);
+            const response = await fetch(`/api/trainer/${trainerData.Name}?override=yes`, 
 			{
                 method: 'POST',
             });
