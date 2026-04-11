@@ -92,8 +92,26 @@
     <script>
         let trainerData = null;
         let currentPokemonList = [];
+        let newPokemonList = [];
+		
+		class Pkmn
+		{
+			/** 
+			 * 
+			 * @param {string} name
+			 * @param {string} rank
+			 * @param {string} mode "", "create", "delete"
+			*/
+			constructor(name, rank="", changeType="")
+			{
+				/** @type {string} */	this.name = name;
+				/** @type {string} */	this.rank = rank;
+				/** @type {string} */	this.mode = mode;
+			}
+		}
 
-        async function loadTrainerData() {
+        async function loadTrainerData() 
+		{
             const pathParts = window.location.pathname.split('/');
             const trainerName = pathParts[pathParts.length - 1];
             
@@ -102,12 +120,17 @@
 
             document.getElementById('t-name').value = trainerData.Name;
             document.getElementById('t-category').value = trainerData.Category;
-            
+
             currentPokemonList = [...trainerData.Pokemon];
+			for (let name of currentPokemonList)
+			{
+				newPokemonList.push(new Pkmn(name));
+			}
             renderPokemonList();
         }
 
-        function renderPokemonList() {
+        function renderPokemonList() 
+		{
             const container = document.getElementById('pokemon-list-container');
             container.innerHTML = '';
 
@@ -121,44 +144,55 @@
             });
         }
 
-        function removePokemon(index) {
-            currentPokemonList.splice(index, 1);
+        function removePokemon(index) 
+		{
+			newPokemonList.splice(index, 1);
             renderPokemonList();
         }
 
         // Questa funzione NON comunica col server, aggiunge solo alla lista "temporanea" dell'editor
-        function addPokemonToList() {
+        function addPokemonToList() 
+		{
             const species = document.getElementById('new-pkmn-species').value.trim();
             const rank = document.getElementById('new-pkmn-rank').value;
 
-            if (!species) return alert("Inserisci una specie!");
+            if (!species) 
+				return alert("Inserisci una specie!");
 
-            // Formato temporaneo che il backend dovrà riconoscere per creare il nuovo file
-            // Esempio: "NEW:Pikachu:Starter"
-            currentPokemonList.push(`NEW:${species}:${rank}`);
+			newPokemonList.push(new Pkmn(name, rank, "create"));
+            currentPokemonList.push({name: species, rank: rank});
             
             // Pulisci input
             document.getElementById('new-pkmn-species').value = '';
             renderPokemonList();
         }
 
-        document.getElementById('trainer-form').onsubmit = async (e) => {
+        document.getElementById('trainer-form').onsubmit = async (e) => 
+		{
             e.preventDefault();
 
-            const updatedTrainer = {
+            const updatedTrainer = 
+			{
                 ...trainerData,
                 Name: document.getElementById('t-name').value,
                 Category: document.getElementById('t-category').value,
-                Pokemon: currentPokemonList // La lista aggiornata (con NEW:... o ID esistenti)
             };
 
-            const response = await fetch(`/api/trainer/${trainerData.Name}`, {
+			let promise = [];
+			for (/** @type {Pkmn} */let pkmn of newPokemonList)
+			{
+				promise.push(fetch(`/api/${pkmn.mode}/pokemon/${pkmn.name}`, 
+                {
+					method: 'POST'
+				}));
+			}
+			await Promise.all(promise);
+            const response = await fetch(`/api/trainer/${trainerData.Name}`, 
+			{
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedTrainer)
             });
-
-            if (response.ok) {
+            if (response.ok) 
+			{
                 alert("Allenatore salvato con successo!");
                 window.location.href = `/trainer/${updatedTrainer.Name}`;
             } else {

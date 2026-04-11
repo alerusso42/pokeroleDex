@@ -8,6 +8,9 @@ const imgItem = "https://raw.githubusercontent.com/Pokerole-Software-Development
 const types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
 const linkSpecial = new Array("Ability", "Pokemon", "Name", "Type", "Evolutions", "Move");
 const linkIgnored = new Array("Kind", "Value", "Stat");
+const dataNormalize = lib.utils.dataNormalize;
+
+//SECTION - getData
 
 /**
  * @description tries to open every possible data directory at the same time.
@@ -17,7 +20,6 @@ const linkIgnored = new Array("Kind", "Value", "Stat");
  */
 async function getData(client)
 {
-	
 	try 
 	{
 		console.log("searching in " + types.at(client.dirIndex));
@@ -158,6 +160,8 @@ function write(client, msg)
 	client.buff += msg;
 }
 
+//SECTION - searchByKey
+
 /**
  * 
  * @param {string} key 
@@ -195,23 +199,6 @@ function addMatchByKey(key, array, match = [])
 			match.push(x);
 		}
 	}
-}
-
-function dataNormalize(dataName)
-{
-	if (dataName == "")
-		return ("");
-	dataName = dataName[0].toUpperCase() + dataName.substring(1, dataName.length);
-	if (dataName.startsWith("Mega ") == true && dataName.includes("drain") == false)
-		dataName = dataNormalize(dataName.substring(5, dataName.length) + " (Mega Form)");
-	let i = 0;
-	while (i != dataName.length)
-	{
-		if (dataName[i] == ' ' || dataName[i] == '(')
-			dataName = dataName.substring(0, i + 1) + dataName[i + 1].toUpperCase() + dataName.substring(i + 2, dataName.length);
-		++i;
-	}
-	return (dataName);
 }
 
 module.exports = {getData, searchByKey};

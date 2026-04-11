@@ -39,4 +39,21 @@ function pokemonToSnakeCase(name)
 	return (name);
 }
 
-module.exports = {includesOneOf, pokemonToSnakeCase};
+function dataNormalize(dataName)
+{
+	if (dataName == "")
+		return ("");
+	dataName = dataName[0].toUpperCase() + dataName.substring(1, dataName.length);
+	if (dataName.startsWith("Mega ") == true && dataName.includes("drain") == false)
+		dataName = dataNormalize(dataName.substring(5, dataName.length) + " (Mega Form)");
+	let i = 0;
+	while (i != dataName.length)
+	{
+		if (dataName[i] == ' ' || dataName[i] == '(')
+			dataName = dataName.substring(0, i + 1) + dataName[i + 1].toUpperCase() + dataName.substring(i + 2, dataName.length);
+		++i;
+	}
+	return (dataName);
+}
+
+module.exports = {includesOneOf, pokemonToSnakeCase, dataNormalize};

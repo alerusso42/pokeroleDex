@@ -5,6 +5,7 @@ const locationLogin = require('./login.js');
 const locationAutoIndex = require('./autoindex.js');
 const {view} = require('./view.js');
 const {edit} = require('./edit.js');
+const {create} = require('./create.js');
 const types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
 const server = new lib.types.Server();
 
@@ -208,6 +209,14 @@ lib.app.post("/api/pokemon/:name", (req, res) =>
 	if (locationLogin.loginCheck(client, res, true) == 1)
 		return ;
 	return (edit(server, client, res));
+});
+
+lib.app.post("/api/create/:type/:name", (req, res) => 
+{
+	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
+	if (locationLogin.loginCheck(client, res, true) == 1)
+		return ;
+	return (create(server, client, res));
 });
 
 lib.app.get("/*splat", (req, res) =>

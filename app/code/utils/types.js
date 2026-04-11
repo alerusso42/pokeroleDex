@@ -7,10 +7,10 @@ const stringUtils = require('./string.js');
 const questDataPath = "../data/questData/";
 const dataPath = "../data/v2.0/";
 
-/** @typedef {typeof import("express").Request} ExpressRequest */
-/** @typedef {typeof import("../../data/template/user.json")} User */
-/** @typedef {typeof import("../../data/template/trainer.json")} Trainer */
-/** @typedef {typeof import("../../data/template/pokemon.json")} Pokemon */
+/** @typedef {import("express").Request} ExpressRequest */
+/** @typedef {typeof import("../../../data/questData/template/user.json")} User */
+/** @typedef {typeof import("../../data/questData/template/trainer.json")} Trainer */
+/** @typedef {typeof import("../../data/questData/template/pokemon.json")} Pokemon */
 
 //SECTION - Server class definition
 
@@ -69,7 +69,7 @@ class Client
 	/**
 	 * 
 	 * @param {Server} server 
-	 * @param {Request} req 
+	 * @param {ExpressRequest} req 
 	 * @param {String} res_html 
 	 */
 	constructor(server, req, res_html)
@@ -78,7 +78,7 @@ class Client
 
 		/** @type {Document} */	this.doc = this.dom.window.document;
 
-		/** @type {Request} */	this.req = req;
+		/** @type {ExpressRequest} */	this.req = req;
 
 		/** @type {string} */	this.body = req.body;
 
