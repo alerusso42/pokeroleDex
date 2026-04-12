@@ -219,6 +219,28 @@ lib.app.post("/api/create/:type/:name", (req, res) =>
 	return (create(server, client, res));
 });
 
+lib.app.post("/api/delete/:type/:name", (req, res) => 
+{
+	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
+	if (locationLogin.loginCheck(client, res, true) == 1)
+		return ;
+	console.log("delete");
+});
+
+lib.app.get("/api/info/:name", (req, res) => 
+{
+	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
+	if (locationLogin.loginCheck(client, res, true) == 1)
+		return ;
+	let name = req.params.name;
+	if (name == "id")
+	{
+		server.metaData.id++;
+		server.metaData.Update("id", server.metaData.id);
+	}
+	res.send(JSON.stringify({name: server.metaData[name]}));
+});
+
 lib.app.get("/*splat", (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/error/404.html");

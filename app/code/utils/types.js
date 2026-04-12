@@ -4,6 +4,7 @@ const url = require("url");
 const net = require('./net.js');
 const stringUtils = require('./string.js');
 
+const metaDataPath = "metadata/";
 const questDataPath = "../data/questData/";
 const dataPath = "../data/v2.0/";
 
@@ -20,6 +21,8 @@ class Server
 	{
 		/** @type {dataList} */
 		this.data = new dataList(true);
+		/** @type {metaData} */
+		this.metaData = new metaData();
 		/** @type {Map<number, User>} */
 		this.userMap = getDataMap("user/", true, true);
 		/** @type {number} */
@@ -60,6 +63,20 @@ function getDataMap(typePath, readFileBool = false, useIdBool = false)
 			map.set(fileNoExt, file);
 	}
 	return (map);
+}
+
+class metaData
+{
+	constructor()
+	{
+		/** @type {number} */	this.id = parseInt(fs.readFileSync(metaDataPath + "id.txt"));
+	}
+	Update(metaParam="", newData="")
+	{
+		if (this[metaParam] == undefined || newData == "")
+			return (console.log("invalid metaData::Update params."));
+		fs.writeFileSync(metaDataPath + metaParam + ".txt", String(newData));
+	}
 }
 
 //SECTION - Client class definition
@@ -280,4 +297,4 @@ const enumAuth =
 	"ADMIN" : 3,
 };
 
-module.exports = {Server, Client, dataList, enumAuth};
+module.exports = {Server, Client, dataList, enumAuth, questDataPath, dataPath};

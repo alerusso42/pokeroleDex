@@ -1,10 +1,7 @@
 {
-  "Id": 0,
-  "File": "",
-  "Name": "ROCKY",
-  "Category": "team_black",
-  "Pokemon": [
-    "Ciccio_1775840495187_795",
-    "Pikachu_1775840528715_110"
-  ]
+	"Id": 0,
+	"File": "",
+	"Name": "Devil Ryugi",
+	"Category": "team_black",
+	"Pokemon": ["Tyranitar_4", "Rayquaza"]
 }

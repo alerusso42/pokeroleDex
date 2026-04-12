@@ -102,7 +102,7 @@
 			 * @param {string} rank
 			 * @param {string} mode "", "create", "delete"
 			*/
-			constructor(name, rank="", changeType="")
+			constructor(name, rank="", mode="")
 			{
 				/** @type {string} */	this.name = name;
 				/** @type {string} */	this.rank = rank;
@@ -146,7 +146,8 @@
 
         function removePokemon(index) 
 		{
-			newPokemonList.splice(index, 1);
+			currentPokemonList.splice(index, 1);
+			newPokemonList[index].mode = "delete";
             renderPokemonList();
         }
 
@@ -159,8 +160,8 @@
             if (!species) 
 				return alert("Inserisci una specie!");
 
-			newPokemonList.push(new Pkmn(name, rank, "create"));
-            currentPokemonList.push({name: species, rank: rank});
+			newPokemonList.push(new Pkmn(species, rank, "create"));
+            currentPokemonList.push(species);
             
             // Pulisci input
             document.getElementById('new-pkmn-species').value = '';
@@ -179,20 +180,35 @@
             };
 
 			let promise = [];
+			let i = -1;
+			try 
+			{
 			for (/** @type {Pkmn} */let pkmn of newPokemonList)
 			{
+				++i;
                 if (pkmn.mode == "")
                     continue ;
-				promise.push(fetch(`/api/${pkmn.mode}/pokemon/${pkmn.name}`, 
+				let id = await fetch(`/api/info/id`);
+				id = await id.json();
+				id = id.name;
+				currentPokemonList[i] += "_" + id;
+				console.log(`/api/${pkmn.mode}/pokemon/${pkmn.name}_${id}`);
+				promise.push(fetch(`/api/${pkmn.mode}/pokemon/${pkmn.name}_${id}`, 
                 {
 					method: 'POST'
 				}));
 			}
 			await Promise.all(promise);
-            let newTrainer = JSON.stringify(newPokemonList);
-            const response = await fetch(`/api/trainer/${trainerData.Name}?override=yes`, 
+            let newTrainer = JSON.stringify({Pokemon: currentPokemonList});
+			console.log(newTrainer);
+            const response = await fetch(`/api/trainer/${trainerData.Name}?onlySome="true"`, 
 			{
                 method: 'POST',
+				headers: 
+				{
+        			'Content-Type': 'application/json'
+   				},
+				body: newTrainer
             });
             if (response.ok) 
 			{
@@ -201,6 +217,11 @@
             } else {
                 alert("Errore durante il salvataggio.");
             }
+			}
+			catch (err)
+			{
+				alert(err);
+			}
         };
 
         loadTrainerData();

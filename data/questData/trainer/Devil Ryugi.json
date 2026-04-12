@@ -1,7 +1,9 @@
 {
-	"Id": 0,
-	"File": "",
-	"Name": "Devil Ryugi",
-	"Category": "team_black",
-	"Pokemon": ["Abomasnow_0", "Lycanroc_7"]
+  "Pokemon": [
+    "Pikachu_undefined"
+  ],
+  "Id": 0,
+  "File": "",
+  "Name": "Devil Ryugi",
+  "Category": "team_black"
 }
