@@ -3,7 +3,7 @@ const lib = require("./utils/lib.js");
 /** @typedef {typeof import("../data/questData/template/trainer.json")} Trainer */
 
 const questDataPath = "../data/questData/";
-const trainerPath = questDataPath + "trainer/";
+const trainerDirPath = questDataPath + "trainer/";
 
 /**
  * 
@@ -24,12 +24,13 @@ function editTrainer(server, client, res)
 
 	trainerOldName = client.req.params.name;
 	trainerName = client.body.name;
-	trainerOldPath = trainerPath + trainerOldName + ".json"; 
-	trainerPath = trainerPath + trainerName + ".json"; 
+	trainerOldPath = trainerDirPath + trainerOldName + ".json"; 
+	trainerPath = trainerDirPath + trainerName + ".json"; 
 	trainerFile = lib.fs.readFileSync(trainerOldPath);
 	trainerNewData = JSON.parse(trainerFile);
-	if (trainerName != trainerOldName &&
-	server.data.trainer.indexOf(client.body.name) != -1)
+	if (
+	(trainerName != trainerOldName) &&
+	(server.data.trainer.indexOf(client.body.name) != -1))
 		res.status(403).send(`${trainerName} is already used.`);
 	trainerNewData.Name = trainerName;
 	error = parseTeam(server, client.body.pkmn);
@@ -44,7 +45,7 @@ function editTrainer(server, client, res)
 		if (error != null)
 			return (res.status(500).send(error));
 	}
-	lib.fs.rmSync(trainerOldPath);
+	//lib.fs.rmSync(trainerOldPath);
 	lib.fs.writeFileSync(trainerPath, JSON.stringify(trainerNewData, null, 2), 'utf-8');
 }
 
