@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/html/style.css">
+    <title>500 - Sistema in Crash!</title>
+    <style>
+        .error-code {
+            font-size: 5em;
+            font-weight: 800;
+            color: var(--poke-red);
+            margin: 0;
+            line-height: 1;
+            text-shadow: 2px 2px #00ffff, -2px -2px #ff00ff;
+        }
+        .error-message {
+            font-size: 1.2em;
+            color: var(--poke-dark);
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        .porygon-text {
+            font-style: italic;
+            color: #888;
+            margin-top: 20px;
+        }
+
+		.copy-container {
+    background: #1a1a1a;
+    border: 1px solid var(--poke-red);
+    border-radius: 8px;
+    padding: 10px;
+    margin: 20px auto;
+    max-width: 90%;
+    position: relative;
+}
+
+pre {
+    margin: 0;
+    overflow-x: auto; /* Fondamentale per mobile: permette lo scroll orizzontale */
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+code {
+    font-family: 'Courier New', Courier, monospace;
+    color: #00ff00; /* Verde terminale */
+    font-size: 0.9em;
+    display: block;
+    text-align: left;
+}
+
+.btn-copy {
+    background: var(--poke-red);
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.7em;
+    cursor: pointer;
+    margin-top: 10px;
+    width: 100%; /* Su mobile è più facile da cliccare se è largo */
+}
+
+.btn-copy:active {
+    transform: scale(0.95);
+}
+
+        /* Effetto Glitch Digitale */
+        @keyframes glitch {
+            0% { clip-path: inset(10% 0 30% 0); transform: translate(-5px, 5px); }
+            20% { clip-path: inset(40% 0 10% 0); transform: translate(5px, -5px); }
+            40% { clip-path: inset(15% 0 50% 0); transform: translate(-5px, 0); }
+            60% { clip-path: inset(80% 0 5% 0); transform: translate(5px, 5px); }
+            80% { clip-path: inset(30% 0 20% 0); transform: translate(-5px, -5px); }
+            100% { clip-path: inset(10% 0 30% 0); transform: translate(0); }
+        }
+
+        .glitch-img {
+            position: relative;
+        }
+
+        /* Creiamo un duplicato fantasma per l'effetto glitch */
+        .image-wrapper::after {
+            content: "";
+            background: url("https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/BookSprites/porygon.png") no-index no-repeat;
+            background-size: contain;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.5;
+            animation: glitch 1s infinite linear alternate-reverse;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="/" class="btn-home">TORNA ALLA HOME</a>
+
+    <div id="test">
+        <div class="image-wrapper" style="position: relative;">
+            <img src="https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/BookSprites/porygon.png" 
+                 alt="Porygon Corrotto" 
+                 id="img" 
+                 class="glitch-img">
+        </div>
+
+        <br><br><br><br>
+        <div style="text-align: center;">
+            <p class="error-code">500</p>
+            <h1>ERRORE DI SISTEMA!</h1>
+            <p class="error-message">Porygon ha trovato un bug nel codice sorgente!</p>
+            
+            <div class="data-row" style="justify-content: center; border-bottom: none;">
+                <p class="value" style="text-align: center; justify-content: center;">
+                    Questo e un bug, avvisare Ale plz!<br>
+					<div class="copy-container">
+    				<pre><code id="msg">In attesa di dati...</code></pre>
+   					 <button onclick="copyError()" class="btn-copy">COPIA ERRORE</button>
+					</div>
+                </p>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <a href="/" class="badge" style="background: var(--poke-dark);">Riavvia Sessione</a>
+            </div>
+
+            <p class="porygon-text">"01001000 01000101 01001100 01010000"</p>
+        </div>
+    </div>
+
+    <script>
+        // Effetto distorsione cromatica casuale
+        const poryImg = document.getElementById('img');
+        setInterval(() => {
+            const randomInvert = Math.random() > 0.9 ? "invert(100%)" : "invert(0%)";
+            const randomHue = `hue-rotate(${Math.floor(Math.random() * 360)}deg)`;
+            poryImg.style.filter = `${randomInvert} ${randomHue}`;
+            
+            setTimeout(() => {
+                poryImg.style.filter = "none";
+            }, 150);
+        }, 4000);
+
+	function copyError() {
+    // Seleziona il testo dentro l'elemento msg
+    const textToCopy = document.getElementById('msg').innerText;
+
+    // API moderna per gli appunti
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        const btn = document.querySelector('.btn-copy');
+        const originalText = btn.innerText;
+        
+        // Feedback visivo
+        btn.innerText = "COPIATO! ✔";
+        btn.style.background = "#27ae60";
+        
+        setTimeout(() => {
+            btn.innerText = originalText;
+            btn.style.background = "";
+        }, 2000);
+    }).catch(err => {
+        console.error("Errore durante la copia: ", err);
+        alert("Copia manuale: " + textToCopy);
+    });
+}
+    </script>
+
+</body>
+</html>

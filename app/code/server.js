@@ -6,6 +6,7 @@ const locationAutoIndex = require('./autoindex.js');
 const {view} = require('./view.js');
 const {edit} = require('./edit.js');
 const {create} = require('./create.js');
+const { editTrainer } = require('./trainer.js');
 const types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
 const server = new lib.types.Server();
 
@@ -13,18 +14,23 @@ lib.app.listen(8080, "0.0.0.0");
 // interpreta il body
 lib.app.use(lib.express.text());
 
+lib.app.get("/html/error/:page", (req, res) => 
+{
+	let		path = `./html/error/${req.params.page}`;
+	let		dom;
+
+	dom = html.getHtml(path);
+	if (req.query.msg != null)
+		dom.window.document.getElementById("msg").innerHTML = `<h3>${req.query.msg}</h3>`;
+	res.send(dom.serialize());
+});
+
 lib.app.use("/html", lib.express.static("html/"));
-lib.app.use("/html/error", lib.express.static("html/error/"));
+// lib.app.use("/html/error", lib.express.static("html/error/"));
 
 lib.app.get("/", (req, res) => 
 {
 	const dom = html.getHtml("./html/home.html");
-	res.send(dom.serialize());
-});
-
-lib.app.get("/search/", (req, res) => 
-{
-	const dom = html.getHtml("./html/search.html");
 	res.send(dom.serialize());
 });
 
@@ -192,7 +198,7 @@ lib.app.post("/api/trainer/:name", (req, res) =>
 	let client = new lib.types.Client(server, req, "./html/trainer/view.html");
 	if (locationLogin.loginCheck(client, res, true) == 1)
 		return ;
-	return (edit(server, client, res));
+	return (editTrainer(server, client, res));
 });
 
 lib.app.get("/api/pokemon/:name", (req, res) => 

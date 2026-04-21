@@ -89,142 +89,141 @@
         </form>
     </div>
 
-    <script>
-        let trainerData = null;
-        let currentPokemonList = [];
-        let newPokemonList = [];
-		
-		class Pkmn
-		{
-			/** 
-			 * 
-			 * @param {string} name
-			 * @param {string} rank
-			 * @param {string} mode "", "create", "delete"
-			*/
-			constructor(name, rank="", mode="")
-			{
-				/** @type {string} */	this.name = name;
-				/** @type {string} */	this.rank = rank;
-				/** @type {string} */	this.mode = mode;
+<script>
+    let trainerData = null;
+    
+    // Questo array conterrà gli oggetti per il backend: 
+    // { type: "DELETE", id: "..." } oppure { type: "CREATE", pkmn: "...", data: {...} }
+    let pendingOperations = [];
+    
+    // Lista visiva attuale (quella che l'utente vede a schermo)
+    let visualPokemonList = [];
+	let	trainerName;
+
+    async function loadTrainerData() {
+        const pathParts = window.location.pathname.split('/');
+        trainerName = pathParts[pathParts.length - 1];
+        
+        const response = await fetch(`/api/trainer/${trainerName}`);
+        trainerData = await response.json();
+
+        document.getElementById('t-name').value = trainerData.Name;
+        document.getElementById('t-category').value = trainerData.Category;
+
+        // Inizializziamo la lista visiva con i nomi/ID attuali
+        visualPokemonList = [...trainerData.Pokemon];
+        renderPokemonList();
+    }
+
+    function renderPokemonList() {
+        const container = document.getElementById('pokemon-list-container');
+        container.innerHTML = '';
+
+        visualPokemonList.forEach((pkmnId, index) => {
+            container.innerHTML += `
+                <div class="pokemon-edit-card">
+                    <span><strong>${pkmnId.replace("_", " (ID: ")} )</strong></span>
+                    <button type="button" class="btn-remove" onclick="removePokemon(${index})">Rimuovi</button>
+                </div>
+            `;
+        });
+    }
+
+	function removePokemon(index) 
+	{
+		const pkmnId = visualPokemonList[index];
+
+		// Se il Pokémon è nuovo (placeholder "_NEW"), dobbiamo semplicemente 
+		// cancellare l'operazione di creazione corrispondente
+		if (pkmnId.endsWith("_NEW")) {
+			// Troviamo l'indice dell'operazione CREATE basandoci su quante 
+			// operazioni di creazione ci sono prima di questa
+			let createIndex = -1;
+			let count = 0;
+			
+			// Cerchiamo l'operazione che corrisponde a questo specifico inserimento
+			// Per semplicità, cerchiamo l'operazione CREATE che ha lo stesso nome
+			const speciesName = pkmnId.split("_NEW")[0];
+			
+			// Troviamo l'indice reale in pendingOperations
+			const opIndex = pendingOperations.findIndex(op => 
+				op.type === "CREATE" && op.name === speciesName
+			);
+
+			if (opIndex !== -1) {
+				pendingOperations.splice(opIndex, 1);
 			}
+		} else {
+			// Se il Pokémon esisteva già sul server, allora serve una DELETE reale
+			pendingOperations.push({
+				type: "DELETE",
+				id: pkmnId,
+				reason: "FREED"
+			});
 		}
 
-        async function loadTrainerData() 
-		{
-            const pathParts = window.location.pathname.split('/');
-            const trainerName = pathParts[pathParts.length - 1];
-            
-            const response = await fetch(`/api/trainer/${trainerName}`);
-            trainerData = await response.json();
+		// Rimuoviamo dalla vista in ogni caso
+		visualPokemonList.splice(index, 1);
+		renderPokemonList();
+	}
 
-            document.getElementById('t-name').value = trainerData.Name;
-            document.getElementById('t-category').value = trainerData.Category;
+	function addPokemonToList() {
+		const species = document.getElementById('new-pkmn-species').value.trim();
+		const rank = document.getElementById('new-pkmn-rank').value;
 
-            currentPokemonList = [...trainerData.Pokemon];
-			for (let name of currentPokemonList)
-			{
-				newPokemonList.push(new Pkmn(name));
+		if (!species) return alert("Inserisci una specie!");
+
+		// Aggiungiamo l'operazione
+		pendingOperations.push({
+			type: "CREATE",
+			name: species,
+			data: { 
+				Rank: rank,
+				Trainer: document.getElementById('t-name').value 
 			}
-            renderPokemonList();
-        }
+		});
 
-        function renderPokemonList() 
-		{
-            const container = document.getElementById('pokemon-list-container');
-            container.innerHTML = '';
+		// Usiamo il nome della specie + un marker unico per riconoscerlo come "nuovo"
+		visualPokemonList.push(`${species}_NEW`);
+		
+		document.getElementById('new-pkmn-species').value = '';
+		renderPokemonList();
+	}
 
-            currentPokemonList.forEach((pkmn, index) => {
-                container.innerHTML += `
-                    <div class="pokemon-edit-card">
-                        <span><strong>${pkmn.replace("_", " ID: ")}</strong></span>
-                        <button type="button" class="btn-remove" onclick="removePokemon(${index})">Rimuovi</button>
-                    </div>
-                `;
-            });
-        }
+    document.getElementById('trainer-form').onsubmit = async (e) => {
+        e.preventDefault();
 
-        function removePokemon(index) 
-		{
-			currentPokemonList.splice(index, 1);
-			newPokemonList[index].mode = "delete";
-            renderPokemonList();
-        }
-
-        // Questa funzione NON comunica col server, aggiunge solo alla lista "temporanea" dell'editor
-        function addPokemonToList() 
-		{
-            const species = document.getElementById('new-pkmn-species').value.trim();
-            const rank = document.getElementById('new-pkmn-rank').value;
-
-            if (!species) 
-				return alert("Inserisci una specie!");
-
-			newPokemonList.push(new Pkmn(species, rank, "create"));
-            currentPokemonList.push(species);
-            
-            // Pulisci input
-            document.getElementById('new-pkmn-species').value = '';
-            renderPokemonList();
-        }
-
-        document.getElementById('trainer-form').onsubmit = async (e) => 
-		{
-            e.preventDefault();
-
-            const updatedTrainer = 
-			{
-                ...trainerData,
-                Name: document.getElementById('t-name').value,
-                Category: document.getElementById('t-category').value,
-            };
-
-			let promise = [];
-			let i = -1;
-			try 
-			{
-			for (/** @type {Pkmn} */let pkmn of newPokemonList)
-			{
-				++i;
-                if (pkmn.mode == "")
-                    continue ;
-				let id = await fetch(`/api/info/id`);
-				id = await id.json();
-				id = id.name;
-				currentPokemonList[i] += "_" + id;
-				console.log(`/api/${pkmn.mode}/pokemon/${pkmn.name}_${id}`);
-				promise.push(fetch(`/api/${pkmn.mode}/pokemon/${pkmn.name}_${id}`, 
-                {
-					method: 'POST'
-				}));
-			}
-			await Promise.all(promise);
-            let newTrainer = JSON.stringify({Pokemon: currentPokemonList});
-			console.log(newTrainer);
-            const response = await fetch(`/api/trainer/${trainerData.Name}?onlySome="true"`, 
-			{
-                method: 'POST',
-				headers: 
-				{
-        			'Content-Type': 'application/json'
-   				},
-				body: newTrainer
-            });
-            if (response.ok) 
-			{
-                alert("Allenatore salvato con successo!");
-                window.location.href = `/trainer/${updatedTrainer.Name}`;
-            } else {
-                alert("Errore durante il salvataggio.");
-            }
-			}
-			catch (err)
-			{
-				alert(err);
-			}
+        // Costruiamo l'oggetto finale secondo la tua nuova logica
+        const payload = {
+            name: document.getElementById('t-name').value,
+            pkmn: pendingOperations 
         };
 
-        loadTrainerData();
-    </script>
+        try {
+            const response = await fetch(`/api/trainer/${trainerName}`, { // Rotta unica
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+			let	err = await response.text();
+            if (response.ok) {
+                alert("Salvataggio completato!");
+                window.location.href = `/trainer/${payload.name}`;
+            }
+			else if (response.status == 500)
+			{
+				window.location.href = `/html/error/500.html?msg=${encodeURIComponent(err)}`;
+			} 
+			else {
+                alert("Errore durante il salvataggio (" + response.status + ": " + err + ")");
+            }
+        } catch (err) {
+            alert("Errore critico client: " + err);
+        }
+    };
+
+    loadTrainerData();
+</script>
 </body>
 </html>
