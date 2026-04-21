@@ -168,7 +168,7 @@ function createPkmn(server, trainerNewData, pkmn)
 	{
 		return { Name: m.Name, Learned: m.Learned }; 
     });
-	dataNew.Moves.slice(0, 4);
+	dataNew.Moves = dataNew.Moves.slice(0, 4);
 	lib.fs.writeFileSync(newFilename, JSON.stringify(dataNew, null, 2), 'utf-8');
 	server.data.pokemon.push(id);
 	trainerNewData.Pokemon.push(id);
