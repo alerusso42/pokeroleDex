@@ -53,6 +53,8 @@ function dataNormalize(dataName)
 			dataName = dataName.substring(0, i + 1) + dataName[i + 1].toUpperCase() + dataName.substring(i + 2, dataName.length);
 		++i;
 	}
+	if (dataName == "Porygon-z")
+		dataName = "Porygon-Z";
 	return (dataName);
 }
 
