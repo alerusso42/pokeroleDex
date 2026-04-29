@@ -1,5 +1,6 @@
 const { getHtml } = require("./html.js");
 const lib = require("./utils/lib.js");
+const {create} = require("./create.js");
 
 /** @typedef {typeof import("../data/template/user.json")} User */
 
@@ -34,7 +35,11 @@ function login(server, req, res, loginBool)
 	}
 	if (loginBool == true)
 		return (res.status(404).end("Not found"));
-	addUser(server, client, res);
+	if (addUser(server, client, res) == 1)
+	{
+		res.status(500).end("Impossibile creare il primo allenatore.");
+		return ;
+	}
 	res.redirect("/user/" + client.dataName);
 }
 
@@ -57,7 +62,9 @@ function addUser(server, client, res, user = null)
 		newUser.IsAdmin = client.isAdmin;
 		newUser.Name = client.dataName;
 		newUser.Password = lib.crypt.hashSync(client.body, server.cryptSalt);
-		newUser.Trainers = [];
+		if (createFirstUserTrainer(server, client, newUser.Name) == 1)
+			return (1);
+		newUser.Trainers = [newUser.Name];
 	}
 	else
 		newUser = user;
@@ -66,6 +73,28 @@ function addUser(server, client, res, user = null)
 	server.data["user"].push(client.dataName);
 	lib.fs.writeFileSync(newUser.File, JSON.stringify(newUser, null, 2), 'utf-8');
 	res.setHeader("Set-Cookie", `userId=${id}; Path=/; HttpOnly; Max-Age=31536000`);
+	return (0);
+}
+
+/**
+ * 
+ * @param {lib.types.Server} server 
+ * @param {lib.types.Client} client
+ * @param {String} user
+ */
+function createFirstUserTrainer(server, client, user)
+{
+	client.req.params = 
+	{
+		type: "trainer",
+		name: user
+	}
+	console.log(client.req.params);
+	if (create(server, client) == 1)
+	{
+		console.log("couldn't create user trainer :-(");
+		return (1);
+	}
 }
 
 //SECTION loginCheck function

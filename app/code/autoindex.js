@@ -1,9 +1,11 @@
 // @ts-check
 const lib = require('./utils/lib.js');
+const { dataNormalize, pokemonToSnakeCase } = require('./utils/string.js');
 const { Server } = require('./utils/types.js');
 
-const trainerBoyUrl = "https://play.pokemonshowdown.com/sprites/trainers/lucas-gen4pt.png";
-const trainerGirlUrl = "https://play.pokemonshowdown.com/sprites/trainers/dawn-gen4pt.png";
+const	trainerBoyUrl = "https://play.pokemonshowdown.com/sprites/trainers/lucas-gen4pt.png";
+const	trainerGirlUrl = "https://play.pokemonshowdown.com/sprites/trainers/dawn-gen4pt.png";
+const	pokemonUrl = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/BoxSprites/";
 
 /**
  * @param {lib.types.Server} server
@@ -21,9 +23,7 @@ function autoIndex(server, client, res)
 	client.dirName = client.dirName.toLowerCase().replaceAll("/", " ");
 	for (let file of server.data[client.dirName])
 	{
-		url = trainerBoyUrl;
-		if (isFemale(file))
-			url = trainerGirlUrl;
+		url = getUrl(file, client.dirName);
 		console.log(file);
 		file = file.replace(".json", "");
 		list.innerHTML += `
@@ -37,6 +37,34 @@ function autoIndex(server, client, res)
 }
 
 /**
+ * 
+ * @param {String} contentName 
+ * @param {String} type 
+ */
+function getUrl(contentName, type)
+{
+	let	lastUnderscore;
+
+	lastUnderscore = contentName.lastIndexOf("_");
+	if (lastUnderscore != -1)
+		contentName = contentName.slice(0, lastUnderscore);
+	switch (type)
+	{
+		case ("pokemon") :
+		{
+			console.log(pokemonUrl + contentName);
+			return (pokemonUrl + pokemonToSnakeCase(contentName) + ".png");
+		}
+		case ("trainer") : case ("user") :
+		{
+			if (isFemale(contentName) == true)
+				return (trainerGirlUrl);
+			return (trainerBoyUrl);
+		}
+	}
+}
+
+/**
  * @param {String} name
  */
 function isFemale(name)
@@ -45,7 +73,7 @@ function isFemale(name)
 
 	names = name.split(" ");
 	name = names[0];
-	if (name.at(name.length - 1) == "a")
+	if (name.at(-1) == "a")
 		return (true);
 	return (false);
 }

@@ -7,19 +7,31 @@ const {questDataPath, dataPath} = require('./utils/types.js');
  * @param {lib.types.Client} client 
  * @param {Response} res 
  */
-function create(server, client, res)
+function create(server, client, res=null)
 {
 	let type = client.req.params.type;
 	let name = client.req.params.name;
+	console.log(name, type);
 	// let id = createUniqueId(server, type, name);
 	name = lib.utils.dataNormalize(name);
-	let id = name.slice(name.indexOf("_") + 1);
-	name = name.slice(0, name.indexOf("_"));
+	let	lastUnderscore = name.indexOf("_");
+	let	id = "";
+	if (lastUnderscore != -1)
+	{
+		name = name.slice(0, lastUnderscore);
+		id = name.slice(lastUnderscore + 1);
+	}
 	let path = server.data.GetPath(type);
-	let filename = path + name + "_" + id + ".json";
+	let	filename;
+	if (id != "")
+		filename = path + name + "_" + id + ".json";
+	else
+		filename = path + name + ".json";
 	console.log("edit: filename ->", filename);
 	if (lib.fs.existsSync(filename) == true)
 	{
+		if (!res)
+			return (1);
 		res.status(500);
 		res.end(getHtml("./html/error/500.html").serialize());
 		return ;
@@ -28,11 +40,20 @@ function create(server, client, res)
 	let newData = fillTemplate(server, type, name, id);
 	if (newData == null)
 	{
+		if (!res)
+			return (1);
 		res.status(500);
 		res.end(getHtml("./html/error/500.html").serialize());
 		return ;
 	}
-	lib.fs.writeFileSync(filename, newData, 'utf-8');
+	console.log(newData);
+	if (id == "")
+		server.data[type].push(name);
+	else
+		server.data[type].push(`${name}_${id}`);
+	lib.fs.writeFileSync(filename, JSON.stringify(newData, null, 2), 'utf-8');
+	if (!res)
+		return (0);
 	res.status(200);
 	res.send("");
 }
