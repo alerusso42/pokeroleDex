@@ -89,12 +89,14 @@ class Client
 	 * @param {ExpressRequest} req 
 	 * @param {String} res_html 
 	 */
-	constructor(server, req, res_html)
+	constructor(server, req, res_html=null)
 	{
-		/** @type {JSDOM} */	this.dom = getHtml(res_html);
-
-		/** @type {Document} */	this.doc = this.dom.window.document;
-
+		if (res_html != null)
+		{
+			/** @type {JSDOM} */	this.dom = getHtml(res_html);
+	
+			/** @type {Document} */	this.doc = this.dom.window.document;
+		}
 		/** @type {ExpressRequest} */	this.req = req;
 
 		/** @type {string} */	this.body = req.body;

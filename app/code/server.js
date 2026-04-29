@@ -247,6 +247,20 @@ lib.app.get("/api/info/:name", (req, res) =>
 	res.send(JSON.stringify({name: server.metaData[name]}));
 });
 
+lib.app.get("/api/userInfo", (req, res) =>
+{
+	let client;
+	let	userInfo;
+	
+	client = new lib.types.Client(server, req);
+	locationLogin.loginCheck(client, res);
+	userInfo = client.user;
+	userInfo.File = "SECRET";
+	userInfo.Password = "SECRET";
+	userInfo.Level = client.authLevel;
+	res.json(userInfo);
+});
+
 lib.app.get("/*splat", (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/error/404.html");

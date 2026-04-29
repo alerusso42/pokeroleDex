@@ -110,6 +110,8 @@
 </head>
 <body>
 
+	<a id="userName" class="btn-home">👤</a>
+
     <div id="test">
         
         <div class="image-wrapper home-ball" onclick="spawnRandomPkmn()">
@@ -150,6 +152,22 @@
     <script>
 		let json;
 
+		saveUserInfo();
+
+		async function saveUserInfo()
+		{
+			let	userInfo;
+
+			userInfo = await fetch("/api/userInfo");
+			if (!userInfo)
+				return ;
+			userInfo = await userInfo.json();
+			if (userInfo == null || userInfo.Level == 0)
+				return ;
+			document.getElementById("userName").innerHTML += userInfo.Name;
+			document.getElementById("userName").setAttribute("href", `/user/${userInfo.Name}`);
+		}
+		
         async function spawnRandomPkmn() 
 		{
             // fino alla Gen 9
