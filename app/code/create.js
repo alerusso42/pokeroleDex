@@ -74,6 +74,7 @@ function fillTemplate(server, type, name, id)
 
 	template = JSON.parse(lib.fs.readFileSync(templatePath));
 	template.id = id;
+	template.Name = name;
 	if (type != "pokemon")
 		return (template);
 	data = JSON.parse(lib.fs.readFileSync(path));
@@ -83,7 +84,6 @@ function fillTemplate(server, type, name, id)
 		if (key in template)
 			template[key] = data[key];
 	}
-	console.log(template);
 	return (JSON.stringify(template, null, 2));
 }
 
