@@ -112,7 +112,7 @@
                         <div class="skill-item"><span>Nature:</span> <span class="skill-val">${data.Nature || 0}</span></div>
                         <div class="skill-item"><span>Stealth:</span> <span class="skill-val">${data.Stealth || 0}</span></div>
                         <div class="skill-item"><span>Initiative:</span> <span class="skill-val">${data.Initiative || 0}</span></div>
-                        <div class="skill-item"><span>Initiative:</span> <span class="skill-val">${data.void || 0}</span></div>
+                        <div class="skill-item"><span></span> <span class="skill-val"></span></div>
 
                     <div class="section-title">Abilità: ${data.Ability.Name}</div>
                     <p style="font-size: 0.9em; color: #666; padding: 0 10px; line-height:1.4;">${data.Ability.Effect}</p>
@@ -121,6 +121,8 @@
                 `;
 
                 // 4. Moveset
+				try 
+				{
                 data.Moves.forEach(move => {
                     html += `
                         <div class="move-card">
@@ -136,6 +138,11 @@
                         </div>
                     `;
                 });
+				}
+				catch (err)
+				{
+					console.log("moves bug");
+				}
 
                 document.getElementById('content-anchor').innerHTML = html;
 

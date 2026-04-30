@@ -1,7 +1,9 @@
 const lib = require('./utils/lib.js');
 const html = require('./html.js');
+const { getJson } = require('./utils/json.js');
 const dataPath = '../data/v2.0/';
 const imgMissingno = "https://media.pokemoncentral.it/wiki/0/02/Sprrz0000.png";
+const imgSigma = "https://imgcdn.stablediffusionweb.com/2024/3/17/3dc94a28-83bd-4f7c-b33e-71652870473a.jpg";
 const imgPkmnType = "https://raw.githubusercontent.com/partywhale/pokemon-type-icons/master/icons/{ID}.svg"
 const imgHome = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/HomeSprites/";
 const imgItem = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/ItemSprites/";
@@ -36,8 +38,9 @@ async function getData(client)
 		console.log(err);
 		if (client.dirName == types.at(-1))
 		{
-			html.loadImgUrl(client.doc, imgMissingno, "");
-			client.doc.getElementById("title").innerHTML = client.dataName + " non trovato."; 
+			html.loadImgUrl(client.doc, imgSigma, "");
+			client.doc.getElementById("title").innerHTML = "<br>" + client.dataName + " non trovato.<br>";
+			client.doc.getElementById("title").innerHTML += `${getRandomQuote()}`;
 			return (err);
 		}
 		client.dirIndex += 1;
@@ -198,6 +201,24 @@ function addMatchByKey(key, array, match = [])
 		{
 			match.push(x);
 		}
+	}
+}
+
+function getRandomQuote()
+{
+	try
+	{
+		let quotesJson = lib.utils.getJson("metadata/randomQuote");
+		let	quotes = quotesJson.quote;
+		let rand = Math.floor(Math.random() * quotes.length);
+		console.log(rand);
+
+		return (quotes[rand]);
+	}
+	catch (error)
+	{
+		console.log(error);
+		return ("");
 	}
 }
 

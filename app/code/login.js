@@ -1,5 +1,6 @@
 const { getHtml } = require("./html.js");
 const lib = require("./utils/lib.js");
+const {json} = lib.utils;
 const {create} = require("./create.js");
 
 /** @typedef {typeof import("../data/template/user.json")} User */
@@ -84,10 +85,14 @@ function addUser(server, client, res, user = null)
  */
 function createFirstUserTrainer(server, client, user)
 {
+	let	trainerJson;
+	let	trainerPath;
+
 	client.req.params = 
 	{
 		type: "trainer",
-		name: user
+		name: user,
+		user: user
 	}
 	console.log(client.req.params);
 	if (create(server, client) == 1)
@@ -95,6 +100,10 @@ function createFirstUserTrainer(server, client, user)
 		console.log("couldn't create user trainer :-(");
 		return (1);
 	}
+	trainerPath = `${server.data.GetPath("trainer")}/${user}`;
+	trainer = json.getJson(trainerPath);
+	trainer.User = user;
+	json.editJson(trainerPath, trainer);
 }
 
 //SECTION loginCheck function

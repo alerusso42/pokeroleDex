@@ -220,6 +220,7 @@ lib.app.post("/api/pokemon/:name", (req, res) =>
 lib.app.post("/api/create/:type/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
+
 	if (locationLogin.loginCheck(client, res, true) == 1)
 		return ;
 	return (create(server, client, res));

@@ -12,7 +12,13 @@ const crypt = require('bcrypt');
 //SECTION - libft
 let net = require('./net.js');
 const string = require('./string.js');
-let utils = Object.assign({}, net, string);
+const json = require('./json.js');
+const utils = {
+  ...require('./net.js'),
+  ...require('./string.js'),
+  ...require('./json.js'),
+  net, string, json
+};
 
 //SECTION - custom data structures
 const types = require('./types.js');

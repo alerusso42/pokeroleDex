@@ -20,12 +20,13 @@ function editTrainer(server, client, res)
 	let	trainerOldPath;
 	let	trainerName;
 	let	trainerOldName;
+	let	trainerOldNameIndex;
 	let	trainerUpd;
 	let	trainerNewData;
 	let	error = null;
 
 	trainerOldName = client.req.params.name;
-	trainerName = client.body.name;
+	trainerName = lib.utils.dataNormalize(client.body.name);
 	trainerOldPath = trainerDirPath + trainerOldName + ".json"; 
 	trainerPath = trainerDirPath + trainerName + ".json"; 
 	trainerFile = lib.fs.readFileSync(trainerOldPath);
@@ -47,8 +48,17 @@ function editTrainer(server, client, res)
 		if (error != null)
 			return (res.status(500).send(error));
 	}
-	//lib.fs.rmSync(trainerOldPath);
 	lib.fs.writeFileSync(trainerPath, JSON.stringify(trainerNewData, null, 2), 'utf-8');
+	trainerOldNameIndex = server.data.trainer.indexOf(trainerOldName);
+	console.assert(trainerOldNameIndex != -1, "old trainer name not found");
+	server.data.trainer.splice(trainerOldNameIndex, 1);
+	server.data.trainer.push(trainerName);
+	if (trainerPath != trainerOldPath)
+	{
+		updateUserTrainers(server, trainerPath, trainerOldName, trainerName);
+		lib.fs.rmSync(trainerOldPath);
+	}
+	res.status(200).end();
 }
 
 function parseTeam(server, team)
@@ -197,6 +207,29 @@ function	createUniqueId(server, pkmn)
 		path = `${pkmn}_${i}`;
 	}
 	return (`${pkmn}_${i}`);
+}
+
+/**
+ * 
+ * @param {lib.types.Server} server 
+ * @param {*} trainerPath 
+ * @param {*} trainerOldName 
+ * @param {*} trainerName 
+ */
+function updateUserTrainers(server, trainerPath, trainerOldName, trainerName)
+{
+	let	json;
+	let	i;
+
+	json = lib.utils.json.getJson(trainerPath);
+	json = lib.utils.json.getJson(`${server.data.GetPath("user")}/${json.User}`);
+	i = json.Trainers.indexOf(trainerOldName);
+	console.assert(i != -1, "Trainer: cannot find oldName in User trainers");
+	json.Trainers.splice(i, 1);
+	json.Trainers.push(trainerName);
+	lib.utils.json.editJson(`${server.data.GetPath("user")}/${json.Name}`, 
+	{Trainers: json.Trainers}
+	);
 }
 
 // function	print(data, key="")

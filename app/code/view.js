@@ -12,6 +12,8 @@ const questDataPath = "../data/questData/";
 function view(server, client, res)
 {
 	client.dirName = client.dirName.replace("api", "");
+	console.log(client.dirName);
+	console.log(client.dataName);
 	let exists = server.data[client.dirName].find(name => name == client.dataName);
 	if (exists == null)
 	{
@@ -29,7 +31,7 @@ function view(server, client, res)
 	}
 	let data = lib.fs.readFileSync(filename);
 	data = JSON.parse(data);
-	res.send(data);
+	res.json(data);
 }
 
 module.exports = {view};

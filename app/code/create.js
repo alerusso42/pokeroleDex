@@ -11,7 +11,6 @@ function create(server, client, res=null)
 {
 	let type = client.req.params.type;
 	let name = client.req.params.name;
-	console.log(name, type);
 	// let id = createUniqueId(server, type, name);
 	name = lib.utils.dataNormalize(name);
 	let	lastUnderscore = name.indexOf("_");
@@ -30,17 +29,17 @@ function create(server, client, res=null)
 	console.log("edit: filename ->", filename);
 	if (lib.fs.existsSync(filename) == true)
 	{
-		if (!res)
+		if (res == null)
 			return (1);
 		res.status(500);
 		res.end(getHtml("./html/error/500.html").serialize());
 		return ;
 	}
 	console.log("creating", type, name);
-	let newData = fillTemplate(server, type, name, id);
+	let newData = fillTemplate(server, client, type, name, id);
 	if (newData == null)
 	{
-		if (!res)
+		if (res == null)
 			return (1);
 		res.status(500);
 		res.end(getHtml("./html/error/500.html").serialize());
@@ -52,7 +51,7 @@ function create(server, client, res=null)
 	else
 		server.data[type].push(`${name}_${id}`);
 	lib.fs.writeFileSync(filename, JSON.stringify(newData, null, 2), 'utf-8');
-	if (!res)
+	if (res == null)
 		return (0);
 	res.status(200);
 	res.send("");
@@ -61,11 +60,12 @@ function create(server, client, res=null)
 /**
  * 
  * @param {lib.types.Server} server
+ * @param {lib.types.Client} client
  * @param {string} type 
  * @param {string} name
  * @param {number} id
  */
-function fillTemplate(server, type, name, id)
+function fillTemplate(server, client, type, name, id)
 {
 	let templatePath = questDataPath + "template/" + type + ".json";
 	let path = dataPath + "Pokemon/" + name + ".json"; 
@@ -75,6 +75,8 @@ function fillTemplate(server, type, name, id)
 	template = JSON.parse(lib.fs.readFileSync(templatePath));
 	template.id = id;
 	template.Name = name;
+	if (client.req.params.type == "trainer")
+		template.User = client.req.params.user ? client.req.params.user : client.user.Name;
 	if (type != "pokemon")
 		return (template);
 	data = JSON.parse(lib.fs.readFileSync(path));
