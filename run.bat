@@ -57,8 +57,17 @@ if %errorlevel% neq 0 (
     echo [INFO] Dipendenze OK.
 )
 
+REM === recupero IP locale ===
+for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /i "IPv4" ^| findstr /v "127.0.0.1"') do (
+    set IP_LOCALE=%%a
+    set IP_LOCALE=!IP_LOCALE: ^=!
+    goto :found_ip
+)
+:found_ip
+
 REM === avvio server ===
 echo [INFO] Avvio del server in corso...
+echo Collegati dagli altri dispositivi a: http://%IP_LOCALE%:8080
 echo ---------------------------------------
 
 node code/server.js

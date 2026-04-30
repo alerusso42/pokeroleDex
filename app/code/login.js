@@ -125,7 +125,7 @@ function loginCheck (client, res, searchBool = false)
 	}
 	else if (client.isAdmin == true)
 		client.authLevel = lib.types.enumAuth.ADMIN;
-	else if (client.Name == client.dataName)
+	else if (client.user.Name == client.dataName)
 		client.authLevel = lib.types.enumAuth.CORRECT_LOGIN;
 	else if (searchBool == true)
 	{
@@ -143,5 +143,22 @@ function loginCheck (client, res, searchBool = false)
 	}
 	return (0);
 }
+
+// /**
+//  * 
+//  * @param {lib.types.Client} client
+//  */
+// function pkmnCheck(client)
+// {
+// 	if (!client.user)
+// 		return (1);
+// 	for (trainer of client.user.Trainers)
+// 	{
+// 		for (pkmn of trainer.Pokemon)
+// 		{
+// 			if (client.dataName == pkmn.Species)
+// 		}
+// 	}
+// }
 
 module.exports = {login, loginCheck};

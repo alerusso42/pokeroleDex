@@ -153,8 +153,8 @@ lib.app.get("/trainer/:name", (req, res) =>
 lib.app.get("/pokemon/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
-	if (locationLogin.loginCheck(client, res) == 1)
-		return ;
+	// if (locationLogin.loginCheck(client, res) == 1)
+	// 	;//return ;
 	return (res.send(client.dom.serialize()));
 });
 
@@ -172,8 +172,8 @@ lib.app.get("/edit/trainer/:name", (req, res) =>
 lib.app.get("/edit/pokemon/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/edit.html");
-	if (locationLogin.loginCheck(client, res, true) == 1)
-		return ;
+	// if (locationLogin.loginCheck(client, res, true) == 1)
+	// 	;//return ;
 	return (res.send(client.dom.serialize()));
 });
 
@@ -204,16 +204,16 @@ lib.app.post("/api/trainer/:name", (req, res) =>
 lib.app.get("/api/pokemon/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
-	if (locationLogin.loginCheck(client, res) == 1)
-		return ;
+	// if (locationLogin.loginCheck(client, res) == 1)
+	// 	;//return ;
 	return (view(server, client, res));
 });
 
 lib.app.post("/api/pokemon/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
-	if (locationLogin.loginCheck(client, res, true) == 1)
-		return ;
+	// if (locationLogin.loginCheck(client, res, true) == 1)
+	// 	;//return ;
 	return (edit(server, client, res));
 });
 
@@ -221,16 +221,16 @@ lib.app.post("/api/create/:type/:name", (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
 
-	if (locationLogin.loginCheck(client, res, true) == 1)
-		return ;
+	// if (locationLogin.loginCheck(client, res, true) == 1)
+	// 	;//return ;
 	return (create(server, client, res));
 });
 
 lib.app.post("/api/delete/:type/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
-	if (locationLogin.loginCheck(client, res, true) == 1)
-		return ;
+	// if (locationLogin.loginCheck(client, res, true) == 1)
+	// 	;//return ;
 	console.log("delete");
 });
 
