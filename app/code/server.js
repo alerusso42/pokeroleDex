@@ -264,6 +264,20 @@ lib.app.get("/api/userInfo", (req, res) =>
 	res.json(userInfo);
 });
 
+// lib.app.post("/api/upload/:type", (req, res) =>
+// {
+// 	let client;
+// 	let	imgData;
+// 	let	imgName;
+// 	let	buffer;
+	
+// 	client = new lib.types.Client(server, req);
+// 	if (locationLogin.loginCheck(client, res, true) == 1)
+// 		return ;
+// 	}
+// 	buffer = Buffer.from()
+// });
+
 lib.app.get("/*splat", (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/error/404.html");
