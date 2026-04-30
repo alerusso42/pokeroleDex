@@ -256,6 +256,8 @@ lib.app.get("/api/userInfo", (req, res) =>
 	client = new lib.types.Client(server, req);
 	locationLogin.loginCheck(client, res);
 	userInfo = client.user;
+	if (userInfo == null)
+		return (res.end());
 	userInfo.File = "SECRET";
 	userInfo.Password = "SECRET";
 	userInfo.Level = client.authLevel;
