@@ -113,7 +113,7 @@ lib.app.post("/register/:user", async (req, res) =>
 lib.app.get("/user/", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/autoindex.html");
-	if (locationLogin.loginCheck(client, res) == 1)
+	if (locationLogin.loginCheck(server, client, res) == 1)
 		return ;
 	return (locationAutoIndex.autoIndex(server, client, res));
 });
@@ -121,7 +121,7 @@ lib.app.get("/user/", (req, res) =>
 lib.app.get("/trainer/", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/autoindex.html");
-	if (locationLogin.loginCheck(client, res) == 1)
+	if (locationLogin.loginCheck(server, client, res) == 1)
 		return ;
 	return (locationAutoIndex.autoIndex(server, client, res));
 });
@@ -129,7 +129,7 @@ lib.app.get("/trainer/", (req, res) =>
 lib.app.get("/pokemon/", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/autoindex.html");
-	if (locationLogin.loginCheck(client, res) == 1)
+	if (locationLogin.loginCheck(server, client, res) == 1)
 		return ;
 	return (locationAutoIndex.autoIndex(server, client, res));
 });
@@ -137,7 +137,7 @@ lib.app.get("/pokemon/", (req, res) =>
 lib.app.get("/user/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/user/view.html");
-	if (locationLogin.loginCheck(client, res) == 1)
+	if (locationLogin.loginCheck(server, client, res) == 1)
 		return ;
 	return (res.send(client.dom.serialize()));
 });
@@ -145,7 +145,7 @@ lib.app.get("/user/:name", (req, res) =>
 lib.app.get("/trainer/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/trainer/view.html");
-	if (locationLogin.loginCheck(client, res) == 1)
+	if (locationLogin.loginCheck(server, client, res) == 1)
 		return ;
 	return (res.send(client.dom.serialize()));
 });
@@ -153,7 +153,7 @@ lib.app.get("/trainer/:name", (req, res) =>
 lib.app.get("/pokemon/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
-	// if (locationLogin.loginCheck(client, res) == 1)
+	// if (locationLogin.loginCheck(server, client, res) == 1)
 	// 	;//return ;
 	return (res.send(client.dom.serialize()));
 });
@@ -164,7 +164,7 @@ lib.app.use(lib.express.urlencoded({ extended: true }));
 lib.app.get("/edit/trainer/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/trainer/edit.html");
-	if (locationLogin.loginCheck(client, res, true) == 1)
+	if (locationLogin.loginCheck(server, client, res, true) == 1)
 		return ;
 	return (res.send(client.dom.serialize()));
 });
@@ -172,7 +172,7 @@ lib.app.get("/edit/trainer/:name", (req, res) =>
 lib.app.get("/edit/pokemon/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/edit.html");
-	// if (locationLogin.loginCheck(client, res, true) == 1)
+	// if (locationLogin.loginCheck(server, client, res, true) == 1)
 	// 	;//return ;
 	return (res.send(client.dom.serialize()));
 });
@@ -180,7 +180,7 @@ lib.app.get("/edit/pokemon/:name", (req, res) =>
 lib.app.get("/api/user/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/user/view.html");
-	if (locationLogin.loginCheck(client, res) == 1)
+	if (locationLogin.loginCheck(server, client, res) == 1)
 		return ;
 	return (view(server, client, res));
 });
@@ -188,7 +188,7 @@ lib.app.get("/api/user/:name", (req, res) =>
 lib.app.get("/api/trainer/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/trainer/view.html");
-	if (locationLogin.loginCheck(client, res) == 1)
+	if (locationLogin.loginCheck(server, client, res) == 1)
 		return ;
 	return (view(server, client, res));
 });
@@ -196,7 +196,7 @@ lib.app.get("/api/trainer/:name", (req, res) =>
 lib.app.post("/api/trainer/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/trainer/view.html");
-	if (locationLogin.loginCheck(client, res, true) == 1)
+	if (locationLogin.loginCheck(server, client, res, true) == 1)
 		return ;
 	return (editTrainer(server, client, res));
 });
@@ -204,7 +204,7 @@ lib.app.post("/api/trainer/:name", (req, res) =>
 lib.app.get("/api/pokemon/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
-	// if (locationLogin.loginCheck(client, res) == 1)
+	// if (locationLogin.loginCheck(server, client, res) == 1)
 	// 	;//return ;
 	return (view(server, client, res));
 });
@@ -212,7 +212,7 @@ lib.app.get("/api/pokemon/:name", (req, res) =>
 lib.app.post("/api/pokemon/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
-	// if (locationLogin.loginCheck(client, res, true) == 1)
+	// if (locationLogin.loginCheck(server, client, res, true) == 1)
 	// 	;//return ;
 	return (edit(server, client, res));
 });
@@ -221,7 +221,7 @@ lib.app.post("/api/create/:type/:name", (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
 
-	// if (locationLogin.loginCheck(client, res, true) == 1)
+	// if (locationLogin.loginCheck(server, client, res, true) == 1)
 	// 	;//return ;
 	return (create(server, client, res));
 });
@@ -229,7 +229,7 @@ lib.app.post("/api/create/:type/:name", (req, res) =>
 lib.app.post("/api/delete/:type/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
-	// if (locationLogin.loginCheck(client, res, true) == 1)
+	// if (locationLogin.loginCheck(server, client, res, true) == 1)
 	// 	;//return ;
 	console.log("delete");
 });
@@ -237,7 +237,7 @@ lib.app.post("/api/delete/:type/:name", (req, res) =>
 lib.app.get("/api/info/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
-	if (locationLogin.loginCheck(client, res, true) == 1)
+	if (locationLogin.loginCheck(server, client, res, true) == 1)
 		return ;
 	let name = req.params.name;
 	if (name == "id")
@@ -254,7 +254,7 @@ lib.app.get("/api/userInfo", (req, res) =>
 	let	userInfo;
 	
 	client = new lib.types.Client(server, req);
-	locationLogin.loginCheck(client, res);
+	locationLogin.loginCheck(server, client, res);
 	userInfo = client.user;
 	if (userInfo == null)
 		return (res.end());
@@ -272,7 +272,7 @@ lib.app.get("/api/userInfo", (req, res) =>
 // 	let	buffer;
 	
 // 	client = new lib.types.Client(server, req);
-// 	if (locationLogin.loginCheck(client, res, true) == 1)
+// 	if (locationLogin.loginCheck(server, client, res, true) == 1)
 // 		return ;
 // 	}
 // 	buffer = Buffer.from()

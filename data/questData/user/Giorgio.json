@@ -1,0 +1,10 @@
+{
+  "File": "../data/questData/user/Giorgio.json",
+  "IsAdmin": true,
+  "Name": "Giorgio",
+  "Password": "$2b$10$EvvD5Fl01inft.PtpasniuGFJMVP2sxQcasY3A5dloI02uhZTRNqW",
+  "Trainers": [
+    "Giorgione"
+  ],
+  "Id": 1
+}

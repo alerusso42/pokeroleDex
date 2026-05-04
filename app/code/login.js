@@ -2,6 +2,7 @@ const { getHtml } = require("./html.js");
 const lib = require("./utils/lib.js");
 const {json} = lib.utils;
 const {create} = require("./create.js");
+const {} = require("./utils/types.js");
 
 /** @typedef {typeof import("../data/template/user.json")} User */
 
@@ -110,12 +111,13 @@ function createFirstUserTrainer(server, client, user)
 
 /**
  * 
+ * @param {lib.types.Server} server
  * @param {lib.types.Client} client 
  * @param {Response} res 
- * @param {bool} searchBool 
+ * @param {bool} protectedPath
  * @returns {number} 0 on success, 1 on failure
  */
-function loginCheck (client, res, searchBool = false)
+function loginCheck (server, client, res, protectedPath = false)
 {
 	if (client.dirName == "")
 	{
@@ -123,11 +125,11 @@ function loginCheck (client, res, searchBool = false)
 		res.end(getHtml("./html/error/400.html").serialize());
 		return (1);
 	}
-	else if (client.isAdmin == true)
-		client.authLevel = lib.types.enumAuth.ADMIN;
-	else if (client.user.Name == client.dataName)
+	// else if (client.isAdmin == true)
+	// 	client.authLevel = lib.types.enumAuth.ADMIN;
+	else if (validSearch(server, client))
 		client.authLevel = lib.types.enumAuth.CORRECT_LOGIN;
-	else if (searchBool == true)
+	else if (protectedPath == true)
 	{
 		res.status(401);
 		res.end(getHtml("./html/error/401.html").serialize());
@@ -144,21 +146,36 @@ function loginCheck (client, res, searchBool = false)
 	return (0);
 }
 
-// /**
-//  * 
-//  * @param {lib.types.Client} client
-//  */
-// function pkmnCheck(client)
-// {
-// 	if (!client.user)
-// 		return (1);
-// 	for (trainer of client.user.Trainers)
-// 	{
-// 		for (pkmn of trainer.Pokemon)
-// 		{
-// 			if (client.dataName == pkmn.Species)
-// 		}
-// 	}
-// }
+/**
+ * 
+ * @param {lib.types.Server} server
+ * @param {lib.types.Client} client 
+ */
+function validSearch(server, client)
+{
+	let	trainerJson;
+
+	if (!client.user || !client.user.Name)
+		return (false);
+	if (client.user.Name == client.dataName)
+		return (true);
+	for (let trainer of client.user.Trainers)
+	{
+		if (trainer == client.dataName)
+			return (true);
+	}
+	for (let trainer of client.user.Trainers)
+	{
+		trainerJson = lib.utils.getJson(server.data.GetPath("trainer") + trainer);
+		if (!trainerJson)
+			throw (`INVALID TRAINER ${trainer} from ${client.user.Name}`);
+		for (let pkmn of trainerJson.Pokemon)
+		{
+			if (pkmn == client.dataName)
+				return (true);
+		}
+	}
+	return (false);
+}
 
 module.exports = {login, loginCheck};
