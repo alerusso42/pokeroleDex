@@ -125,9 +125,9 @@ function loginCheck (server, client, res, protectedPath = false)
 		res.end(getHtml("./html/error/400.html").serialize());
 		return (1);
 	}
-	// else if (client.isAdmin == true)
-	// 	client.authLevel = lib.types.enumAuth.ADMIN;
-	else if (validSearch(server, client))
+	else if (client.isAdmin == true)
+		client.authLevel = lib.types.enumAuth.ADMIN;
+	else if (validSearch(server, client) == true)
 		client.authLevel = lib.types.enumAuth.CORRECT_LOGIN;
 	else if (protectedPath == true)
 	{
@@ -147,7 +147,11 @@ function loginCheck (server, client, res, protectedPath = false)
 }
 
 /**
- * 
+ * Checks if the searched data can be found it:
+ * 1)	the user name;
+ * 2)	the user trainers' name;
+ * 3)	the user trainers's pokemon's name.
+ * If nothing is searched, returns true.
  * @param {lib.types.Server} server
  * @param {lib.types.Client} client 
  */
@@ -159,21 +163,16 @@ function validSearch(server, client)
 		return (false);
 	if (!client.dataName)
 		return (true);
-	console.log("searched:", client.dataName);
-	console.log("username:", client.user.Name);
 	if (client.user.Name == client.dataName)
 		return (true);
-	console.log("failed. searching trainerNames:");
 	for (let trainer of client.user.Trainers)
 	{
-		console.log(trainer);
 		if (trainer == client.dataName)
 			return (true);
 	}
 	console.log("failed. searching pokemonNames:");
 	for (let trainer of client.user.Trainers)
 	{
-		console.log("all pkmn of", trainer);
 		trainerJson = lib.utils.getJson(server.data.GetPath("trainer") + trainer);
 		if (!trainerJson)
 			throw (`INVALID TRAINER ${trainer} from ${client.user.Name}`);
@@ -181,7 +180,9 @@ function validSearch(server, client)
 		{
 			console.log(pkmn);
 			if (pkmn == client.dataName)
+			{
 				return (true);
+			}
 		}
 	}
 	return (false);

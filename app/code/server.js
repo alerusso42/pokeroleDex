@@ -137,7 +137,7 @@ lib.app.get("/pokemon/", (req, res) =>
 lib.app.get("/user/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/user/view.html");
-	if (locationLogin.loginCheck(server, client, res) == 1)
+	if (locationLogin.loginCheck(server, client, res, true) == 1)
 		return ;
 	return (res.send(client.dom.serialize()));
 });
@@ -145,7 +145,7 @@ lib.app.get("/user/:name", (req, res) =>
 lib.app.get("/trainer/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/trainer/view.html");
-	if (locationLogin.loginCheck(server, client, res) == 1)
+	if (locationLogin.loginCheck(server, client, res, true) == 1)
 		return ;
 	return (res.send(client.dom.serialize()));
 });
@@ -153,7 +153,7 @@ lib.app.get("/trainer/:name", (req, res) =>
 lib.app.get("/pokemon/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
-	if (locationLogin.loginCheck(server, client, res) == 1)
+	if (locationLogin.loginCheck(server, client, res, true) == 1)
 		return ;
 	return (res.send(client.dom.serialize()));
 });
