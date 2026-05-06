@@ -33,7 +33,6 @@ function editJson(path, data, addBool=false)
 /**
  * 
  * @param {String} path path to the json file
- * @returns {JSON}
  */
 function getJson(path)
 {

@@ -1,6 +1,7 @@
 // @ts-check
-const {dataPath, metaDataPath, questDataPath} = require("../macro.js");
 const fs = require("fs");
+const {dataPath, metaDataPath, questDataPath} = require("../macro.js");
+const {getJson} = require("../json.js");
 
 //SECTION - dataList class definition
 
@@ -121,6 +122,8 @@ function fillDataListArray(fill, type)
 		return (array);
 	for (let file of fs.readdirSync(path))
 	{
+		if (file[0] == ".")
+			continue ;
 		file = file.replace(".json", "");
 		array.push(file);
 	}
@@ -129,24 +132,32 @@ function fillDataListArray(fill, type)
 
 //SECTION - expanded data list
 
+/**
+ * @typedef {Object} ExpPrototype
+ * @property {string} filename
+ * @property {string} img img extension or url
+ * @property {string} category category of data
+ */
+
 class expandedDataList
 {
 	/** @param {dataList} list */
 	constructor(list)
 	{
-		this.pokedex = fillDataListExpanded(list, "pokedex", dataPath);
-		this.nature = fillDataListExpanded(list, "nature", dataPath);
-		this.move = fillDataListExpanded(list, "move", dataPath);
-		this.item = fillDataListExpanded(list, "item", dataPath);
-		this.ability = fillDataListExpanded(list, "ability", dataPath);
+		//this.pokedex = fillDataListExpanded(list, "pokedex", dataPath);
+		//this.nature = fillDataListExpanded(list, "nature", dataPath);
+		//this.move = fillDataListExpanded(list, "move", dataPath);
+		//this.item = fillDataListExpanded(list, "item", dataPath);
+		//this.ability = fillDataListExpanded(list, "ability", dataPath);
 		this.user = fillDataListExpanded(list, "user");
 		this.trainer = fillDataListExpanded(list, "trainer");
 		this.pokemon = fillDataListExpanded(list, "pokemon");
-		
-		this.Print = print.bind(this);
+
+		this.Print = printExp.bind(this);
 		this.GetPath = getPath;
 		this.GetDirName = getDirName;
 		this.GetFilename = getfilename;
+
 	}
 }
 
@@ -154,20 +165,50 @@ class expandedDataList
  * 
  * @param {dataList} list the lists of data divided by directories
  * @param {string} type the directory name 
+ * @returns {Map<string, ExpPrototype>}
  */
 function fillDataListExpanded(list, type, root=questDataPath)
 {
-	let	array;
+	/**  @type {ExpPrototype}*/let	expData;
+	let	arrayFiles;
+	let	mapExpData;
 	let	filename;
+	let	json;
 
 	// @ts-ignore
-	array = list[type];
-	if (!array)
+	expData = {};
+	mapExpData = new Map();
+	// @ts-ignore
+	arrayFiles = list[type];
+	if (!arrayFiles)
 		throw ("fillDataListExpanded: cannot init type " + type);
-	for (let data of array)
+	for (let data of arrayFiles)
 	{
 		filename = getfilename(data, getDirName(type), root);
-		console.log(filename);
+		json = getJson(filename);
+		expData.filename = filename;
+		if (json.Category)
+			expData.category = json.category;
+		if (json.Img)
+			expData.img = json.Img;
+		mapExpData.set(data, expData);
+	}
+	return (mapExpData);
+}
+
+/**
+ * 
+ * @this {*}
+ */
+function printExp()
+{
+	if (!this)
+		return ;
+	for (let ar in this)
+	{
+		console.log("\x1b[32m", ar, "print:\x1b[0m");
+		// @ts-ignore
+		console.log(this[ar]);
 	}
 }
 

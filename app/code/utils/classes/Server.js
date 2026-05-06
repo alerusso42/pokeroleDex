@@ -49,6 +49,8 @@ function getDataMap(typePath, readFileBool = false, useIdBool = false)
 
 	for (let file of dir)
 	{
+		if (file[0] == ".")
+			continue ;
 		let fileNoExt = file.replace(".json", "");
 		if (readFileBool)
 		{
