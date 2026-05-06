@@ -1,7 +1,7 @@
 // @ts-check
 const fs = require("fs");
 const {metaDataPath, questDataPath} = require("../macro.js");
-const {dataList} = require("./DataList.js");
+const {dataList, expandedDataList} = require("./DataList.js");
 
 /** @typedef {typeof import("../../../../data/questData/template/user.json")} User */
 
@@ -13,6 +13,9 @@ class Server
 	{
 		/** @type {dataList} */
 		this.data = new dataList(true);
+
+		/** @type {expandedDataList} */
+		this.expandedData = new expandedDataList(this.data);
 
 		/** @type {metaData} */
 		this.metaData = new metaData();

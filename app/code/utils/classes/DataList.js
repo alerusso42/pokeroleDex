@@ -20,35 +20,64 @@ class dataList
 		/** @type {Array<string>} */	this.user = fillDataListArray(fill, "user");
 		/** @type {Array<string>} */	this.trainer = fillDataListArray(fill, "trainer");
 		/** @type {Array<string>} */	this.pokemon = fillDataListArray(fill, "pokemon");
-	}
-	/**
-	 * 
-	 */
-	Print()
-	{
-		for (let ar in this)
-		{
-			console.log("\x1b[32m", ar, "print:\x1b[0m");
-			console.log(this[ar]);
-		}
-	}
-
-	/** @param {string} dataName */
-	GetPath(dataName)
-	{
-		// @ts-ignore
-		return (dataListPath[dataName]);
-	}
-
-	/** @param {string} dirName */
-	GetDirName(dirName)
-	{
-		// @ts-ignore
-		return (dataListDirName[dirName]);
+		
+		this.Print = print.bind(this);
+		this.GetPath = getPath;
+		this.GetDirName = getDirName;
+		this.GetFilename = getfilename;
 	}
 }
 
 //SECTION - dataList class methods/utils
+
+/**
+ * 
+ * @this {*}
+ */
+function print()
+{
+	if (!this)
+		return ;
+	for (let ar in this)
+	{
+		console.log("\x1b[32m", ar, "print:\x1b[0m");
+		// @ts-ignore
+		console.log(this[ar]);
+	}
+}
+
+/** @param {string} dataName */
+function getPath(dataName)
+{
+	// @ts-ignore
+	return (dataListPath[dataName]);
+}
+
+/** @param {string} dirName */
+function getDirName(dirName)
+{
+	// @ts-ignore
+	return (dataListDirName[dirName]);
+}
+
+/**
+ * 
+ * @param {string} dataName 
+ * @param {string} dirName 
+ * @param {string} root 
+ * @param {string} ext 
+ */
+function getfilename(dataName, dirName="", root=questDataPath, ext=".json")
+{
+	let	filename;
+
+	if (!dataName)
+		throw ("getFilename: dataName is null");
+	filename = root + dirName + "/" + dataName + ext;
+	if (fs.existsSync(filename) == false)
+		throw ("getFilename: cannot find " + filename);
+	return (filename);
+}
 
 /** @enum {string} */
 const dataListDirName = 
@@ -98,4 +127,48 @@ function fillDataListArray(fill, type)
 	return (array);
 }
 
-module.exports = {dataList};
+//SECTION - expanded data list
+
+class expandedDataList
+{
+	/** @param {dataList} list */
+	constructor(list)
+	{
+		this.pokedex = fillDataListExpanded(list, "pokedex", dataPath);
+		this.nature = fillDataListExpanded(list, "nature", dataPath);
+		this.move = fillDataListExpanded(list, "move", dataPath);
+		this.item = fillDataListExpanded(list, "item", dataPath);
+		this.ability = fillDataListExpanded(list, "ability", dataPath);
+		this.user = fillDataListExpanded(list, "user");
+		this.trainer = fillDataListExpanded(list, "trainer");
+		this.pokemon = fillDataListExpanded(list, "pokemon");
+		
+		this.Print = print.bind(this);
+		this.GetPath = getPath;
+		this.GetDirName = getDirName;
+		this.GetFilename = getfilename;
+	}
+}
+
+/**
+ * 
+ * @param {dataList} list the lists of data divided by directories
+ * @param {string} type the directory name 
+ */
+function fillDataListExpanded(list, type, root=questDataPath)
+{
+	let	array;
+	let	filename;
+
+	// @ts-ignore
+	array = list[type];
+	if (!array)
+		throw ("fillDataListExpanded: cannot init type " + type);
+	for (let data of array)
+	{
+		filename = getfilename(data, getDirName(type), root);
+		console.log(filename);
+	}
+}
+
+module.exports = {dataList, expandedDataList};
