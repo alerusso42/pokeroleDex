@@ -157,20 +157,27 @@ function validSearch(server, client)
 
 	if (!client.user || !client.user.Name)
 		return (false);
+	console.log("searched:", client.user.dataName);
+	console.log("username:", client.user.Name);
 	if (client.user.Name == client.dataName)
 		return (true);
+	console.log("failed. searching trainerNames:");
 	for (let trainer of client.user.Trainers)
 	{
+		console.log(trainer);
 		if (trainer == client.dataName)
 			return (true);
 	}
+	console.log("failed. searching pokemonNames:");
 	for (let trainer of client.user.Trainers)
 	{
+		console.log("all pkmn of", trainer);
 		trainerJson = lib.utils.getJson(server.data.GetPath("trainer") + trainer);
 		if (!trainerJson)
 			throw (`INVALID TRAINER ${trainer} from ${client.user.Name}`);
 		for (let pkmn of trainerJson.Pokemon)
 		{
+			console.log(pkmn);
 			if (pkmn == client.dataName)
 				return (true);
 		}
