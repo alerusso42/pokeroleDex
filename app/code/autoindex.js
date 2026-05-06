@@ -1,7 +1,7 @@
 // @ts-check
 const lib = require('./utils/lib.js');
 const { dataNormalize, pokemonToSnakeCase } = require('./utils/string.js');
-const { Server } = require('./utils/types.js');
+const { Server } = require('./utils/classes/classes.js');
 
 const	trainerBoyUrl = "https://play.pokemonshowdown.com/sprites/trainers/lucas-gen4pt.png";
 const	trainerGirlUrl = "https://play.pokemonshowdown.com/sprites/trainers/dawn-gen4pt.png";

@@ -2,7 +2,7 @@
  * checks if one on the strings is present in the source string
  * @param {String} str  the source string 
  * @param {String/Array} ... one or more string to compare, OR an Array
- * @returns {number} the first string found if a match exists, else ""
+ * @returns {string} the first string found if a match exists, else ""
  */
 function includesOneOf(str)
 {

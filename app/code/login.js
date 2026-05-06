@@ -2,7 +2,7 @@ const { getHtml } = require("./html.js");
 const lib = require("./utils/lib.js");
 const {json} = lib.utils;
 const {create} = require("./create.js");
-const {} = require("./utils/types.js");
+const {} = require("./utils/classes/classes.js");
 
 /** @typedef {typeof import("../data/template/user.json")} User */
 

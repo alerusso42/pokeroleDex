@@ -1,5 +1,5 @@
 const lib = require("./utils/lib.js");
-const {questDataPath, dataPath} = require('./utils/types.js');
+const {questDataPath, dataPath} = require('./utils/classes/classes.js');
 
 /**
  * 

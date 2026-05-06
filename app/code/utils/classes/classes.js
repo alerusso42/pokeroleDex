@@ -1,17 +1,17 @@
+// @ts-check
+
+/*
 const { JSDOM } = require("jsdom");
 const fs = require("fs");
 const url = require("url");
-const net = require('./net.js');
-const stringUtils = require('./string.js');
+const net = require('../net.js');
+const stringUtils = require('../string.js');
+const {dataPath, metaDataPath, questDataPath} = require("../macro.js");
 
-const metaDataPath = "metadata/";
-const questDataPath = "../data/questData/";
-const dataPath = "../data/v2.0/";
-
-/** @typedef {import("express").Request} ExpressRequest */
-/** @typedef {typeof import("../../../data/questData/template/user.json")} User */
-/** @typedef {typeof import("../../data/questData/template/trainer.json")} Trainer */
-/** @typedef {typeof import("../../data/questData/template/pokemon.json")} Pokemon */
+/** @typedef {import("express").Request} ExpressRequest *^/
+/** @typedef {typeof import("../../../../data/questData/template/user.json")} User *^/
+/** @typedef {typeof import("../../data/questData/template/trainer.json")} Trainer *^/
+/** @typedef {typeof import("../../data/questData/template/pokemon.json")} Pokemon *^/
 
 //SECTION - Server class definition
 
@@ -19,15 +19,15 @@ class Server
 {
 	constructor()
 	{
-		/** @type {dataList} */
+		/** @type {dataList} *^/
 		this.data = new dataList(true);
-		/** @type {metaData} */
+		/** @type {metaData} *^/
 		this.metaData = new metaData();
-		/** @type {Map<number, User>} */
+		/** @type {Map<number, User>} *^/
 		this.userMap = getDataMap("user/", true, true);
-		/** @type {number} */
+		/** @type {number} *^/
 		this.userNum = this.userMap.size;
-		/** @type {number} */
+		/** @type {number} *^/
 		this.cryptSalt = 10;
 
 		//this.data.Print();
@@ -41,7 +41,7 @@ class Server
  * @param {string} typePath the data type path 
  * @param {boolean} readFileBool the data type path 
  * @returns {Map}
- */
+ *^/
 function getDataMap(typePath, readFileBool = false, useIdBool = false)
 {
 	let map = new Map();
@@ -69,7 +69,7 @@ class metaData
 {
 	constructor()
 	{
-		/** @type {number} */	this.id = parseInt(fs.readFileSync(metaDataPath + "id.txt"));
+		/** @type {number} *^/	this.id = parseInt(fs.readFileSync(metaDataPath + "id.txt"));
 	}
 	Update(metaParam="", newData="")
 	{
@@ -88,37 +88,37 @@ class Client
 	 * @param {Server} server 
 	 * @param {ExpressRequest} req 
 	 * @param {String} res_html 
-	 */
+	 *^/
 	constructor(server, req, res_html=null)
 	{
 		if (res_html != null)
 		{
-			/** @type {JSDOM} */	this.dom = getHtml(res_html);
+			/** @type {JSDOM} *^/	this.dom = getHtml(res_html);
 	
-			/** @type {Document} */	this.doc = this.dom.window.document;
+			/** @type {Document} *^/	this.doc = this.dom.window.document;
 		}
-		/** @type {ExpressRequest} */	this.req = req;
+		/** @type {ExpressRequest} *^/	this.req = req;
 
-		/** @type {string} */	this.body = req.body;
+		/** @type {string} *^/	this.body = req.body;
 
-		/** @type {string} */	this.buff = "";
+		/** @type {string} *^/	this.buff = "";
 
-		/** @type {string} */	this.url = url.parse(req.url).pathname;
+		/** @type {string} *^/	this.url = url.parse(req.url).pathname;
 
-		/** @type {User} */		this.user = getUser(server, req);
+		/** @type {User} *^/		this.user = getUser(server, req);
 
-		/** @type {string} */	this.dataName = net.urlArg(this.url).replaceAll("/", "");
+		/** @type {string} *^/	this.dataName = net.urlArg(this.url).replaceAll("/", "");
 								this.dataName = dataNormalize(this.dataName);
 
-		/** @type {string} */	this.dirName = net.urlDir(this.url).replaceAll("/", "");
+		/** @type {string} *^/	this.dirName = net.urlDir(this.url).replaceAll("/", "");
 		
-		/** @type {number} */	this.dirIndex = 0;
+		/** @type {number} *^/	this.dirIndex = 0;
 
-		/** @type {boolean} */	this.isAdmin = isAdmin(req);
+		/** @type {boolean} *^/	this.isAdmin = isAdmin(req);
 
-		/** @type {boolean} */	this.isLogged = this.user != null;
+		/** @type {boolean} *^/	this.isLogged = this.user != null;
 
-		/** @type {number} */	this.authLevel = enumAuth.UNKNOWN;
+		/** @type {number} *^/	this.authLevel = enumAuth.UNKNOWN;
 
 		if (this.isAdmin == true && this.isLogged == true)
 			console.log("Admin", this.user.Name, "searching for \"" + this.dataName + "\"");
@@ -162,7 +162,7 @@ function dataNormalize(dataName)
  * @param {Server} server 
  * @param {Request} req 
  * @returns {User} 
- */
+ *^/
 function getUser(server, req)
 {
 	let cookie = req.headers.cookie;
@@ -182,7 +182,7 @@ function getUser(server, req)
  * 
  * @param {ExpressRequest} req 
  * @param {User} user 
- */
+ *^/
 function isAdmin(req, user)
 {
 	if (stringUtils.includesOneOf(req.ip, "127.0.0.1", "localhost", "::1") != "" || 
@@ -200,22 +200,22 @@ class dataList
 	/**
 	 * 
 	 * @param {boolean} fill
-	 */
+	 *^/
 	constructor(fill)
 	{
-		/** @type {Array<string>} */	this.pokedex = fillDataListArray(fill, "pokedex");
-		/** @type {Array<string>} */	this.nature = fillDataListArray(fill, "nature");
-		/** @type {Array<string>} */	this.move = fillDataListArray(fill, "move");
-		/** @type {Array<string>} */	this.item = fillDataListArray(fill, "item");
-		/** @type {Array<string>} */	this.ability = fillDataListArray(fill, "ability");
-		/** @type {Array<string>} */	this.user = fillDataListArray(fill, "user");
-		/** @type {Array<string>} */	this.trainer = fillDataListArray(fill, "trainer");
-		/** @type {Array<string>} */	this.pokemon = fillDataListArray(fill, "pokemon");
+		/** @type {Array<string>} *^/	this.pokedex = fillDataListArray(fill, "pokedex");
+		/** @type {Array<string>} *^/	this.nature = fillDataListArray(fill, "nature");
+		/** @type {Array<string>} *^/	this.move = fillDataListArray(fill, "move");
+		/** @type {Array<string>} *^/	this.item = fillDataListArray(fill, "item");
+		/** @type {Array<string>} *^/	this.ability = fillDataListArray(fill, "ability");
+		/** @type {Array<string>} *^/	this.user = fillDataListArray(fill, "user");
+		/** @type {Array<string>} *^/	this.trainer = fillDataListArray(fill, "trainer");
+		/** @type {Array<string>} *^/	this.pokemon = fillDataListArray(fill, "pokemon");
 	}
 	/**
 	 * 
 	 * @param {dataList} dt 
-	 */
+	 *^/
 	Print()
 	{
 		for (let ar in this)
@@ -225,13 +225,13 @@ class dataList
 		}
 	}
 
-	/** @param {string} dataName */
+	/** @param {string} dataName *^/
 	GetPath(dataName)
 	{
 		return (dataListPath[dataName]);
 	}
 
-	/** @param {string} dirName */
+	/** @param {string} dirName *^/
 	GetDirName(dirName)
 	{
 		return (dataListDirName[dirName]);
@@ -240,7 +240,7 @@ class dataList
 
 //SECTION - dataList class methods/utils
 
-/** @enum {string} */
+/** @enum {string} *^/
 const dataListDirName = 
 {
 	"pokedex" : "Pokemon",
@@ -253,7 +253,7 @@ const dataListDirName =
 	"pokemon" : "pokemon"
 };
 
-/** @enum {string} */
+/** @enum {string} *^/
 const dataListPath = 
 {
 	"pokedex" : dataPath + "Pokemon/",
@@ -271,7 +271,7 @@ const dataListPath =
  * @param {boolean} fill
  * @param {string} type 
  * @returns {Array<string>} the array filled with all files in that directory
- */
+ *^/
 function fillDataListArray(fill, type)
 {
 	let array = new Array();
@@ -289,7 +289,7 @@ function fillDataListArray(fill, type)
 
 //SECTION generic enums
 
-/** @enum {string} */
+/** @enum {string} *^/
 const enumAuth = 
 {
 	"UNKNOWN" : 0,
@@ -297,6 +297,12 @@ const enumAuth =
 	"WRONG_LOGIN" : 1,
 	"CORRECT_LOGIN" : 2,
 	"ADMIN" : 3,
-};
+};*/
 
-module.exports = {Server, Client, dataList, enumAuth, questDataPath, dataPath};
+const Server = require("./Server").Server;
+const Client = require("./Client").Client;
+const dataList = require("./DataList").dataList
+const enumAuth = require("../enums").enumAuth;
+const {dataPath, metaDataPath, questDataPath} = require("../macro");
+
+module.exports = {Server, Client, dataList, enumAuth, questDataPath, dataPath, metaDataPath};

@@ -21,6 +21,6 @@ const utils = {
 };
 
 //SECTION - custom data structures
-const types = require('./types.js');
+const types = require('./classes/classes.js');
 
 module.exports = {http, url, fs, path, crypt, express, app, JSDOM, utils, types};
