@@ -157,7 +157,9 @@ function validSearch(server, client)
 
 	if (!client.user || !client.user.Name)
 		return (false);
-	console.log("searched:", client.user.dataName);
+	if (!client.dataName)
+		return (true);
+	console.log("searched:", client.dataName);
 	console.log("username:", client.user.Name);
 	if (client.user.Name == client.dataName)
 		return (true);
