@@ -72,6 +72,23 @@ body {
     transition: 0.2s;
 }
 
+/* Pulsante come Home ma a destra */
+.btn-right {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: var(--poke-dark);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 50px;
+    text-decoration: solid;
+    font-weight: bold;
+    border: 4px solid #000;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+    z-index: 100;
+    transition: 0.2s;
+}
+
 .btn-home:hover {
     background: var(--poke-red);
     transform: scale(1.05);

@@ -111,6 +111,8 @@
 <body>
 
 	<a id="userName" class="btn-home">👤</a>
+	<a id="admin" class="btn-right"></a>
+	<br>
 
     <div id="test">
         
@@ -163,6 +165,13 @@
 				return ;
 			userInfo = await userInfo.json();
 			if (userInfo == null || userInfo.Level == 0)
+				return ;
+			if (userInfo.Level >= 3)// ATTENZIONE: HARDCODING AUTHLEVEL!!!
+			{
+				document.getElementById("admin").innerHTML = "ADMIN";
+				document.getElementById("admin").setAttribute("href", "/admin/");
+			}
+			if (userInfo.Name == "nameless")
 				return ;
 			document.getElementById("userName").innerHTML += userInfo.Name;
 			document.getElementById("userName").setAttribute("href", `/user/${userInfo.Name}`);

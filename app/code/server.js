@@ -7,6 +7,7 @@ const {view} = require('./view.js');
 const {edit} = require('./edit.js');
 const {create} = require('./create.js');
 const { editTrainer } = require('./trainer.js');
+const { enumAuth } = require('./utils/enums.js');
 const types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
 const server = new lib.types.Server();
 
@@ -259,7 +260,7 @@ lib.app.get("/api/userInfo", (req, res) =>
 	if (userInfo == null)
 	{
 		if (client.isAdmin == true)
-			return (res.json({Name: "nameless"}));
+			return (res.json({Name: "nameless", Level: enumAuth.ADMIN}));
 		return (res.end());
 	}
 	userInfo.File = "SECRET";
@@ -281,6 +282,20 @@ lib.app.get("/api/userInfo", (req, res) =>
 // 	}
 // 	buffer = Buffer.from()
 // });
+
+lib.app.get("/admin/", (req, res) => 
+{
+	let	client;
+
+	client = new lib.types.Client(server, req, "./html/admin.html");
+	if (client.isAdmin == false)
+	{
+		res.status(401);
+		res.end(getHtml("./html/error/401.html").serialize());
+		return (1);
+	}
+	res.send(client.dom.serialize());
+});
 
 lib.app.get("/*splat", (req, res) =>
 {
