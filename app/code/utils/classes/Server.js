@@ -1,6 +1,6 @@
 // @ts-check
 const fs = require("fs");
-const {metaDataPath, questDataPath} = require("../macro.js");
+const {metaDataPath, questDataPath, questImgPath} = require("../macro.js");
 const {dataList, expandedDataList} = require("./DataList.js");
 
 /** @typedef {typeof import("../../../../data/questData/template/user.json")} User */

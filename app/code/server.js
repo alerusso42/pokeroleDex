@@ -8,6 +8,8 @@ const {edit} = require('./edit.js');
 const {create} = require('./create.js');
 const { editTrainer } = require('./trainer.js');
 const { enumAuth } = require('./utils/enums.js');
+const { questImgPath } = require('./utils/macro.js');
+const { editJson } = require('./utils/json.js');
 const types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
 const server = new lib.types.Server();
 
@@ -269,19 +271,41 @@ lib.app.get("/api/userInfo", (req, res) =>
 	res.json(userInfo);
 });
 
-// lib.app.post("/api/upload/:type", (req, res) =>
-// {
-// 	let client;
-// 	let	imgData;
-// 	let	imgName;
-// 	let	buffer;
-	
-// 	client = new lib.types.Client(server, req);
-// 	if (locationLogin.loginCheck(server, client, res, true) == 1)
-// 		return ;
-// 	}
-// 	buffer = Buffer.from()
-// });
+lib.app.post("/api/upload/:type/:id", (req, res) =>
+{
+	let client;
+	let	buffer;
+	let	ext;
+	let	filename;
+	let	filetype;
+	let	update;
+
+	client = new lib.types.Client(server, req);
+	if (locationLogin.loginCheck(server, client, res, true) == 1)
+		return ;
+	ext = req.query.ext;
+	filetype = req.query.filetype;
+	if (!ext || !filetype)
+	{
+		console.warn("missing extension or filetype in upload");
+		return (res.status(400).end("missing extension in upload"));
+	}
+	if (filetype != "Img" && filetype != "Ico")
+		return (res.status(400).end("filetype must be Ico or Img"));
+	buffer = Buffer.from(client.body);
+	if (!buffer)
+		throw ("Buffer in upload failed");
+	filename = server.data.GetFilename(req.params.id, req.params.type, questImgPath, ext);
+	if (!filename)
+		return (res.status(400).end("upload: cannot get filename"));
+	if (filename.indexOf("..") != -1)
+		return (res.status(400).end("upload: filename with .. invalid"));
+	lib.fs.writeFileSync(filename, buffer);
+	update[filetype] = ext;
+	editJson(req.params.id, update);
+	server.expandedData[req.params.type][req.params.id][filetype] = ext;
+	return (res.status(200).end());
+});
 
 lib.app.get("/admin/", (req, res) => 
 {
