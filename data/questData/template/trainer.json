@@ -1,9 +1,10 @@
 {
 	"Id": 0,
 	"File": "",
-	"Img" : "",
 	"User" : "",
 	"Name": "ROCKY",
 	"Category": "team_black",
+	"Img": "",
+	"Ico": "",
 	"Pokemon": []
 }

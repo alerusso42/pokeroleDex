@@ -5,6 +5,8 @@
   "User": "Giorgio",
   "Name": "Giorgione",
   "Category": "team_black",
-  "Pokemon": [],
+  "Pokemon": [
+    "Rayquaza"
+  ],
   "id": ""
 }
