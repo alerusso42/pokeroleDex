@@ -257,7 +257,11 @@ lib.app.get("/api/userInfo", (req, res) =>
 	locationLogin.loginCheck(server, client, res);
 	userInfo = client.user;
 	if (userInfo == null)
+	{
+		if (client.isAdmin == true)
+			return (res.json({Name: "nameless"}));
 		return (res.end());
+	}
 	userInfo.File = "SECRET";
 	userInfo.Password = "SECRET";
 	userInfo.Level = client.authLevel;

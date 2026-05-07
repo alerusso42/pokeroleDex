@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pokeRoleDex - Admin Zone</title>
+    <!-- Font Pixelato per richiamare il Nintendo DS -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <style>
+        /* =========================================
+           1. AMBIENTE SPINDA CAFE (BACKGROUND)
+           ========================================= */
+        :root {
+            --pmd-window-bg: rgba(44, 62, 80, 0.85); /* Blu scuro semi-trasparente stile menu PMD */
+            --pmd-border: #e0e0e0;
+            --pmd-orange: #f39c12;
+            --poke-red: #d32f2f;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            /* Background dinamico con la tua GIF */
+            background: url("https://c.tenor.com/ZngWIQ-pR2QAAAAd/tenor.gif") no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* Overlay per migliorare la leggibilità senza coprire la GIF */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.2);
+            z-index: 0;
+        }
+
+        /* =========================================
+           2. IL CONTENITORE STILE "MENU PMD"
+           ========================================= */
+        #test {
+            position: relative;
+            z-index: 10;
+            width: 90%;
+            max-width: 700px;
+            background: var(--pmd-window-bg);
+            backdrop-filter: blur(5px); /* Effetto moderno ma pulito */
+            border: 4px solid var(--pmd-border);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5), inset 0 0 10px rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2rem;
+            text-align: center;
+            color: var(--pmd-orange);
+            text-shadow: 3px 3px 0px #000;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        /* =========================================
+           3. NAVIGAZIONE E ICONE
+           ========================================= */
+        .icon-nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 20px;
+        }
+
+        .nav-item {
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover {
+            background: rgba(243, 156, 18, 0.3);
+            border-color: var(--pmd-orange);
+            transform: scale(1.05);
+        }
+
+        .circle-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            filter: drop-shadow(2px 2px 0px #000);
+        }
+
+        .nav-label {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: #fff;
+            text-align: center;
+        }
+
+        /* =========================================
+           4. CONTROLLI AUDIO E HOME
+           ========================================= */
+        .btn-home {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: var(--pmd-orange);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.3);
+        }
+
+        #music-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            background: #fff;
+            border: 3px solid var(--pmd-orange);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: 0.3s;
+        }
+
+        #music-control:hover { transform: rotate(15deg) scale(1.1); }
+
+        .image-wrapper, .home-ball { display: none !important; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Pulsanti di navigazione esterni -->
+    <a href="/" class="btn-home">🏠 HOME</a>
+
+    <!-- Jukebox per la musica -->
+    <div id="music-control" onclick="toggleMusic()" title="Play Spinda's Cafe Music">
+        ☕
+    </div>
+
+    <audio id="cafe-audio" loop>
+        <source src="https://soundcloud.com/user-192292150/spindas-cafe?utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing" type="audio/mpeg">
+    </audio>
+
+    <div id="test">
+        <h1 id="greetAdmin">Spinda's Cafe Admin</h1>
+
+        <div class="icon-nav">
+            <a href="/html/search.html" class="nav-item">
+                <div class="circle-icon">🔍</div>
+                <span class="nav-label">Cerca</span>
+            </a>
+            <!-- Aggiungi qui gli altri nav-item come nel tuo codice originale -->
+            <a href="#" class="nav-item">
+                <div class="circle-icon">📖</div>
+                <span class="nav-label">Logs</span>
+            </a>
+            <a href="#" class="nav-item">
+                <div class="circle-icon">⚙️</div>
+                <span class="nav-label">Settings</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Gestione Audio
+        const audio = document.getElementById('cafe-audio');
+        const btn = document.getElementById('music-control');
+        let isPlaying = false;
+
+        function toggleMusic() {
+            if (isPlaying) {
+                audio.pause();
+                btn.innerText = "☕";
+                btn.style.background = "#fff";
+            } else {
+                audio.play().catch(e => console.log("Interazione richiesta per audio"));
+                btn.innerText = "🎶";
+                btn.style.background = "#f39c12";
+            }
+            isPlaying = !isPlaying;
+        }
+
+		async function greetAdmin()
+		{
+			let	res;
+			let	user;
+			let	greet;
+
+			try
+			{
+				res = await fetch("/api/userInfo");
+				if (!res.body)
+					return;
+				user = await res.json();
+				if (!user)
+					throw ("user missing!");
+				if (!user.Name)
+					window.location.replace("/html/error/400.html");
+				greet = "Hello, admin " + user.Name + "!";
+				document.getElementById("greetAdmin").innerHTML = greet;
+			}
+			catch (err)
+			{
+				alert("error! " + err);
+			}
+		}
+
+		greetAdmin();
+        // Piccola chicca: se premi un tasto qualsiasi all'inizio, prova a far partire la musica
+        document.body.addEventListener('click', () => {
+           // Opzionale: auto-play al primo click sulla pagina
+        }, { once: true });
+    </script>
+</body>
+</html>

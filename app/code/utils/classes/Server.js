@@ -52,13 +52,10 @@ function getDataMap(typePath, readFileBool = false, useIdBool = false)
 		if (file[0] == ".")
 			continue ;
 		let fileNoExt = file.replace(".json", "");
-		if (readFileBool)
+		if (readFileBool && !useIdBool)
 		{
 			let json = JSON.parse(fs.readFileSync(dirName + file, 'utf-8'));
-			if (useIdBool)
-				map.set(json.Id, json);
-			else
-				map.set(fileNoExt, json);
+			map.set(json.Id, json);
 		}
 		else
 			map.set(fileNoExt, file);
