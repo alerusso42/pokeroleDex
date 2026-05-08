@@ -16,6 +16,7 @@ const server = new lib.types.Server();
 lib.app.listen(8080, "0.0.0.0");
 // interpreta il body
 lib.app.use(lib.express.text());
+lib.app.use(lib.express.raw({ type: 'application/octet-stream', limit: '5mb' }));
 
 lib.app.get("/html/error/:page", (req, res) => 
 {
@@ -283,8 +284,11 @@ lib.app.post("/api/upload/:type/:id", (req, res) =>
 	client = new lib.types.Client(server, req);
 	if (locationLogin.loginCheck(server, client, res, true) == 1)
 		return ;
+	if (req.params.id.indexOf("..") != -1 || req.params.type.indexOf("..") != -1)
+		return (res.status(400).end("upload: filename with .. invalid"));
 	ext = req.query.ext;
 	filetype = req.query.filetype;
+	update = {};
 	if (!ext || !filetype)
 	{
 		console.warn("missing extension or filetype in upload");
@@ -295,15 +299,13 @@ lib.app.post("/api/upload/:type/:id", (req, res) =>
 	buffer = Buffer.from(client.body);
 	if (!buffer)
 		throw ("Buffer in upload failed");
-	filename = server.data.GetFilename(req.params.id, req.params.type, questImgPath, ext);
+	filename = server.data.GetFilename(req.params.id, req.params.type, questImgPath, ext, false);
 	if (!filename)
 		return (res.status(400).end("upload: cannot get filename"));
-	if (filename.indexOf("..") != -1)
-		return (res.status(400).end("upload: filename with .. invalid"));
 	lib.fs.writeFileSync(filename, buffer);
-	update[filetype] = ext;
-	editJson(req.params.id, update);
-	server.expandedData[req.params.type][req.params.id][filetype] = ext;
+	update.filetype = ext;
+	editJson(server.data.GetFilename(req.params.id, "trainer"), update);
+	server.expandedData[req.params.type].get(req.params.id)[filetype] = ext;
 	return (res.status(200).end());
 });
 

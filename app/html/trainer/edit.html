@@ -61,6 +61,17 @@
                 </select>
             </div>
 
+			<div class="section-title">Immagini Allenatore</div>
+			<div class="form-group">
+				<label>Sprite Allenatore (Img)</label>
+				<input type="file" id="upload-img" accept="image/*" onchange="handleUpload(this, 'Img')">
+			</div>
+
+			<div class="form-group">
+				<label>Icona (Ico)</label>
+				<input type="file" id="upload-ico" accept="image/*" onchange="handleUpload(this, 'Ico')">
+			</div>
+
             <div class="section-title">Squadra Pokémon</div>
             <div id="pokemon-list-container">
                 </div>
@@ -221,6 +232,49 @@
             alert("Errore critico client: " + err);
         }
     };
+
+
+async function handleUpload(input, filetype) {
+    const file = input.files[0];
+    if (!file) return;
+
+    // 1. Estrae l'estensione (es. "png", "jpg")
+    const ext = file.name.split('.').pop().toLowerCase();
+    
+    // 2. Prepara l'URL con i parametri richiesti dal tuo backend
+    // :type -> req.params.type (es. "trainer")
+    // :id -> req.params.id (es. "red")
+    // ?ext=... &filetype=... -> req.query
+    const type = "trainer"; // Sostituisci con la categoria corretta se dinamica
+    const id = trainerName;   // La variabile trainerName è già definita nel tuo script
+    
+    const url = `/api/upload/${type}/${id}?ext=${ext}&filetype=${filetype}`;
+
+    try {
+        // 3. Legge il file come ArrayBuffer (dati binari grezzi)
+        const arrayBuffer = await file.arrayBuffer();
+
+        // 4. Invia la fetch con il body binario
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/octet-stream' // Indica dati binari generici
+            },
+            body: arrayBuffer // Il tuo backend riceverà questo nel client.body
+        });
+
+        if (response.ok) {
+            alert(`${filetype} caricato con successo!`);
+        } else {
+            const errorMsg = await response.text();
+            alert(`Errore caricamento ${filetype}: ${errorMsg}`);
+            input.value = ""; // Resetta l'input in caso di errore
+        }
+    } catch (err) {
+        console.error("Errore durante l'upload:", err);
+        alert("Errore critico durante l'invio del file.");
+    }
+}
 
     loadTrainerData();
 </script>

@@ -67,15 +67,16 @@ function getDirName(dirName)
  * @param {string} dirName 
  * @param {string} root 
  * @param {string} ext 
+ * @param {boolean} checkExistBool
  */
-function getfilename(dataName, dirName="", root=questDataPath, ext=".json")
+function getfilename(dataName, dirName="", root=questDataPath, ext="json", checkExistBool=true)
 {
 	let	filename;
 
 	if (!dataName)
 		throw ("getFilename: dataName is null");
-	filename = root + dirName + "/" + dataName + ext;
-	if (fs.existsSync(filename) == false)
+	filename = root + dirName + "/" + dataName + `.${ext}`;
+	if (checkExistBool == true && fs.existsSync(filename) == false)
 		throw ("getFilename: cannot find " + filename);
 	return (filename);
 }
@@ -135,7 +136,8 @@ function fillDataListArray(fill, type)
 /**
  * @typedef {Object} ExpPrototype
  * @property {string} filename
- * @property {string} img img extension or url
+ * @property {string} Img Img extension or url
+ * @property {string} Ico Ico extension or url
  * @property {string} category category of data
  */
 
@@ -189,8 +191,8 @@ function fillDataListExpanded(list, type, root=questDataPath)
 		expData.filename = filename;
 		if (json.Category)
 			expData.category = json.category;
-		if (json.Img)
-			expData.img = json.Img;
+		expData.Img = json.Img;
+		expData.Ico = json.Ico;
 		mapExpData.set(data, expData);
 	}
 	return (mapExpData);
