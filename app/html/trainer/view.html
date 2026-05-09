@@ -51,9 +51,10 @@
                 const response = await fetch(`/api/trainer/${trainerName}`);
                 const data = await response.json();
 
-                // 1. Titolo
+                // 1. Titolo e immagine
                 document.getElementById('title').innerText = data.Name;
-
+				if (data.Img)
+					document.getElementById("data-img").src = data.Img;
                 // 2. Costruzione Dati Allenatore
                 let html = `
                     <div class="section-title">Dati Allenatore</div>

@@ -19,19 +19,14 @@ function edit(server, client, res)
 		res.end(getHtml("./html/error/404.html").serialize());
 		return ;
 	}
-	let filename = questDataPath + client.dirName + "/" + client.dataName + ".json";
-	console.log("edit: filename ->", filename);
-	if (lib.fs.existsSync(filename) == false)
-	{
-		console.log("error 404");
-		res.status(404);
-		res.end(getHtml("./html/error/404.html").serialize());
-		return ;
-	}
+	// let filename = questDataPath + client.dirName + "/" + client.dataName + ".json";
+	let filename = server.data.GetFilename(client.dataName, client.dirName);
 	let json = JSON.parse(client.body);
-	console.log(client.req.query)
+	console.log(client.req.query);
 	if (client.req.query && client.req.query.onlySome)
 		overrideOriginal(filename, json);
+	if (json.Name)
+		server.expandedData.SetId(client.dataName, client.dirName);
 	lib.fs.writeFileSync(filename, JSON.stringify(json, null, 2), 'utf-8');
 	res.status(200);
 	res.send(json);

@@ -35,6 +35,8 @@ function editTrainer(server, client, res)
 	(trainerName != trainerOldName) &&
 	(server.data.trainer.indexOf(client.body.name) != -1))
 		res.status(403).send(`${trainerName} is already used.`);
+	if (trainerName != trainerOldName)
+		server.expandedData.SetId(trainerOldName, "trainer", trainerName);
 	trainerNewData.Name = trainerName;
 	error = parseTeam(server, client.body.pkmn);
 	if (error != null)

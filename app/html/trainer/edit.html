@@ -218,7 +218,6 @@
 
 			let	err = await response.text();
             if (response.ok) {
-                alert("Salvataggio completato!");
                 window.location.href = `/trainer/${payload.name}`;
             }
 			else if (response.status == 500)
@@ -263,9 +262,8 @@ async function handleUpload(input, filetype) {
             body: arrayBuffer // Il tuo backend riceverà questo nel client.body
         });
 
-        if (response.ok) {
-            alert(`${filetype} caricato con successo!`);
-        } else {
+        if (response.ok) {} 
+		else {
             const errorMsg = await response.text();
             alert(`Errore caricamento ${filetype}: ${errorMsg}`);
             input.value = ""; // Resetta l'input in caso di errore

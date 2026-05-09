@@ -1,12 +1,14 @@
 {
   "Id": 0,
   "File": "",
-  "Img": "",
+  "Img": ".jpg",
+  "Ico": ".jpg",
   "User": "Giorgio",
-  "Name": "Giorgione",
+  "Name": "Giorgionoooooooooooooo",
   "Category": "team_black",
   "Pokemon": [
-    "Rayquaza"
+    "Rayquaza",
+    "Audino"
   ],
   "id": ""
 }

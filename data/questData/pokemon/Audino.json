@@ -1,0 +1,88 @@
+{
+  "Species": "Audino",
+  "Name": "Audino",
+  "Trainer": "Giorgione",
+  "Category": "The caves near the school",
+  "Img": "",
+  "Ico": "",
+  "Type1": "Normal",
+  "Type2": "",
+  "HP": {
+    "current": 5,
+    "max": 5
+  },
+  "Will": {
+    "current": 5,
+    "max": 5
+  },
+  "Strength": {
+    "current": 2,
+    "max": 4
+  },
+  "Dexterity": {
+    "current": 2,
+    "max": 4
+  },
+  "Vitality": {
+    "current": 2,
+    "max": 5
+  },
+  "Special": {
+    "current": 2,
+    "max": 4
+  },
+  "Insight": {
+    "current": 2,
+    "max": 5
+  },
+  "Ability": {
+    "Name": "Healer",
+    "Effect": "",
+    "Description": ""
+  },
+  "Brawl": 1,
+  "Channel": 1,
+  "Clash": 1,
+  "Evasion": 1,
+  "Alert": 1,
+  "Athletics": 1,
+  "Nature": 1,
+  "Stealth": 1,
+  "Initiative": 1,
+  "void": 0,
+  "Height": {
+    "Meters": 1.1,
+    "Feet": 3.6
+  },
+  "Weight": {
+    "Kilograms": 31,
+    "Pounds": 68.3
+  },
+  "DexDescription": "Its auditory sense is astounding, using the feelers on it’s ears it can know the health state of others. It is a caring Pokemon with a sweet disposition to help, but it is not too common to see in the wild.",
+  "Evolutions": [
+    {
+      "To": "Audino (Mega Form)",
+      "Kind": "Mega",
+      "Item": "Audinite"
+    }
+  ],
+  "Moves": [
+    {
+      "Name": "Play Nice",
+      "Learned": "Starter"
+    },
+    {
+      "Name": "Pound",
+      "Learned": "Starter"
+    },
+    {
+      "Name": "Growl",
+      "Learned": "Starter"
+    },
+    {
+      "Name": "Helping Hand",
+      "Learned": "Starter"
+    }
+  ],
+  "Id": "Audino"
+}

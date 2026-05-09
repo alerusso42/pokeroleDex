@@ -1,6 +1,6 @@
 // @ts-check
 const fs = require("fs");
-const {dataPath, metaDataPath, questDataPath} = require("../macro.js");
+const {dataPath, metaDataPath, questDataPath, questImgPath} = require("../macro.js");
 const {getJson} = require("../json.js");
 
 //SECTION - dataList class definition
@@ -75,7 +75,12 @@ function getfilename(dataName, dirName="", root=questDataPath, ext="json", check
 
 	if (!dataName)
 		throw ("getFilename: dataName is null");
-	filename = root + dirName + "/" + dataName + `.${ext}`;
+	if (ext != null && ext.at(0) == ".")
+		ext = ext.slice(1, ext.length);
+	if (ext != null)
+		filename = root + dirName + "/" + dataName + `.${ext}`;
+	else
+		filename = root + dirName + "/" + dataName;
 	if (checkExistBool == true && fs.existsSync(filename) == false)
 		throw ("getFilename: cannot find " + filename);
 	return (filename);
@@ -138,7 +143,7 @@ function fillDataListArray(fill, type)
  * @property {string} filename
  * @property {string} Img Img extension or url
  * @property {string} Ico Ico extension or url
- * @property {string} category category of data
+ * @property {string} Category category of data
  */
 
 class expandedDataList
@@ -159,7 +164,12 @@ class expandedDataList
 		this.GetPath = getPath;
 		this.GetDirName = getDirName;
 		this.GetFilename = getfilename;
-
+		this.GetData = getData;
+		this.SetId = setId;
+		this.GetImg = getImg;
+		this.SetImg = setImg;
+		this.GetIco = getIco;
+		this.SetIco = setIco;
 	}
 }
 
@@ -190,7 +200,7 @@ function fillDataListExpanded(list, type, root=questDataPath)
 		json = getJson(filename);
 		expData.filename = filename;
 		if (json.Category)
-			expData.category = json.category;
+			expData.Category = json.category;
 		expData.Img = json.Img;
 		expData.Ico = json.Ico;
 		mapExpData.set(data, expData);
@@ -211,6 +221,175 @@ function printExp()
 		console.log("\x1b[32m", ar, "print:\x1b[0m");
 		// @ts-ignore
 		console.log(this[ar]);
+	}
+}
+
+// this.GetId = getId;
+// 		this.GetImg = getImg;
+// 		this.GetIco = getIco;
+// 		this.SetImg = setImg;
+// 		this.SetIco = setIco;
+
+/**
+ * 
+ * @this {expandedDataList}
+ * @param {string} id 
+ * @param {string} dir 
+ * @returns {ExpPrototype}
+ */
+function getData(id, dir)
+{
+	let	data;
+
+	if (!this[dir])
+		throw (`expandedDataList, getId: dir ${dir} invalid`);
+	data = this[dir].get(id);
+	if (!data)
+		throw (`expandedDataList, getId: data ${dir}/${id} invalid`);
+	return (data);
+}
+
+/**
+ * 
+ * @this {expandedDataList}
+ * @param {string} id 
+ * @param {string} dir 
+ * @param {string} username
+ */
+function setId(id, dir, username)
+{
+	let	data;
+	/** @type {ExpPrototype} */let	newData;
+	let	idNumber;
+	let	underscoreIndex;
+
+	data = this.GetData(id, dir);
+	underscoreIndex = username.lastIndexOf("_");
+	if (underscoreIndex != -1)
+		idNumber = username.slice(underscoreIndex);
+	else
+		idNumber = "";
+	username = username + idNumber;
+	newData = 
+	{
+		Category: data.Category,
+		filename: data.filename,
+		Ico: data.Ico,
+		Img: data.Img
+	};
+	this[dir].set(username, newData);
+	this.SetImg(username, dir, newData.Img, id);
+	this.SetIco(username, dir, newData.Ico, id);
+	this[dir].delete(id);
+}
+
+/**
+ * 
+ * @this {expandedDataList}
+ * @param {string} id 
+ * @param {string} dir 
+ * @returns {string}
+ */
+function getImg(id, dir)
+{
+	let	img;
+
+	img = this.GetData(id, dir).Img;
+	if (img.at(0) != ".")
+		return (img);
+	else
+		return (`/media/pictures/${dir}/${id}_Img${img}`);
+}
+
+/**
+ * 
+ * @this {expandedDataList}
+ * @param {string} id 
+ * @param {string} dir 
+ * @param {string} newData 
+ * @param {string} oldId
+ */
+function setImg(id, dir, newData, oldId="")
+{
+	let	data;
+	let	filepath;
+	let	oldpath;
+	let	existBool;
+
+	filepath = this.GetFilename(id, dir, questImgPath, newData, false);
+	data = this.GetData(id, dir);
+	if (!oldId)
+		oldpath = "";
+	else
+	{
+		oldpath = this.GetFilename(oldId, dir, questImgPath, data.Img, false);
+		oldpath = oldpath.replace(`${data.Img}`, `_Img${data.Img}`);
+		filepath = filepath.replace(newData, `_Img${data.Img}`);
+	}
+	existBool = fs.existsSync(oldpath);
+	data.Img = newData;
+	if (existBool)
+	{
+		existBool = fs.existsSync(filepath);
+		if (existBool == false && newData.at(0) == ".")
+			fs.copyFileSync(oldpath, filepath);
+		if (oldpath != filepath)
+			fs.rmSync(oldpath);
+	}
+}
+
+/**
+ * returns a href to the ico
+ * @this {expandedDataList}
+ * @param {string} id 
+ * @param {string} dir 
+ * @returns {string}
+ */
+function getIco(id, dir)
+{
+	let	ico;
+
+	ico = this.GetData(id, dir).Ico;
+	if (ico.at(0) != ".")
+		return (ico);
+	else
+		return (`/media/pictures/${dir}/${id}_Ico${ico}`);
+}
+
+/**
+ * 
+ * @this {expandedDataList}
+ * @param {string} id 
+ * @param {string} dir 
+ * @param {string} newData
+ * @param {string} oldId
+ */
+function setIco(id, dir, newData, oldId="")
+{
+	let	data;
+	let	filepath;
+	let	oldpath;
+	let	existBool;
+
+	filepath = this.GetFilename(id, dir, questImgPath, newData, false);
+	data = this.GetData(id, dir);
+	if (!oldId)
+		oldpath = "";
+	else
+	{
+		oldpath = this.GetFilename(oldId, dir, questImgPath, data.Ico, false);
+		oldpath = oldpath.replace(`${data.Ico}`, `_Ico${data.Ico}`);
+		filepath = filepath.replace(newData, `_Ico${data.Ico}`);
+	}
+	existBool = fs.existsSync(oldpath);
+	data.Ico = newData;
+	if (existBool)
+	{
+		existBool = fs.existsSync(filepath);
+		if (existBool == false && newData.at(0) == ".")
+			fs.copyFileSync(oldpath, filepath);
+		if (oldpath != filepath)
+			fs.rmSync(oldpath);
 	}
 }
 

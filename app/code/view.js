@@ -31,6 +31,10 @@ function view(server, client, res)
 	}
 	let data = lib.fs.readFileSync(filename);
 	data = JSON.parse(data);
+	if (data.Img)
+		data.Img = server.expandedData.GetImg(client.dataName, client.dirName);
+	if (data.Ico)
+		data.Ico = server.expandedData.GetIco(client.dataName, client.dirName);
 	res.json(data);
 }
 

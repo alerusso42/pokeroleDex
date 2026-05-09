@@ -13,7 +13,6 @@ const { editJson } = require('./utils/json.js');
 const types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
 const server = new lib.types.Server();
 
-lib.app.listen(8080, "0.0.0.0");
 // interpreta il body
 lib.app.use(lib.express.text());
 lib.app.use(lib.express.raw({ type: 'application/octet-stream', limit: '5mb' }));
@@ -302,11 +301,31 @@ lib.app.post("/api/upload/:type/:id", (req, res) =>
 	filename = server.data.GetFilename(req.params.id, req.params.type, questImgPath, ext, false);
 	if (!filename)
 		return (res.status(400).end("upload: cannot get filename"));
+	filename = filename.replace(`.${ext}`, `_${filetype}.${ext}`);
 	lib.fs.writeFileSync(filename, buffer);
-	update.filetype = ext;
-	editJson(server.data.GetFilename(req.params.id, "trainer"), update);
-	server.expandedData[req.params.type].get(req.params.id)[filetype] = ext;
+	update[filetype] = `.${ext}`;
+	editJson(server.data.GetFilename(req.params.id, "trainer"), update, true);
+	server.expandedData[req.params.type].get(req.params.id)[filetype] = `.${ext}`;
+	// console.log(server.expandedData[req.params.type].get(req.params.id)[filetype]);
 	return (res.status(200).end());
+});
+
+lib.app.get("/media/pictures/:type/:filename", (req, res) =>
+{
+	let	client;
+	let	filename;
+	let	buffer;
+
+	client = new lib.types.Client(server, req);
+	if (req.params.type.indexOf("..") != -1)
+	{
+		res.status(400).end("get requests with .. are forbidden");
+		return ;
+	}
+	filename = server.data.GetFilename(client.dataName, req.params.type, questImgPath, null, true);
+	buffer = lib.fs.readFileSync(filename);
+	buffer = Buffer.from(buffer);
+	res.send(buffer);
 });
 
 lib.app.get("/admin/", (req, res) => 
@@ -329,3 +348,5 @@ lib.app.get("/*splat", (req, res) =>
 	res.status(404);
 	res.end(client.dom.serialize());
 });
+
+lib.app.listen(8080, "0.0.0.0");
