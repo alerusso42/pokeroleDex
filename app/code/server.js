@@ -19,7 +19,7 @@ lib.app.use(lib.express.raw({ type: 'application/octet-stream', limit: '5mb' }))
 
 lib.app.get("/html/error/:page", (req, res) => 
 {
-	let		path = `./html/error/${req.params.page}`;
+	let		path = `../html/error/${req.params.page}`;
 	let		dom;
 
 	dom = html.getHtml(path);
@@ -33,6 +33,7 @@ lib.app.use("/html", lib.express.static("html/"));
 
 lib.app.get("/", (req, res) => 
 {
+	AbstractRange.abra.kadabra.alakazam = 69;
 	const dom = html.getHtml("./html/home.html");
 	res.send(dom.serialize());
 });
@@ -347,6 +348,17 @@ lib.app.get("/*splat", (req, res) =>
 	let client = new lib.types.Client(server, req, "./html/error/404.html");
 	res.status(404);
 	res.end(client.dom.serialize());
+});
+
+lib.app.use((err, req, res, next) =>
+{
+	if (!err || !err.message || !err.stack)
+	{
+		
+	}
+	console.error("ERROR\n", err.message, "\nSTACK");
+	console.error(err.stack);
+	res.redirect("/html/error/500.html?msg=" + err.message + "<br>" + err.stack);
 });
 
 lib.app.listen(8080, "0.0.0.0");

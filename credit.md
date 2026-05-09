@@ -35,9 +35,8 @@ This project is a **fan-made, non-commercial application** and is not affiliated
 
 ## Technologies Used
 
-- React Native
-- SQLite
-- JavaScript / TypeScript
+- JavaScript
+- Node/Express.js
 
 ---
 
