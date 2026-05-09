@@ -350,6 +350,8 @@ function getIco(id, dir)
 	let	ico;
 
 	ico = this.GetData(id, dir).Ico;
+	if (!ico)
+		return ("");
 	if (ico.at(0) != ".")
 		return (ico);
 	else

@@ -23,7 +23,7 @@ function autoIndex(server, client, res)
 	client.dirName = client.dirName.toLowerCase().replaceAll("/", " ");
 	for (let file of server.data[client.dirName])
 	{
-		url = getUrl(file, client.dirName);
+		url = getUrl(server, file, client.dirName);
 		console.log(file);
 		file = file.replace(".json", "");
 		list.innerHTML += `
@@ -38,12 +38,14 @@ function autoIndex(server, client, res)
 
 /**
  * 
+ * @param {lib.types.Server} server
  * @param {String} contentName 
  * @param {String} type 
  */
-function getUrl(contentName, type)
+function getUrl(server, contentName, type)
 {
 	let	lastUnderscore;
+	let	url;
 
 	lastUnderscore = contentName.lastIndexOf("_");
 	if (lastUnderscore != -1)
@@ -57,6 +59,9 @@ function getUrl(contentName, type)
 		}
 		case ("trainer") : case ("user") :
 		{
+			url = server.expandedData.GetIco(contentName, type);
+			if (url)
+				return (url);
 			if (isFemale(contentName) == true)
 				return (trainerGirlUrl);
 			return (trainerBoyUrl);
@@ -73,6 +78,9 @@ function isFemale(name)
 
 	names = name.split(" ");
 	name = names[0];
+	name = name.toLocaleLowerCase();
+	if (name == "elia")
+		return (false);
 	if (name.at(-1) == "a")
 		return (true);
 	return (false);
