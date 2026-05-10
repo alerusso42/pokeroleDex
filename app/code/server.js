@@ -19,13 +19,27 @@ lib.app.use(lib.express.raw({ type: 'application/octet-stream', limit: '5mb' }))
 
 lib.app.get("/html/error/:page", (req, res) => 
 {
-	let		path = `../html/error/${req.params.page}`;
-	let		dom;
+	
+	try
+	{
+		let		page = req.params.page;
+		let		path = "./html/error/";
+		let		dom;
 
-	dom = html.getHtml(path);
-	if (req.query.msg != null)
-		dom.window.document.getElementById("msg").innerHTML = `<h3>${req.query.msg}</h3>`;
-	res.send(dom.serialize());
+		if (!page.endsWith(".html"))
+			page += ".html";
+		path += page;
+		console.log(path);
+		dom = html.getHtml(path);
+		if (req.query.msg != null)
+			dom.window.document.getElementById("msg").innerHTML = `<h3>${req.query.msg}</h3>`;
+		res.send(dom.serialize());
+	}
+	catch(err)
+	{
+		console.error(err);
+		res.send(err);
+	}
 });
 
 lib.app.use("/html", lib.express.static("html/"));
@@ -33,7 +47,6 @@ lib.app.use("/html", lib.express.static("html/"));
 
 lib.app.get("/", (req, res) => 
 {
-	AbstractRange.abra.kadabra.alakazam = 69;
 	const dom = html.getHtml("./html/home.html");
 	res.send(dom.serialize());
 });
@@ -354,7 +367,9 @@ lib.app.use((err, req, res, next) =>
 {
 	if (!err || !err.message || !err.stack)
 	{
-		
+		console.error("ERROR\n");
+		res.redirect("/html/error/500.html");
+		return ;
 	}
 	console.error("ERROR\n", err.message, "\nSTACK");
 	console.error(err.stack);
