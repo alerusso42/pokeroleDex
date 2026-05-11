@@ -178,6 +178,14 @@ lib.app.get("/pokemon/:name", (req, res) =>
 lib.app.use(lib.express.json());
 lib.app.use(lib.express.urlencoded({ extended: true }));
 
+lib.app.get("/edit/user/:name", (req, res) => 
+{
+	let client = new lib.types.Client(server, req, "./html/user/edit.html");
+	if (locationLogin.loginCheck(server, client, res, true) == 1)
+		return ;
+	return (res.send(client.dom.serialize()));
+});
+
 lib.app.get("/edit/trainer/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/trainer/edit.html");

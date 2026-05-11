@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/html/style.css">
+    <title>Editor User</title>
+    <style>
+        .edit-container { display: flex; flex-direction: column; gap: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; }
+        label { font-weight: bold; color: var(--poke-red); text-transform: uppercase; font-size: 0.8em; }
+        
+        input, select { padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-family: inherit; }
+        
+        .item-edit-card {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #fff; padding: 10px 15px; border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .btn-remove { background: #e74c3c; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; }
+        .btn-clear-pw { background: #f39c12; color: white; border: none; border-radius: 5px; padding: 10px; cursor: pointer; font-weight: bold; }
+        
+        .add-box {
+            background: #f0f0f0; padding: 15px; border-radius: 10px; border: 2px dashed #ccc;
+            display: flex; gap: 10px; align-items: end;
+        }
+
+        .btn-add { background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        .btn-save {
+            background: #27ae60; color: white; border: none; padding: 15px;
+            border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 1.1em;
+            margin: 30px 0; transition: 0.3s;
+        }
+        .btn-save:hover { background: #219150; transform: translateY(-2px); }
+        .section-title { border-bottom: 2px solid var(--poke-red); padding-bottom: 5px; margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <a href="javascript:history.back()" class="btn-home">⬅️ ANNULLA</a>
+
+    <div id="test">
+        <h1>Modifica Utente</h1>
+        
+        <form id="user-form" class="edit-container">
+            <div class="section-title">Dati Account</div>
+            <div class="form-group">
+                <label>Nome Utente</label>
+                <input type="text" id="u-name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Categoria / Titolo</label>
+                <input type="text" id="u-category" placeholder="Es: I bro">
+            </div>
+
+            <div class="form-group">
+                <label>Sicurezza</label>
+                <button type="button" class="btn-clear-pw" onclick="clearPassword()">ELIMINA PASSWORD (RESET)</button>
+                <small id="pw-status" style="color: gray; margin-top: 5px;">Password attuale: impostata</small>
+            </div>
+
+            <div class="section-title">Immagini Profilo</div>
+            <div class="form-group">
+                <label>Avatar Full (Img)</label>
+                <input type="file" id="upload-img" accept="image/*" onchange="handleUpload(this, 'Img')">
+            </div>
+
+            <div class="form-group">
+                <label>Icona Rotonda (Ico)</label>
+                <input type="file" id="upload-ico" accept="image/*" onchange="handleUpload(this, 'Ico')">
+            </div>
+
+            <div class="section-title">Team Trainers Associati</div>
+            <div id="trainers-list-container">
+                <!-- Qui appariranno i trainer associati -->
+            </div>
+
+            <div class="section-title">Associa Nuovo Trainer</div>
+            <div class="add-box">
+                <div class="form-group" style="margin:0; flex-grow: 1;">
+                    <label>Nome Trainer</label>
+                    <input type="text" id="new-trainer-name" placeholder="Es: Devil Ryugi">
+                </div>
+                <button type="button" class="btn-add" onclick="addTrainerToList()">ASSOCIA</button>
+            </div>
+
+            <button type="submit" class="btn-save">SALVA MODIFICHE UTENTE</button>
+        </form>
+    </div>
+
+<script>
+    let userData = null;
+    let visualTrainersList = [];
+    let currentUserName;
+    let passwordToBeCleared = false;
+
+    async function loadUserData() {
+        const pathParts = window.location.pathname.split('/');
+        currentUserName = pathParts[pathParts.length - 1];
+        
+        try {
+            const response = await fetch(`/api/user/${currentUserName}`);
+            userData = await response.json();
+
+            document.getElementById('u-name').value = userData.Name;
+            document.getElementById('u-category').value = userData.Category;
+
+            visualTrainersList = [...userData.Trainers];
+            renderTrainersList();
+        } catch (err) {
+            console.error("Errore caricamento dati:", err);
+        }
+    }
+
+    function renderTrainersList() {
+        const container = document.getElementById('trainers-list-container');
+        container.innerHTML = '';
+
+        visualTrainersList.forEach((trainerName, index) => {
+            container.innerHTML += `
+                <div class="item-edit-card">
+                    <span><strong>${trainerName}</strong></span>
+                    <button type="button" class="btn-remove" onclick="removeTrainer(${index})">Scollega</button>
+                </div>
+            `;
+        });
+    }
+
+    function removeTrainer(index) {
+        visualTrainersList.splice(index, 1);
+        renderTrainersList();
+    }
+
+    function addTrainerToList() {
+        const name = document.getElementById('new-trainer-name').value.trim();
+        if (!name) return alert("Inserisci il nome del trainer!");
+        
+        if (visualTrainersList.includes(name)) {
+            return alert("Trainer già associato!");
+        }
+
+        visualTrainersList.push(name);
+        document.getElementById('new-trainer-name').value = '';
+        renderTrainersList();
+    }
+
+    function clearPassword() {
+        if(confirm("Sei sicuro di voler rimuovere la password?")) {
+            passwordToBeCleared = true;
+            document.getElementById('pw-status').innerText = "Password verrà resettata al salvataggio";
+            document.getElementById('pw-status').style.color = "#e74c3c";
+        }
+    }
+
+    document.getElementById('user-form').onsubmit = async (e) => {
+        e.preventDefault();
+
+        const payload = {
+            Name: document.getElementById('u-name').value,
+            Category: document.getElementById('u-category').value,
+            Trainers: visualTrainersList,
+            // Se l'utente ha cliccato "Elimina", mandiamo stringa vuota, altrimenti manteniamo l'originale (o gestito lato server)
+            Password: passwordToBeCleared ? "" : userData.Password 
+        };
+
+        try {
+            const response = await fetch(`/api/user/${currentUserName}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                window.location.href = `/user/${payload.Name}`;
+            } else {
+                const err = await response.text();
+                alert("Errore salvataggio: " + err);
+            }
+        } catch (err) {
+            alert("Errore client: " + err);
+        }
+    };
+
+    async function handleUpload(input, filetype) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const ext = file.name.split('.').pop().toLowerCase();
+        const type = "user"; 
+        const id = currentUserName;
+        
+        const url = `/api/upload/${type}/${id}?ext=${ext}&filetype=${filetype}`;
+
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/octet-stream' },
+                body: arrayBuffer
+            });
+
+            if (!response.ok) {
+                const errorMsg = await response.text();
+                alert(`Errore caricamento ${filetype}: ${errorMsg}`);
+                input.value = "";
+            }
+        } catch (err) {
+            console.error("Errore upload:", err);
+            alert("Errore critico durante l'invio del file.");
+        }
+    }
+
+    loadUserData();
+</script>
+</body>
+</html>
