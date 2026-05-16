@@ -280,7 +280,8 @@ function setId(id, dir, username)
 	this[dir].set(username, newData);
 	this.SetImg(username, dir, newData.Img, id);
 	this.SetIco(username, dir, newData.Ico, id);
-	this[dir].delete(id);
+	if (username != id)
+		this[dir].delete(id);
 }
 
 /**

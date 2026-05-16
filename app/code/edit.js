@@ -21,12 +21,13 @@ function edit(server, client, res)
 	}
 	// let filename = questDataPath + client.dirName + "/" + client.dataName + ".json";
 	let filename = server.data.GetFilename(client.dataName, client.dirName);
-	let json = JSON.parse(client.body);
+	// let json = JSON.parse(client.body);
+	let json = client.body;
 	console.log(client.req.query);
 	if (client.req.query && client.req.query.onlySome)
 		overrideOriginal(filename, json);
 	if (json.Name)
-		server.expandedData.SetId(client.dataName, client.dirName);
+		server.expandedData.SetId(client.dataName, client.dirName, json.Name);
 	lib.fs.writeFileSync(filename, JSON.stringify(json, null, 2), 'utf-8');
 	res.status(200);
 	res.send(json);

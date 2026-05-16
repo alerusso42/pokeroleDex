@@ -218,6 +218,14 @@ lib.app.get("/api/trainer/:name", (req, res) =>
 	return (view(server, client, res));
 });
 
+lib.app.post("/api/user/:name", (req, res) => 
+{
+	let client = new lib.types.Client(server, req);
+	if (locationLogin.loginCheck(server, client, res, true) == 1)
+		return ;
+	return (edit(server, client, res));
+});
+
 lib.app.post("/api/trainer/:name", (req, res) => 
 {
 	let client = new lib.types.Client(server, req, "./html/trainer/view.html");
