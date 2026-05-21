@@ -79,16 +79,13 @@ set "NODE_EXE="
 
 if exist "%NODE_DIR%\node.exe" (
     call :CheckNodeVersion "%NODE_DIR%\node.exe"
-    if not errorlevel 1 set "NODE_EXE=%NODE_DIR%\node.exe"
-)
-
-if not defined NODE_EXE (
-    for /f "delims=" %%n in ('where node 2^>nul') do (
-        if not defined NODE_EXE (
-            call :CheckNodeVersion "%%~fn"
-            if not errorlevel 1 set "NODE_EXE=%%~fn"
-        )
+    if not errorlevel 1 (
+        set "NODE_EXE=%NODE_DIR%\node.exe"
+    ) else (
+        echo [WARN] Node.js locale trovato, ma non e' versione %REQUIRED_NODE_MAJOR%. Lo reinstallo.
     )
+) else (
+    echo [INFO] Node.js locale non trovato. Lo installo.
 )
 
 if defined NODE_EXE (
@@ -99,11 +96,11 @@ if defined NODE_EXE (
         echo [INFO] Node.js OK: !NODE_VERSION!
         exit /b 0
     )
-    echo [WARN] Node.js trovato, ma npm non e' disponibile. Uso una copia locale.
+    echo [WARN] Node.js locale trovato, ma npm non e' disponibile. Lo reinstallo.
     set "NODE_EXE="
 )
 
-echo [INFO] Node.js %REQUIRED_NODE_MAJOR% non trovato. Scarico una copia locale...
+echo [INFO] Scarico Node.js %REQUIRED_NODE_MAJOR% locale...
 call :RequirePowerShell
 if errorlevel 1 exit /b 1
 
@@ -129,15 +126,20 @@ exit /b 0
 
 :CheckNodeVersion
 set "NODE_MAJOR="
-for /f "delims=" %%v in ('"%~1" -p "process.versions.node.split('.')[0]" 2^>nul') do set "NODE_MAJOR=%%v"
-if "%NODE_MAJOR%"=="%REQUIRED_NODE_MAJOR%" exit /b 0
+for /f "tokens=1 delims=." %%v in ('"%~1" -v 2^>nul') do set "NODE_MAJOR=%%v"
+if /i "!NODE_MAJOR!"=="v%REQUIRED_NODE_MAJOR%" exit /b 0
 exit /b 1
 
 :CheckNpm
-where npm >nul 2>&1
-if errorlevel 1 exit /b 1
-call npm -v >nul 2>&1
-exit /b %errorlevel%
+if exist "%NODE_DIR%\npm.cmd" (
+    call "%NODE_DIR%\npm.cmd" -v >nul 2>&1
+    exit /b %errorlevel%
+)
+if exist "%NODE_DIR%\node_modules\npm\bin\npm-cli.js" (
+    "%NODE_DIR%\node.exe" "%NODE_DIR%\node_modules\npm\bin\npm-cli.js" -v >nul 2>&1
+    exit /b %errorlevel%
+)
+exit /b 1
 
 :DownloadNode
 if /i not "%PROCESSOR_ARCHITECTURE%"=="AMD64" if /i not "%PROCESSOR_ARCHITEW6432%"=="AMD64" (
