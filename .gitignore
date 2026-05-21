@@ -1,1 +1,4 @@
 node_modules
+.tools/
+logs/
+app/.install-fingerprint
