@@ -6,6 +6,7 @@ set "REPO_DIR=%USERPROFILE%\Desktop\pokeroleDex"
 set "TMP_TOOLS=%TEMP%\pokeroleDex-bootstrap"
 set "GIT_DIR=%TMP_TOOLS%\mingit"
 set "DOWNLOAD_DIR=%TMP_TOOLS%\downloads"
+set "CLONE_DIR=%TMP_TOOLS%\repo-clone"
 
 echo.
 echo =======================================
@@ -26,10 +27,11 @@ if exist "%REPO_DIR%\.git" (
         goto :fatal
     )
 ) else if exist "%REPO_DIR%" (
-    echo [FATAL] Esiste gia' una cartella non-git qui:
-    echo         %REPO_DIR%
-    echo         Rinominala o cancellala, poi rilancia questo file.
-    goto :fatal
+    echo [WARN] Esiste gia' una cartella senza metadata Git:
+    echo        %REPO_DIR%
+    echo [INFO] La converto in una copia aggiornabile con Git.
+    call :ConvertExistingExport
+    if errorlevel 1 goto :fatal
 ) else (
     echo [INFO] Scarico PokeRole Dex sul Desktop...
     git clone "%REPO_URL%" "%REPO_DIR%"
@@ -54,6 +56,27 @@ echo.
 echo Premi un tasto per chiudere.
 pause >nul
 exit /b 1
+
+:ConvertExistingExport
+if exist "%CLONE_DIR%" rmdir /s /q "%CLONE_DIR%"
+
+git clone "%REPO_URL%" "%CLONE_DIR%"
+if errorlevel 1 (
+    echo [FATAL] git clone temporaneo fallito. Controlla la connessione internet.
+    exit /b 1
+)
+
+robocopy "%CLONE_DIR%" "%REPO_DIR%" /E /NFL /NDL /NJH /NJS /NP >nul
+if errorlevel 8 (
+    echo [FATAL] Non riesco a copiare la versione Git nella cartella Desktop.
+    echo         Chiudi eventuali programmi aperti dentro:
+    echo         %REPO_DIR%
+    exit /b 1
+)
+
+rmdir /s /q "%CLONE_DIR%"
+echo [INFO] Cartella convertita: ora include .git e puo' aggiornarsi.
+exit /b 0
 
 :EnsureGit
 set "GIT_EXE="
