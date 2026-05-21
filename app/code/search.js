@@ -1,6 +1,7 @@
 const lib = require('./utils/lib.js');
 const html = require('./html.js');
 const { getJson } = require('./utils/json.js');
+const { includesOneOf } = require('./utils/string.js');
 const dataPath = '../data/v2.0/';
 const imgMissingno = "https://media.pokemoncentral.it/wiki/0/02/Sprrz0000.png";
 const imgSigma = "https://imgcdn.stablediffusionweb.com/2024/3/17/3dc94a28-83bd-4f7c-b33e-71652870473a.jpg";
@@ -8,6 +9,7 @@ const imgPkmnType = "https://raw.githubusercontent.com/partywhale/pokemon-type-i
 const imgHome = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/HomeSprites/";
 const imgItem = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/ItemSprites/";
 const types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
+const lowCaseTypes = new Array("pokedex", "move", "nature", "ability", "item");
 const linkSpecial = new Array("Ability", "Pokemon", "Name", "Type", "Evolutions", "Move");
 const linkIgnored = new Array("Kind", "Value", "Stat");
 const dataNormalize = lib.utils.dataNormalize;
@@ -175,14 +177,23 @@ function write(client, msg)
 function searchByKey(key, data, validArray = [])
 {
 	let match = new lib.types.dataList(false);
+	let	ascii;
 
 	if (validArray == undefined)
 		validArray = [];
 	key = dataNormalize(key);
 	for (const dataName in data)
 	{
+		if (includesOneOf(dataName, lowCaseTypes) == "")
+			continue ;
 		if (validArray.length == 0 || validArray.includes(dataName) == true)
 			addMatchByKey(key, data[dataName], match[dataName]);
+	}
+	for (const key in match)
+	{
+		ascii = key.charCodeAt(0);
+		if (ascii >= "A".charCodeAt(0) && ascii <= "Z".charCodeAt(0))
+			delete match[key];
 	}
 	return (match);
 }
@@ -195,6 +206,8 @@ function searchByKey(key, data, validArray = [])
  */
 function addMatchByKey(key, array, match = [])
 {
+	if (!array || typeof(array) != "object")
+		return ;
 	for (let x of array)
 	{
 		if (x.startsWith(key) == true)
