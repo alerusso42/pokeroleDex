@@ -216,10 +216,18 @@ exit /b 0
 
 :OfferGitUpdate
 git rev-parse --is-inside-work-tree >nul 2>&1
-if errorlevel 1 exit /b 0
+if errorlevel 1 (
+    echo [WARN] Questa cartella non contiene metadata Git ^(.git^).
+    echo        Gli aggiornamenti automatici sono disattivati.
+    echo        Usa install-on-desktop.bat per creare una copia aggiornabile.
+    exit /b 0
+)
 
 git remote get-url origin > "%LOG_DIR%\git_remote.log" 2>&1
-if errorlevel 1 exit /b 0
+if errorlevel 1 (
+    echo [WARN] Remote Git "origin" non configurato. Salto il controllo aggiornamenti.
+    exit /b 0
+)
 
 echo [INFO] Controllo aggiornamenti del progetto...
 git fetch --quiet origin > "%LOG_DIR%\git_fetch.log" 2>&1
@@ -231,21 +239,46 @@ if errorlevel 1 (
 set "BRANCH="
 for /f "delims=" %%b in ('git rev-parse --abbrev-ref HEAD 2^>nul') do set "BRANCH=%%b"
 if not defined BRANCH exit /b 0
-if /i "%BRANCH%"=="HEAD" exit /b 0
+if /i "!BRANCH!"=="HEAD" (
+    echo [WARN] Git e' in stato detached HEAD. Salto il controllo aggiornamenti.
+    exit /b 0
+)
 
 set "UPSTREAM="
-for /f "delims=" %%u in ('git rev-parse --abbrev-ref --symbolic-full-name @{u} 2^>nul') do set "UPSTREAM=%%u"
-if not defined UPSTREAM set "UPSTREAM=origin/%BRANCH%"
+for /f "delims=" %%u in ('git rev-parse --abbrev-ref --symbolic-full-name "@{u}" 2^>nul') do set "UPSTREAM=%%u"
+if not defined UPSTREAM (
+    for /f "delims=" %%u in ('git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2^>nul') do set "UPSTREAM=%%u"
+)
+if not defined UPSTREAM set "UPSTREAM=origin/!BRANCH!"
 
-git rev-parse --verify "%UPSTREAM%" >nul 2>&1
-if errorlevel 1 exit /b 0
+git rev-parse --verify "!UPSTREAM!" >nul 2>&1
+if errorlevel 1 (
+    echo [WARN] Non trovo il branch remoto "!UPSTREAM!". Salto il controllo aggiornamenti.
+    exit /b 0
+)
 
 set "BEHIND=0"
-for /f "delims=" %%c in ('git rev-list --count HEAD.."%UPSTREAM%" 2^>nul') do set "BEHIND=%%c"
+for /f "delims=" %%c in ('git rev-list --count HEAD.."!UPSTREAM!" 2^>nul') do set "BEHIND=%%c"
 
-if %BEHIND% GTR 0 (
+if !BEHIND! GTR 0 (
     echo.
-    echo [INFO] E' disponibile una nuova versione del progetto ^(%BEHIND% commit^).
+    echo [INFO] E' disponibile una nuova versione del progetto ^(!BEHIND! commit^).
+    git diff --quiet >nul 2>&1
+    if errorlevel 1 (
+        echo [WARN] Ci sono modifiche locali nella cartella del progetto.
+        echo        Per evitare di sovrascriverle, non aggiorno automaticamente.
+        git status --short > "%LOG_DIR%\git_status.log" 2>&1
+        echo        Dettagli in "%LOG_DIR%\git_status.log".
+        exit /b 0
+    )
+    git diff --cached --quiet >nul 2>&1
+    if errorlevel 1 (
+        echo [WARN] Ci sono modifiche locali nella cartella del progetto.
+        echo        Per evitare di sovrascriverle, non aggiorno automaticamente.
+        git status --short > "%LOG_DIR%\git_status.log" 2>&1
+        echo        Dettagli in "%LOG_DIR%\git_status.log".
+        exit /b 0
+    )
     choice /c SN /n /m "Vuoi aggiornarla ora? [S/N] "
     if errorlevel 2 (
         echo [INFO] Aggiornamento saltato.
