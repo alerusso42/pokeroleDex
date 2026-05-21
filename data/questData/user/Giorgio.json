@@ -1,10 +1,8 @@
 {
-  "File": "../data/questData/user/Giorgio.json",
-  "IsAdmin": true,
   "Name": "Giorgio",
-  "Password": "$2b$10$EvvD5Fl01inft.PtpasniuGFJMVP2sxQcasY3A5dloI02uhZTRNqW",
+  "Category": "undefined",
   "Trainers": [
-    "Giorgionoooooooooooooo"
+    "Giorgio"
   ],
-  "Id": 2
+  "Password": "$2b$10$OdXdvZMtFTuwGPUK2Z6R7.eCEobLjk70LQgFP54Ste80KDlRPTIGq"
 }
