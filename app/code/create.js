@@ -47,9 +47,19 @@ function create(server, client, res=null)
 	}
 	console.log(newData);
 	if (id == "")
-		server.data[type].push(name);
+		id = name;
 	else
-		server.data[type].push(`${name}_${id}`);
+		id = `${name}_${id}`;
+	server.data[type].push(id);
+		server.data[type].push(id);
+	if (server.expandedData[type])
+	{
+		server.expandedData[type].set(id, 
+		{Category: "",
+		filename: filename,
+		Ico: "",
+		Img: ""});
+	}
 	lib.fs.writeFileSync(filename, JSON.stringify(newData, null, 2), 'utf-8');
 	if (res == null)
 		return (0);
@@ -114,4 +124,4 @@ function fillTemplate(server, client, type, name, id)
 // 	return (id);
 // }
 
-module.exports = {create};
+module.exports = {create, fillTemplate};

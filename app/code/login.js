@@ -1,8 +1,9 @@
 const { getHtml } = require("./html.js");
 const lib = require("./utils/lib.js");
 const {json} = lib.utils;
-const {create} = require("./create.js");
+const {create, fillTemplate} = require("./create.js");
 const {} = require("./utils/classes/classes.js");
+const { editJson } = require("./utils/json.js");
 
 /** @typedef {typeof import("../data/template/user.json")} User */
 
@@ -56,10 +57,15 @@ function addUser(server, client, res, user = null)
 {
 	server.userNum++;
 	let id = server.userNum;
+	let idName;
 	/** @type {lib.types.User} */ let newUser = {};
 
 	if (user == null)
 	{
+		idName = client.dataName;
+		if (server.data.user.indexOf(client.dataName) != -1)
+			idName += "_" + id;
+		newUser = fillTemplate(server, client, "user", idName, id);
 		newUser.File = dataPath + "user/" + client.dataName + ".json";
 		newUser.IsAdmin = client.isAdmin;
 		newUser.Name = client.dataName;
@@ -73,6 +79,11 @@ function addUser(server, client, res, user = null)
 	newUser.Id = id;
 	server.userMap.set(id, newUser);
 	server.data["user"].push(client.dataName);
+	server.expandedData["user"].set(client.dataName, 
+	{Category: "",
+	filename: "",
+	Ico: "",
+	Img: ""});
 	lib.fs.writeFileSync(newUser.File, JSON.stringify(newUser, null, 2), 'utf-8');
 	res.setHeader("Set-Cookie", `userId=${id}; Path=/; HttpOnly; Max-Age=31536000`);
 	return (0);
