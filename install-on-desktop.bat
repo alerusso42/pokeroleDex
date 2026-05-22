@@ -74,6 +74,21 @@ if errorlevel 8 (
     exit /b 1
 )
 
+if not exist "%REPO_DIR%\.git" (
+    robocopy "%CLONE_DIR%\.git" "%REPO_DIR%\.git" /E /COPY:DAT /DCOPY:DAT /NFL /NDL /NJH /NJS /NP >nul
+    if errorlevel 8 (
+        echo [FATAL] Non riesco a copiare la cartella .git.
+        exit /b 1
+    )
+)
+
+if not exist "%REPO_DIR%\.git" (
+    echo [FATAL] La conversione non ha creato la cartella .git.
+    exit /b 1
+)
+
+attrib -h -s "%REPO_DIR%\.git" >nul 2>&1
+
 rmdir /s /q "%CLONE_DIR%"
 echo [INFO] Cartella convertita: ora include .git e puo' aggiornarsi.
 exit /b 0
