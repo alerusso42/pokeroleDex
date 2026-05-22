@@ -263,30 +263,8 @@ for /f "delims=" %%c in ('git rev-list --count HEAD.."!UPSTREAM!" 2^>nul') do se
 if !BEHIND! GTR 0 (
     echo.
     echo [INFO] E' disponibile una nuova versione del progetto ^(!BEHIND! commit^).
-    git diff --quiet >nul 2>&1
-    if errorlevel 1 (
-        echo [WARN] Ci sono modifiche locali nella cartella del progetto.
-        echo        Per evitare di sovrascriverle, non aggiorno automaticamente.
-        git status --short > "%LOG_DIR%\git_status.log" 2>&1
-        echo        Dettagli in "%LOG_DIR%\git_status.log".
-        exit /b 0
-    )
-    git diff --cached --quiet >nul 2>&1
-    if errorlevel 1 (
-        echo [WARN] Ci sono modifiche locali nella cartella del progetto.
-        echo        Per evitare di sovrascriverle, non aggiorno automaticamente.
-        git status --short > "%LOG_DIR%\git_status.log" 2>&1
-        echo        Dettagli in "%LOG_DIR%\git_status.log".
-        exit /b 0
-    )
-    choice /c SN /n /m "Vuoi aggiornarla ora? [S/N] "
-    if errorlevel 2 (
-        echo [INFO] Aggiornamento saltato.
-        exit /b 0
-    )
-
-    echo [INFO] Aggiornamento in corso...
-    git pull --ff-only > "%LOG_DIR%\git_pull.log" 2>&1
+    echo [INFO] Aggiornamento automatico in corso...
+    git pull --ff-only --autostash > "%LOG_DIR%\git_pull.log" 2>&1
     if errorlevel 1 (
         echo [WARN] Aggiornamento non riuscito. Continuo con la versione locale.
         echo        Dettagli in "%LOG_DIR%\git_pull.log".
