@@ -66,7 +66,8 @@ if errorlevel 1 (
     exit /b 1
 )
 
-robocopy "%CLONE_DIR%" "%REPO_DIR%" /E /NFL /NDL /NJH /NJS /NP >nul
+:: Sostituito /E con /E /IA:HS per includere esplicitamente i file Nascosti (Hidden) e di Sistema (System) come .git
+robocopy "%CLONE_DIR%" "%REPO_DIR%" /E /IA:HS /NFL /NDL /NJH /NJS /NP >nul
 if errorlevel 8 (
     echo [FATAL] Non riesco a copiare la versione Git nella cartella Desktop.
     echo         Chiudi eventuali programmi aperti dentro:
@@ -75,18 +76,11 @@ if errorlevel 8 (
 )
 
 if not exist "%REPO_DIR%\.git" (
-    robocopy "%CLONE_DIR%\.git" "%REPO_DIR%\.git" /E /COPY:DAT /DCOPY:DAT /NFL /NDL /NJH /NJS /NP >nul
-    if errorlevel 8 (
-        echo [FATAL] Non riesco a copiare la cartella .git.
-        exit /b 1
-    )
-)
-
-if not exist "%REPO_DIR%\.git" (
     echo [FATAL] La conversione non ha creato la cartella .git.
     exit /b 1
 )
 
+:: Rimuove gli attributi Nascosto e Sistema dalla cartella .git se Windows fa i capricci per leggerla
 attrib -h -s "%REPO_DIR%\.git" >nul 2>&1
 
 rmdir /s /q "%CLONE_DIR%"
