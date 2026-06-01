@@ -34,11 +34,12 @@ if exist "%REPO_DIR%\.git" (
     if errorlevel 1 goto :fatal
 ) else (
     echo [INFO] Scarico PokeRole Dex sul Desktop...
-    git clone "%REPO_URL%" "%REPO_DIR%"
+	git clone "%REPO_URL%" "%REPO_DIR%"
     if errorlevel 1 (
         echo [FATAL] git clone fallito. Controlla la connessione internet.
         goto :fatal
     )
+    attrib -h -s "%REPO_DIR%\.git" >nul 2>&1
 )
 
 echo.
