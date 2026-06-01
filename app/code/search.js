@@ -2,6 +2,7 @@ const lib = require('./utils/lib.js');
 const html = require('./html.js');
 const { getJson } = require('./utils/json.js');
 const { includesOneOf } = require('./utils/string.js');
+const { questDataPath } = require('./utils/macro.js');
 const dataPath = '../data/v2.0/';
 const imgMissingno = "https://media.pokemoncentral.it/wiki/0/02/Sprrz0000.png";
 const imgSigma = "https://imgcdn.stablediffusionweb.com/2024/3/17/3dc94a28-83bd-4f7c-b33e-71652870473a.jpg";
@@ -201,6 +202,37 @@ function searchByKey(key, data, validArray = [])
 /**
  * 
  * @param {string} key 
+ * @param {lib.types.dataListExp} data 
+ * @param {Array<string>} validArray 
+ * @returns {lib.types.dataList}
+ */
+function searchByKeyExpanded(key, data)
+{
+	let match = new lib.types.dataListExp(false);
+	let	ascii;
+
+	if (validArray == undefined)
+		validArray = [];
+	key = dataNormalize(key);
+	for (const dataName in data)
+	{
+		if (includesOneOf(dataName, lowCaseTypes) == "")
+			continue ;
+		if (validArray.length == 0 || validArray.includes(dataName) == true)
+			addMatchByKey(key, data[dataName], match[dataName]);
+	}
+	for (const key in match)
+	{
+		ascii = key.charCodeAt(0);
+		if (ascii >= "A".charCodeAt(0) && ascii <= "Z".charCodeAt(0))
+			delete match[key];
+	}
+	return (match);
+}
+
+/**
+ * 
+ * @param {string} key 
  * @param {Array<string>} array 
  * @param {Array<string>} match 
  */
@@ -221,7 +253,7 @@ function getRandomQuote()
 {
 	try
 	{
-		let quotesJson = lib.utils.getJson("metadata/randomQuote");
+		let quotesJson = lib.utils.getJson(`${questDataPath}/other/randomQuote`);
 		let	quotes = quotesJson.quote;
 		let rand = Math.floor(Math.random() * quotes.length);
 		console.log(rand);
