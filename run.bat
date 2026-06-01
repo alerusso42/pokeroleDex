@@ -216,8 +216,19 @@ exit /b 0
 
 :OfferGitUpdate
 attrib -h -s ".git" >nul 2>&1
-git config --global --add safe.directory "%~dp0." >nul 2>&1
-git rev-parse --is-inside-work-tree >nul 2>&1
+
+set "REPO_ROOT=%~dp0"
+set "REPO_ROOT=!REPO_ROOT:~0,-1!"
+
+REM Azzera variabili d'ambiente Git che MinGit potrebbe aver impostato su se stesso
+set "GIT_DIR="
+set "GIT_WORK_TREE="
+set "GIT_PAGER=cat"
+
+git config --global --add safe.directory "!REPO_ROOT!" >nul 2>&1
+git config --system --add safe.directory "!REPO_ROOT!" >nul 2>&1
+
+git -C "!REPO_ROOT!" rev-parse --is-inside-work-tree >nul 2>&1
 if errorlevel 1 (
     echo [WARN] Questa cartella non contiene metadata Git ^(.git^).
     echo        Gli aggiornamenti automatici sono disattivati.
@@ -225,21 +236,21 @@ if errorlevel 1 (
     exit /b 0
 )
 
-git remote get-url origin > "%LOG_DIR%\git_remote.log" 2>&1
+git -C "!REPO_ROOT!" remote get-url origin > "%LOG_DIR%\git_remote.log" 2>&1
 if errorlevel 1 (
     echo [WARN] Remote Git "origin" non configurato. Salto il controllo aggiornamenti.
     exit /b 0
 )
 
 echo [INFO] Controllo aggiornamenti del progetto...
-git fetch --quiet origin > "%LOG_DIR%\git_fetch.log" 2>&1
+git -C "!REPO_ROOT!" fetch --quiet origin > "%LOG_DIR%\git_fetch.log" 2>&1
 if errorlevel 1 (
     echo [WARN] Non riesco a controllare gli aggiornamenti. Continuo con la versione locale.
     exit /b 0
 )
 
 set "BRANCH="
-for /f "delims=" %%b in ('git rev-parse --abbrev-ref HEAD 2^>nul') do set "BRANCH=%%b"
+for /f "delims=" %%b in ('git -C "!REPO_ROOT!" rev-parse --abbrev-ref HEAD 2^>nul') do set "BRANCH=%%b"
 if not defined BRANCH exit /b 0
 if /i "!BRANCH!"=="HEAD" (
     echo [WARN] Git e' in stato detached HEAD. Salto il controllo aggiornamenti.
@@ -247,26 +258,26 @@ if /i "!BRANCH!"=="HEAD" (
 )
 
 set "UPSTREAM="
-for /f "delims=" %%u in ('git rev-parse --abbrev-ref --symbolic-full-name "@{u}" 2^>nul') do set "UPSTREAM=%%u"
+for /f "delims=" %%u in ('git -C "!REPO_ROOT!" rev-parse --abbrev-ref --symbolic-full-name "@{u}" 2^>nul') do set "UPSTREAM=%%u"
 if not defined UPSTREAM (
-    for /f "delims=" %%u in ('git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2^>nul') do set "UPSTREAM=%%u"
+    for /f "delims=" %%u in ('git -C "!REPO_ROOT!" symbolic-ref --quiet --short refs/remotes/origin/HEAD 2^>nul') do set "UPSTREAM=%%u"
 )
 if not defined UPSTREAM set "UPSTREAM=origin/!BRANCH!"
 
-git rev-parse --verify "!UPSTREAM!" >nul 2>&1
+git -C "!REPO_ROOT!" rev-parse --verify "!UPSTREAM!" >nul 2>&1
 if errorlevel 1 (
     echo [WARN] Non trovo il branch remoto "!UPSTREAM!". Salto il controllo aggiornamenti.
     exit /b 0
 )
 
 set "BEHIND=0"
-for /f "delims=" %%c in ('git rev-list --count HEAD.."!UPSTREAM!" 2^>nul') do set "BEHIND=%%c"
+for /f "delims=" %%c in ('git -C "!REPO_ROOT!" rev-list --count HEAD.."!UPSTREAM!" 2^>nul') do set "BEHIND=%%c"
 
 if !BEHIND! GTR 0 (
     echo.
     echo [INFO] E' disponibile una nuova versione del progetto ^(!BEHIND! commit^).
     echo [INFO] Aggiornamento automatico in corso...
-    git pull --ff-only --autostash > "%LOG_DIR%\git_pull.log" 2>&1
+    git -C "!REPO_ROOT!" pull --ff-only --autostash > "%LOG_DIR%\git_pull.log" 2>&1
     if errorlevel 1 (
         echo [WARN] Aggiornamento non riuscito. Continuo con la versione locale.
         echo        Dettagli in "%LOG_DIR%\git_pull.log".
