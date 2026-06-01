@@ -282,6 +282,7 @@ function setId(id, dir, username)
 	this.SetIco(username, dir, newData.Ico, id);
 	if (username != id)
 		this[dir].delete(id);
+	return (id);
 }
 
 /**

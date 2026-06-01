@@ -10,6 +10,10 @@ const questDataPath = "../data/questData/";
  */
 function edit(server, client, res)
 {
+	let	id;
+	let	img;
+	let	ico;
+
 	//client.dataName = client.dataName.replace("", "");
 	client.dirName = client.dirName.replace("api", "");
 	let exists = server.data[client.dirName].find(name => name == client.dataName);
@@ -27,8 +31,17 @@ function edit(server, client, res)
 	if (client.req.query && client.req.query.onlySome)
 		overrideOriginal(filename, json);
 	if (json.Name)
-		server.expandedData.SetId(client.dataName, client.dirName, json.Name);
+		id = server.expandedData.SetId(client.dataName, client.dirName, json.Name);
+	json.id = id;
+	img = server.expandedData.GetImg(id, client.dirName);
+	ico = server.expandedData.GetIco(id, client.dirName);
+	if (img)
+		json.Img = img.slice(img.lastIndexOf("."), img.length);
+	if (ico)
+		json.Ico = ico.slice(ico.lastIndexOf("."), ico.length);
 	lib.fs.writeFileSync(filename, JSON.stringify(json, null, 2), 'utf-8');
+	json.Img = server.expandedData.GetImg(id, client.dirName);
+	json.Ico = server.expandedData.GetIco(id, client.dirName);
 	res.status(200);
 	res.send(json);
 }

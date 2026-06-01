@@ -1,8 +1,11 @@
 {
   "Name": "Giorgio",
-  "Category": "undefined",
+  "Category": "I bro",
   "Trainers": [
     "Giorgio"
   ],
-  "Password": "$2b$10$OdXdvZMtFTuwGPUK2Z6R7.eCEobLjk70LQgFP54Ste80KDlRPTIGq"
+  "Password": "$2b$10$XExUR.JbkZ9VeG.e0LmmyODuJmSK2LmtZ1joWmvUlDuH53bFoxkZi",
+  "id": "Giorgio",
+  "Img": ".jpg",
+  "Ico": ".jpg"
 }
