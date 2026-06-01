@@ -215,6 +215,8 @@ if errorlevel 1 (
 exit /b 0
 
 :OfferGitUpdate
+attrib -h -s ".git" >nul 2>&1
+git config --global --add safe.directory "%~dp0." >nul 2>&1
 git rev-parse --is-inside-work-tree >nul 2>&1
 if errorlevel 1 (
     echo [WARN] Questa cartella non contiene metadata Git ^(.git^).
