@@ -1,8 +1,13 @@
+//@ts-check
 const lib = require('./utils/lib.js');
 const html = require('./html.js');
 const { getJson } = require('./utils/json.js');
+const {validSearch} = require("./login.js");
 const { includesOneOf } = require('./utils/string.js');
 const { questDataPath } = require('./utils/macro.js');
+const { Server } = require('./utils/classes/Server.js');
+const { Client } = require('./utils/classes/Client.js');
+const { condCheck, condSanifier } = require('./utils/conds.js');
 const dataPath = '../data/v2.0/';
 const imgMissingno = "https://media.pokemoncentral.it/wiki/0/02/Sprrz0000.png";
 const imgSigma = "https://imgcdn.stablediffusionweb.com/2024/3/17/3dc94a28-83bd-4f7c-b33e-71652870473a.jpg";
@@ -11,6 +16,7 @@ const imgHome = "https://raw.githubusercontent.com/Pokerole-Software-Development
 const imgItem = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/ItemSprites/";
 const types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
 const lowCaseTypes = new Array("pokedex", "move", "nature", "ability", "item");
+const expLowCaseTypes = new Array("user", "trainer", "pokemon", "category", "world");
 const linkSpecial = new Array("Ability", "Pokemon", "Name", "Type", "Evolutions", "Move");
 const linkIgnored = new Array("Kind", "Value", "Stat");
 const dataNormalize = lib.utils.dataNormalize;
@@ -199,33 +205,112 @@ function searchByKey(key, data, validArray = [])
 	return (match);
 }
 
+/** @typedef {import("../metadata/cond.json")} Cond*/
+/** @typedef {Array<Cond>} Conds*/
+/** @typedef {import('./utils/classes/DataList.js').ExpPrototype} ExpData*/
+/** @typedef {Set<ExpData>} ExpDataSet*/
+
 /**
  * 
- * @param {string} key 
- * @param {lib.types.dataListExp} data 
- * @param {Array<string>} validArray 
- * @returns {lib.types.dataList}
+ * @param {Server} server
+ * @param {Client} client
+ * @param {string} field
+ * @param {boolean} checkValidBool
+ * @returns {*}
  */
-function searchByKeyExpanded(key, data)
+function searchByDataExpanded(server, client, field="", checkValidBool=true)
 {
-	let match = new lib.types.dataListExp(false);
-	let	ascii;
+	/** @type {Conds} */	let	conds;
+	/** @type {ExpData}*/let	data;
+	/** @type {Set<*>}*/let match;
+	let	json;
+	let	key;
+	let	dir;
 
-	if (validArray == undefined)
-		validArray = [];
-	key = dataNormalize(key);
-	for (const dataName in data)
+	//@ts-ignore
+	conds = client.body.conds;
+	if (Array.isArray(conds) == false)
+		throw Error(`searchByKeyExp: received invalid array => ${conds}`);
+	if (condSanifier(conds) == false)
+		throw Error(`searchByKeyExp: cannot sanify => ${conds}`);
+	key = dataNormalize(client.dataName);
+	dir = dataNormalize(client.dirName);
+	if (!includesOneOf(dir, expLowCaseTypes))
+		throw Error(`searchByKeyExp: invalid dir => ${dir}`);
+	match = new Set();
+	//@ts-ignore
+	data = server.expandedData[dir];
+	if (!data)
+		throw Error(`searchByKeyExp: error getting dataSet for => ${dir}`);
+	//@ts-ignore
+	data = server.expandedData[dir][key];
+	if (!data)
+		throw Error(`searchByKeyExp: error getting dataSet for => ${dir}`);
+	if (!data.Id)
+		Error(`searchByKeyExp: invalid data => ${data}`);
+	if (checkValidBool == true && !validSearch(server, client, data.Id))
+		return (undefined);
+	json = server.expandedData.GetData(data.Id, dir);
+	if (typeof(json) != "object")
+		throw Error(`searchByKeyExp: trash data => ${json}`);
+	if (field)
+		json = resolveField(json, field);
+	if (!json)
+		return (undefined);
+	//@ts-ignore
+	for (const field of json)
 	{
-		if (includesOneOf(dataName, lowCaseTypes) == "")
+		if (condCheck(field, conds) == false)
 			continue ;
-		if (validArray.length == 0 || validArray.includes(dataName) == true)
-			addMatchByKey(key, data[dataName], match[dataName]);
+		match.add(field);
 	}
-	for (const key in match)
+	return (match);
+}
+
+/**
+ * 
+ * @param {Server} server
+ * @param {Client} client
+ * @param {string} input
+ * @param {boolean} checkValidBool
+ * @returns {ExpDataSet}
+ */
+function searchByDirExpanded(server, client, input, checkValidBool=true)
+{
+	/** @type {Conds} */	let	conds;
+	/** @type {ExpDataSet}*/let	dataSet;
+	/** @type {ExpDataSet}*/let match;
+	let	json;
+	let	dir;
+
+	//@ts-ignore
+	conds = client.body.conds;
+	if (Array.isArray(conds) == false)
+		throw Error(`searchByKeyExp: received invalid array => ${conds}`);
+	if (condSanifier(conds) == false)
+		throw Error(`searchByKeyExp: cannot sanify => ${conds}`);
+	dir = dataNormalize(client.dirName);
+	if (!includesOneOf(dir, expLowCaseTypes))
+		throw Error(`searchByKeyExp: invalid dir => ${dir}`);
+	match = new Set();
+	//@ts-ignore
+	dataSet = server.expandedData[dir];
+	if (!dataSet)
+		throw Error(`searchByKeyExp: error getting dataSet for => ${dir}`);
+	for (const data of dataSet)
 	{
-		ascii = key.charCodeAt(0);
-		if (ascii >= "A".charCodeAt(0) && ascii <= "Z".charCodeAt(0))
-			delete match[key];
+		if (!data.Id)
+			Error(`searchByKeyExp: invalid data => ${data}`);
+		if (data.Id.startsWith(input, 0) == false)
+			continue ;
+		if (checkValidBool == true && !validSearch(server, client, data.Id))
+			continue ;
+		json = server.expandedData.GetData(data.Id, dir);
+		if (typeof(json) != "object")
+			throw Error(`searchByKeyExp: trash data => ${json}`);
+		if (condCheck(json, conds) == false)
+			continue ;
+		match.add(data);
 	}
 	return (match);
 }
@@ -267,4 +352,4 @@ function getRandomQuote()
 	}
 }
 
-module.exports = {getData, searchByKey};
+module.exports = {getData, searchByKey, searchByDataExpanded, searchByDirExpanded};

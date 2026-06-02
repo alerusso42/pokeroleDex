@@ -1,7 +1,7 @@
 {
-	"dataName": "",
-	"dataDir": "",
+	"field": "",
 	"cond": "",
-	"value": "", 
+	"value": "",
+	"expect": true,
 	"next": ""
 }

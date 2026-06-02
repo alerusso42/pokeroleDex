@@ -87,39 +87,31 @@ lib.app.get("/keyPressed/search*splat", (req, res) =>
 }
 );
 
-lib.app.post("/keyPressed/edit*splat", (req, res) => 
+lib.app.post("/keyPressed/data/:dir/:name/:field", (req, res) => 
 {
-	let url = lib.url.parse(req.url).pathname;
-	let arg = lib.utils.urlArg(url);
-	let	json = JSON.parse(req.body);
+	let client = new lib.types.Client(server, req);
+	let match;
+	let	field;
 
-	if (arg.length <= 1)
-		return (res.end(""));
-	arg = arg.slice(1, arg.length);// elimina lo /
-	let match = locationSearch.searchByKey(arg, server.data, req.query.include);
-	for (let category in match)
-	{
-		if (match[category].length == 0)
-			continue ;
-		let path = server.data.GetDirName(`${category}`);
-		res.write(`<div class="search-category-title">${category}</div>`);
-		res.write(`<div class="search-results-list">`);
-		for (let name of match[category])
-		{
-			let img = lib.utils.pokemonToSnakeCase(name) + ".png";
-				res.write(`<a href="/search/${path}/${name}" class="search-item">`);
-				if (category == "pokedex")
-				{
-					res.write(`<img src="https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/BoxSprites/${img}" class="item-icon">`);
-				}
-				res.write(`
-					<span class="item-name">${name}</span>
-					<span class="item-type-label">${category}</span>
-				</a>
-				`);
-		}
-		res.write(`</div>`);
-	}
+	req.body = JSON.parse(req.body);
+	client.dataName = req.params.name;
+	client.dirName = req.params.dir;
+	field = req.params.field;
+	match = locationSearch.searchByDataExpanded(server, client, field, true);
+	res.end();
+}
+);
+
+lib.app.post("/keyPressed/autoindex/:dir{/:keys}", (req, res) => 
+{
+	let client = new lib.types.Client(server, req);
+	let match;
+	let	field;
+
+	req.body = JSON.parse(req.body);
+	client.dirName = req.params.dir;
+	field = req.params.field;
+	match = locationSearch.searchByDirExpanded(server, client, field, true);
 	res.end();
 }
 );
@@ -146,6 +138,13 @@ lib.app.get("/search/*splat", (req, res) =>
 		return (res.status(404).end("info: " + err + "\n"));
 	}
 	);
+});
+
+lib.app.get("/searchAdvanced/", (req, res) =>
+{
+	let client = new lib.types.Client(server, req, "./html/searchAdvanced.html");
+
+	res.send(client.dom.serialize());
 });
 
 lib.app.get("/auth", (req, res) => 

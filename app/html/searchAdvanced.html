@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="/html/style.css">
+    <title>PokéDex Advanced Query Engine</title>
+    <style>
+        /* ==========================================================================
+           ESTENSIONI STILE POKÉDEX (Costruite sopra lo stylesheet di base)
+           ========================================================================== */
+        
+        /* Contenitore stile scocca Pokédex */
+        .pokedex-frame {
+            border: 6px solid #111;
+            background: #e57373;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: inset -10px -10px 0px rgba(0,0,0,0.15), 0 10px 25px rgba(0,0,0,0.4);
+            margin-bottom: 30px;
+        }
+
+        /* Schermo Tech Interno */
+        .pokedex-screen {
+            background: #222;
+            color: #00ff66;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 15px;
+            border-radius: 10px;
+            border: 4px solid #555;
+            box-shadow: inset 0 0 10px #000;
+            margin-bottom: 20px;
+        }
+
+        .pokedex-screen h2, .pokedex-screen h3 {
+            color: #fff;
+            margin-top: 0;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        /* Costruttore di Condizioni */
+        .query-builder {
+            background: #fdfdfd;
+            border: 3px solid var(--poke-dark);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .condition-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 5px solid var(--poke-red);
+            animation: fadeIn 0.2s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .builder-select, .builder-input {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 2px solid #ccc;
+            font-family: inherit;
+            font-size: 0.95em;
+            outline: none;
+        }
+
+        .builder-select:focus, .builder-input:focus {
+            border-color: var(--poke-dark);
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9em;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* Pulsanti personalizzati dell'interfaccia */
+        .btn-action {
+            background: var(--poke-dark);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-action:hover {
+            background: #1a252f;
+        }
+
+        .btn-delete {
+            background: #e74c3c;
+        }
+
+        .btn-delete:hover {
+            background: #c0392b;
+        }
+
+        .btn-add-chain {
+            background: #27ae60;
+            margin-bottom: 15px;
+        }
+
+        .btn-add-chain:hover {
+            background: #219a52;
+        }
+
+        /* Visualizzazione Griglia Risultati */
+        .pokemon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .pokemon-card {
+            background: #fff;
+            border: 3px solid #333;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 4px 4px 0px #333;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pokemon-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px #333;
+        }
+
+        .pokemon-card .id-tag {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: #eee;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .pokemon-card h4 {
+            margin: 10px 0 5px 0;
+            font-size: 1.2em;
+            color: #111;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: white;
+            text-transform: uppercase;
+            margin: 2px;
+        }
+
+        /* Colore Tipi Pokémon Base */
+        .type-Normal { background-color: #A8A77A; }
+        .type-Fire { background-color: #EE8130; }
+        .type-Water { background-color: #6390F0; }
+        .type-Electric { background-color: #F7D02C; }
+        .type-Grass { background-color: #7AC74C; }
+        .type-Ice { background-color: #96D9D6; }
+        .type-Fighting { background-color: #C22E28; }
+        .type-Poison { background-color: #A33EA1; }
+        .type-Ground { background-color: #E2BF65; }
+        .type-Flying { background-color: #A98FF3; }
+        .type-Psychic { background-color: #F95587; }
+        .type-Bug { background-color: #A6B91A; }
+        .type-Rock { background-color: #B6A136; }
+        .type-Ghost { background-color: #705746; }
+        .type-Dragon { background-color: #6F35FC; }
+        .type-Dark { background-color: #705746; }
+        .type-Steel { background-color: #B7B7CE; }
+        .type-Fairy { background-color: #D685AD; }
+
+        /* Statistiche Dettagliate */
+        .stats-block {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            font-size: 0.85em;
+            text-align: left;
+            margin-top: 10px;
+            background: #fafafa;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+	<a href="/" class="btn-home">🏠 HOME</a>
+    
+    <div class="container">
+        <div class="pokedex-frame">
+            <div class="pokedex-screen">
+                <h2>PokéDex Query Engine v1.0</h2>
+                <h3>Configura i filtri logici ed esegui la scansione dei dati</h3>
+            </div>
+        </div>
+
+        <div class="query-builder">
+            <h3 style="margin-top:0; color: var(--poke-dark);">Filtri di Ricerca Avanzata</h3>
+            <div id="conditionsContainer">
+                </div>
+            <button class="btn-action btn-add-chain" onclick="addConditionRow()">+ Aggiungi Condizione</button>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Prefisso nome o lascia vuoto...">
+            <button onclick="executeSearch()" class="search-button">Scansiona</button>
+        </div>
+    </div>
+
+    <div id="test">
+        <h3 style="margin-top:0; border-bottom: 2px solid #ccc; padding-bottom: 10px;">Terminal Risultati</h3>
+        <div id="searchResults" class="pokemon-grid">
+            <p style="color: #666; grid-column: 1/-1; text-align: center;">Nessuna scansione eseguita. Configura i filtri e clicca su Scansiona.</p>
+        </div>
+    </div>
+
+    <script>
+        // Mappatura delle proprietà del template JSON fornito
+        const searchableFields = [
+            { id: "Name", label: "Nome" },
+            { id: "Type1", label: "Tipo 1" },
+            { id: "Type2", label: "Tipo 2" },
+            { id: "BaseHP", label: "Punti Vita Base (HP)" },
+            { id: "Strength", label: "Forza Attuale" },
+            { id: "MaxStrength", label: "Forza Massima" },
+            { id: "Dexterity", label: "Destrezza" },
+            { id: "MaxDexterity", label: "Destrezza Massima" },
+            { id: "Vitality", label: "Vitalità" },
+            { id: "MaxVitality", label: "Vitalità Massima" },
+            { id: "Special", label: "Special" },
+            { id: "MaxSpecial", label: "Special Massimo" },
+            { id: "Insight", label: "Intuito" },
+            { id: "MaxInsight", label: "Intuito Massimo" },
+            { id: "Ability1", label: "Abilità 1" },
+            { id: "Ability2", label: "Abilità 2" },
+            { id: "HiddenAbility", label: "Abilità Nascosta" },
+            { id: "RecommendedRank", label: "Grado Consigliato" },
+            { id: "Legendary", label: "Leggendario (true/false)" },
+            { id: "GoodStarter", label: "Ottimo Starter (true/false)" },
+            { id: "DexCategory", label: "Categoria Pokédex" },
+            { id: "Height.Meters", label: "Altezza (Metri)" },
+            { id: "Weight.Kilograms", label: "Peso (Kg)" },
+            { id: "Evolutions.To", label: "Si Evolve In (Nome)" },
+            { id: "Moves.Name", label: "Mossa Appresa (Nome)" }
+        ];
+
+        // Inizializza aggiungendo una riga di default all'avvio
+        document.addEventListener("DOMContentLoaded", () => {
+            addConditionRow();
+        });
+
+        // Funzione per creare e inserire una nuova riga di condizione nel DOM
+        function addConditionRow() {
+            const container = document.getElementById("conditionsContainer");
+            const rowId = 'row_' + Date.now();
+
+            const rowHtml = `
+                <div class="condition-group" id="${rowId}">
+                    <select class="builder-select field-select">
+                        ${searchableFields.map(f => `<option value="${f.id}">${f.label}</option>`).join('')}
+                    </select>
+
+                    <select class="builder-select cond-select">
+                        <option value="EQUAL">UGUALE (=)</option>
+                        <option value="GREAT">MAGGIORE (&gt;)</option>
+                        <option value="EQUAL_GREAT">MAGGIORE O UGUALE (&gt;=)</option>
+                        <option value="SMALL">MINORE (&lt;)</option>
+                        <option value="EQUAL_SMALL">MINORE O UGUALE (&lt;=)</option>
+                        <option value="HAS">CONTIENE VALORE (HAS)</option>
+                    </select>
+
+                    <input type="text" class="builder-input value-input" placeholder="Valore da confrontare">
+
+                    <label class="checkbox-container">
+                        <input type="checkbox" class="expect-checkbox" checked>
+                        Soddisfatta (Expect)
+                    </label>
+
+                    <select class="builder-select next-select">
+                        <option value="AND">E SUCCESSIVA (AND)</option>
+                        <option value="OR">O SUCCESSIVA (OR)</option>
+                        <option value="">FINE CATENA (NEXT)</option>
+                    </select>
+
+                    <button class="btn-action btn-delete" onclick="removeConditionRow('${rowId}')">Elimina</button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', rowHtml);
+        }
+
+        function removeConditionRow(id) {
+            const row = document.getElementById(id);
+            if (row) row.remove();
+        }
+
+        // Raccoglie i filtri della UI e genera la struttura JSON per il backend
+        function compileConditions() {
+            const conditionGroups = document.querySelectorAll(".condition-group");
+            const condsArray = [];
+
+            conditionGroups.forEach((group) => {
+                const field = group.querySelector(".field-select").value;
+                const cond = group.querySelector(".cond-select").value;
+                let value = group.querySelector(".value-input").value.trim();
+                const expect = group.querySelector(".expect-checkbox").checked;
+                const next = group.querySelector(".next-select").value;
+
+                // Cast basilare per i numeri o booleani se applicabile
+                if (value.toLowerCase() === "true") value = true;
+                else if (value.toLowerCase() === "false") value = false;
+                else if (!isNaN(value) && value !== "") value = Number(value);
+
+                condsArray.push({
+                    field: field,
+                    cond: cond,
+                    value: value,
+                    expect: expect,
+                    next: next
+                });
+            });
+
+            return condsArray;
+        }
+
+        // Esegue la ricerca avanzata inviando i dati strutturati al backend tramite POST
+        async function executeSearch() {
+            const keys = document.getElementById('searchInput').value.trim();
+            const resultsContainer = document.getElementById("searchResults");
+            
+            resultsContainer.innerHTML = `<p style="color: #3498db; grid-column: 1/-1; text-align: center; font-weight: bold;">Scansione in corso nell'archivio Pokédex...</p>`;
+
+            const compiledConds = compileConditions();
+            const payload = { conds: compiledConds };
+
+            // Endpoint strutturato basato sulle specifiche fornite
+            const url = `/keyPressed/autoindex/pokedex/${keys}`;
+
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Errore Server: ${response.status}`);
+                }
+
+                const data = await response.json();
+                renderResults(data);
+
+            } catch (err) {
+                resultsContainer.innerHTML = `<p style="color: #e74c3c; grid-column: 1/-1; text-align: center; font-weight: bold;">⚠️ Errore di connessione o formato dati non valido.<br>${err.message}</p>`;
+            }
+        }
+
+        // Genera i blocchi grafici per ogni pokémon trovato
+        function renderResults(pokemonList) {
+            const resultsContainer = document.getElementById("searchResults");
+            resultsContainer.innerHTML = "";
+
+            if (!pokemonList || pokemonList.length === 0) {
+                resultsContainer.innerHTML = `<p style="color: #e67e22; grid-column: 1/-1; text-align: center; font-weight: bold;">Nessun Pokèmon corrisponde ai criteri inseriti.</p>`;
+                return;
+            }
+
+            pokemonList.forEach(pokemon => {
+                // Gestione campi nulli o mancanti
+                const t1 = pokemon.Type1 || "Normal";
+                const t2 = pokemon.Type2 ? `<span class="type-badge type-${pokemon.Type2}">${pokemon.Type2}</span>` : "";
+                const dexId = pokemon.DexID || "N/A";
+                
+                const cardHtml = `
+                    <div class="pokemon-card" onclick="console.log('ID Selezionato: ${pokemon._id}')">
+                        <span class="id-tag">#${dexId}</span>
+                        <h4 style="margin-top: 15px;">${pokemon.Name}</h4>
+                        <div style="margin-bottom: 10px;">
+                            <span class="type-badge type-${t1}">${t1}</span>${t2}
+                        </div>
+                        <div style="font-size: 0.85em; color: #555; font-style: italic; margin-bottom: 5px;">
+                            ${pokemon.DexCategory || ''}
+                        </div>
+                        <div class="stats-block">
+                            <div><strong>HP Base:</strong> ${pokemon.BaseHP || 0}</div>
+                            <div><strong>Grado:</strong> ${pokemon.RecommendedRank || 'Beginner'}</div>
+                            <div><strong>Forza:</strong> ${pokemon.Strength || 0}/${pokemon.MaxStrength || 0}</div>
+                            <div><strong>Destr:</strong> ${pokemon.Dexterity || 0}/${pokemon.MaxDexterity || 0}</div>
+                            <div><strong>Vital:</strong> ${pokemon.Vitality || 0}/${pokemon.MaxVitality || 0}</div>
+                            <div><strong>Intuito:</strong> ${pokemon.Insight || 0}/${pokemon.MaxInsight || 0}</div>
+                        </div>
+                    </div>
+                `;
+                resultsContainer.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        // Manteniamo le funzioni mappate precedentemente come da requisiti di compatibilità
+        function executeTip() {
+            // Reindirizza la logica di digitazione live direttamente sul motore avanzato se necessario
+            console.log("Input modificato. Pronto per l'invio sequenziale.");
+        }
+
+        // Listener per attivare la scansione premendo Invio sulla barra
+        document.getElementById('searchInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') executeSearch();
+        });
+        
+        document.getElementById('searchInput').addEventListener('input', executeTip);
+    </script>
+</body>
+</html>

@@ -140,6 +140,7 @@ function fillDataListArray(fill, type)
 
 /**
  * @typedef {Object} ExpPrototype
+ * @property {string} Id id of the data
  * @property {string} filename
  * @property {string} Img Img extension or url
  * @property {string} Ico Ico extension or url
@@ -151,11 +152,11 @@ class expandedDataList
 	/** @param {dataList} list */
 	constructor(list)
 	{
-		//this.pokedex = fillDataListExpanded(list, "pokedex", dataPath);
-		//this.nature = fillDataListExpanded(list, "nature", dataPath);
-		//this.move = fillDataListExpanded(list, "move", dataPath);
-		//this.item = fillDataListExpanded(list, "item", dataPath);
-		//this.ability = fillDataListExpanded(list, "ability", dataPath);
+		this.pokedex = fillDataListExpanded(list, "pokedex", dataPath);
+		this.nature = fillDataListExpanded(list, "nature", dataPath);
+		this.move = fillDataListExpanded(list, "move", dataPath);
+		this.item = fillDataListExpanded(list, "item", dataPath);
+		this.ability = fillDataListExpanded(list, "ability", dataPath);
 		this.user = fillDataListExpanded(list, "user");
 		this.trainer = fillDataListExpanded(list, "trainer");
 		this.pokemon = fillDataListExpanded(list, "pokemon");
@@ -171,6 +172,8 @@ class expandedDataList
 		this.GetIco = getIco;
 		this.SetIco = setIco;
 	}
+	/** @param {string} id*/
+	GetRealName(id){return (getRealName(id));}
 }
 
 /**
@@ -203,6 +206,7 @@ function fillDataListExpanded(list, type, root=questDataPath)
 			expData.Category = json.category;
 		expData.Img = json.Img;
 		expData.Ico = json.Ico;
+		expData.Id = data;
 		mapExpData.set(data, expData);
 	}
 	return (mapExpData);
@@ -241,12 +245,29 @@ function getData(id, dir)
 {
 	let	data;
 
+	//@ts-ignore
 	if (!this[dir])
 		throw (`expandedDataList, getId: dir ${dir} invalid`);
+	//@ts-ignore
 	data = this[dir].get(id);
 	if (!data)
 		throw (`expandedDataList, getId: data ${dir}/${id} invalid`);
 	return (data);
+}
+
+/**
+ * 
+ * @param {string} id 
+ */
+function getRealName(id)
+{
+	let	underscoreIndex;
+
+	underscoreIndex = id.lastIndexOf("_");
+	if (underscoreIndex == -1)
+		return (id);
+	else
+		return (id.slice(0, underscoreIndex));
 }
 
 /**
@@ -272,15 +293,16 @@ function setId(id, dir, username)
 	username = username + idNumber;
 	newData = 
 	{
+		Id: username,
 		Category: data.Category,
 		filename: data.filename,
 		Ico: data.Ico,
 		Img: data.Img
-	};
+	};//@ts-ignore
 	this[dir].set(username, newData);
 	this.SetImg(username, dir, newData.Img, id);
 	this.SetIco(username, dir, newData.Ico, id);
-	if (username != id)
+	if (username != id)//@ts-ignore
 		this[dir].delete(id);
 	return (id);
 }

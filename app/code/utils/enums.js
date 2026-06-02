@@ -10,4 +10,22 @@ const enumAuth =
 	"ADMIN" : 3,
 };
 
-module.exports = {enumAuth};
+const enumConds = 
+{
+	"EQUAL" : "EQUAL",
+	"EQUAL_GREAT" : "EQUAL_GREAT",
+	"EQUAL_SMALL" : "EQUAL_SMALL",
+	"GREAT" : "EQUAL_GREAT",
+	"SMALL" : "EQUAL_SMALL",
+	"HAS" : "HAS"
+};
+
+const enumCondBooleans = 
+{
+	"OR" : "OR",
+	"||" : "OR",
+	"AND" : "AND",
+	"&&" : "AND"
+};
+
+module.exports = {enumAuth, enumConds, enumCondBooleans};

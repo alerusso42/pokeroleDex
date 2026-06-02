@@ -165,20 +165,23 @@ function loginCheck (server, client, res, protectedPath = false)
  * If nothing is searched, returns true.
  * @param {lib.types.Server} server
  * @param {lib.types.Client} client 
+ * @param {string} dataName taken from client, if missing
  */
-function validSearch(server, client)
+function validSearch(server, client, dataName=client.dataName)
 {
 	let	trainerJson;
 
+	if (client.isAdmin == true)
+		return (true);
 	if (!client.user || !client.user.Name)
 		return (false);
-	if (!client.dataName)
+	if (!dataName)
 		return (true);
-	if (client.user.Name == client.dataName)
+	if (client.user.Name == dataName)
 		return (true);
 	for (let trainer of client.user.Trainers)
 	{
-		if (trainer == client.dataName)
+		if (trainer == dataName)
 			return (true);
 	}
 	console.log("failed. searching pokemonNames:");
@@ -190,7 +193,7 @@ function validSearch(server, client)
 		for (let pkmn of trainerJson.Pokemon)
 		{
 			console.log(pkmn);
-			if (pkmn == client.dataName)
+			if (pkmn == dataName)
 			{
 				return (true);
 			}
@@ -199,4 +202,4 @@ function validSearch(server, client)
 	return (false);
 }
 
-module.exports = {login, loginCheck};
+module.exports = {login, loginCheck, validSearch};
