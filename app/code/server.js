@@ -93,6 +93,8 @@ lib.app.post("/keyPressed/data/:dir/:name/:field", (req, res) =>
 	let match;
 	let	field;
 
+	if (!req.body)
+		res.status(400).send("missing body");
 	req.body = JSON.parse(req.body);
 	client.dataName = req.params.name;
 	client.dirName = req.params.dir;
@@ -108,6 +110,8 @@ lib.app.post("/keyPressed/autoindex/:dir{/:keys}", (req, res) =>
 	let match;
 	let	field;
 
+	if (!req.body)
+		res.status(400).send("missing body");
 	req.body = JSON.parse(req.body);
 	client.dirName = req.params.dir;
 	field = req.params.field;
