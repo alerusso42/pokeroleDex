@@ -209,7 +209,7 @@ function searchByKey(key, data, validArray = [])
 /** @typedef {import("../metadata/cond.json")} Cond*/
 /** @typedef {Array<Cond>} Conds*/
 /** @typedef {import('./utils/classes/DataList.js').ExpPrototype} ExpData*/
-/** @typedef {Set<ExpData>} ExpDataSet*/
+/** @typedef {Map<string, ExpData>} ExpDataSet*/
 
 /**
  * 
@@ -298,11 +298,11 @@ function searchByDirExpanded(server, client, input, checkValidBool=true)
 	dataSet = server.expandedData[dir];
 	if (!dataSet)
 		throw Error(`searchByKeyExp: error getting dataSet for => ${dir}`);
-	for (const data of dataSet)
+	for (const [key, data] of dataSet)
 	{
 		if (!data.Id)
-			data.Id = data.
-		if (data.Id.startsWith(input, 0) == false)
+			data.Id = key;
+		if (input && data.Id.startsWith(input, 0) == false)
 			continue ;
 		if (checkValidBool == true && !validSearch(server, client, data.Id))
 			continue ;
