@@ -145,8 +145,7 @@ function condSanifier(conds)
 		{
 			return (console.log("condSanify: missing: " + cond), false);
 		}
-		if (Number.isInteger(cond.value) == true)
-			cond.value = cond.value.toString();
+		cond.value = cond.value.toString();
 		cond.value = dataNormalize(cond.value);
 		if (cond.expect != false && cond.expect != true)
 			return (console.log("condSanify: bad expect: " + cond), false);
@@ -270,7 +269,6 @@ function resolveField(data, field, skip={counter: 0, end: false})
 		}
 		else if (Array.isArray(data))
 			break ;
-		console.log(input);
 		if (index != -1)
 		{
 			currKey = input.slice(0, index);

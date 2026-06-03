@@ -311,7 +311,7 @@ function searchByDirExpanded(server, client, input, checkValidBool=true)
 			throw Error(`searchByKeyExp: trash data => ${json}`);
 		if (condCheck(json, conds) == false)
 			continue ;
-		match.add(data);
+		match.add(json);
 	}
 	return (match);
 }

@@ -357,6 +357,8 @@
             resultsContainer.innerHTML = `<p style="color: #3498db; grid-column: 1/-1; text-align: center; font-weight: bold;">Scansione in corso nell'archivio Pokédex...</p>`;
 
             const compiledConds = compileConditions();
+			compiledConds[compiledConds.length - 1].next = undefined;
+			console.log("go");
             const payload = { conds: compiledConds };
 
             // Endpoint strutturato basato sulle specifiche fornite
