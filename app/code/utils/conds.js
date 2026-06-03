@@ -140,12 +140,14 @@ function condSanifier(conds)
 {
 	for (const cond of conds)
 	{
-		cond.value = dataNormalize(cond.value);
 		if (cond.cond == undefined || cond.field == undefined || 
 			cond.value == undefined || cond.expect == undefined)
 		{
 			return (console.log("condSanify: missing: " + cond), false);
 		}
+		if (Number.isInteger(cond.value) == true)
+			cond.value = cond.value.toString();
+		cond.value = dataNormalize(cond.value);
 		if (cond.expect != false && cond.expect != true)
 			return (console.log("condSanify: bad expect: " + cond), false);
 	}

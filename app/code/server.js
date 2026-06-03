@@ -16,6 +16,8 @@ const server = new lib.types.Server();
 // interpreta il body
 lib.app.use(lib.express.text());
 lib.app.use(lib.express.raw({ type: 'application/octet-stream', limit: '5mb' }));
+lib.app.use(lib.express.json());
+lib.app.use(lib.express.urlencoded({ extended: true }));
 
 lib.app.get("/html/error/:page", (req, res) => 
 {
@@ -95,7 +97,6 @@ lib.app.post("/keyPressed/data/:dir/:name/:field", (req, res) =>
 
 	if (!req.body)
 		res.status(400).send("missing body");
-	req.body = JSON.parse(req.body);
 	client.dataName = req.params.name;
 	client.dirName = req.params.dir;
 	field = req.params.field;
@@ -112,7 +113,6 @@ lib.app.post("/keyPressed/autoindex/:dir{/:keys}", (req, res) =>
 
 	if (!req.body)
 		res.status(400).send("missing body");
-	req.body = JSON.parse(req.body);
 	client.dirName = req.params.dir;
 	field = req.params.field;
 	match = locationSearch.searchByDirExpanded(server, client, field, true);
@@ -214,9 +214,6 @@ lib.app.get("/pokemon/:name", (req, res) =>
 		return ;
 	return (res.send(client.dom.serialize()));
 });
-
-lib.app.use(lib.express.json());
-lib.app.use(lib.express.urlencoded({ extended: true }));
 
 lib.app.get("/edit/user/:name", (req, res) => 
 {

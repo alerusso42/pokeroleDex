@@ -20,6 +20,7 @@ const expLowCaseTypes = new Array("user", "trainer", "pokemon", "category", "wor
 const linkSpecial = new Array("Ability", "Pokemon", "Name", "Type", "Evolutions", "Move");
 const linkIgnored = new Array("Kind", "Value", "Stat");
 const dataNormalize = lib.utils.dataNormalize;
+const {resolveField} = require("./utils/conds.js");
 
 //SECTION - getData
 
@@ -235,7 +236,7 @@ function searchByDataExpanded(server, client, field="", checkValidBool=true)
 		throw Error(`searchByKeyExp: cannot sanify => ${conds}`);
 	key = dataNormalize(client.dataName);
 	dir = dataNormalize(client.dirName);
-	if (!includesOneOf(dir, expLowCaseTypes))
+	if (!includesOneOf(dir, expLowCaseTypes) && !includesOneOf(dir, lowCaseTypes))
 		throw Error(`searchByKeyExp: invalid dir => ${dir}`);
 	match = new Set();
 	//@ts-ignore
@@ -289,8 +290,8 @@ function searchByDirExpanded(server, client, input, checkValidBool=true)
 		throw Error(`searchByKeyExp: received invalid array => ${conds}`);
 	if (condSanifier(conds) == false)
 		throw Error(`searchByKeyExp: cannot sanify => ${conds}`);
-	dir = dataNormalize(client.dirName);
-	if (!includesOneOf(dir, expLowCaseTypes))
+	dir = client.dirName.toLocaleLowerCase();
+	if (!includesOneOf(dir, expLowCaseTypes) && !includesOneOf(dir, lowCaseTypes))
 		throw Error(`searchByKeyExp: invalid dir => ${dir}`);
 	match = new Set();
 	//@ts-ignore
@@ -300,7 +301,7 @@ function searchByDirExpanded(server, client, input, checkValidBool=true)
 	for (const data of dataSet)
 	{
 		if (!data.Id)
-			Error(`searchByKeyExp: invalid data => ${data}`);
+			data.Id = data.
 		if (data.Id.startsWith(input, 0) == false)
 			continue ;
 		if (checkValidBool == true && !validSearch(server, client, data.Id))
