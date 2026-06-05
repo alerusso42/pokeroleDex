@@ -299,6 +299,7 @@ function searchByDirExpanded(server, client, input, checkValidBool=true)
 	dataSet = server.expandedData[dir];
 	if (!dataSet)
 		throw Error(`searchByKeyExp: error getting dataSet for => ${dir}`);
+	input = dataNormalize(input);
 	for (const [key, data] of dataSet)
 	{
 		data.Id = key;
@@ -309,8 +310,6 @@ function searchByDirExpanded(server, client, input, checkValidBool=true)
 		json = getJson(key, dir, server);
 		if (typeof(json) != "object")
 			throw Error(`searchByKeyExp: trash data => ${json}`);
-		if (key == "Eevee")
-			console.log(key);
 		if (condCheck(json, conds) == false)
 			continue ;
 		match.push(json);

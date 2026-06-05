@@ -109,13 +109,13 @@ lib.app.post("/keyPressed/autoindex/:dir{/:keys}", (req, res) =>
 {
 	let client = new lib.types.Client(server, req);
 	let match;
-	let	field;
+	let	keys;
 
 	if (!req.body)
 		res.status(400).send("missing body");
 	client.dirName = req.params.dir;
-	field = req.params.field;
-	match = locationSearch.searchByDirExpanded(server, client, field, true);
+	keys = req.params.keys;
+	match = locationSearch.searchByDirExpanded(server, client, keys, true);
 	res.send(match);
 }
 );

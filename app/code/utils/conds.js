@@ -106,6 +106,8 @@ function condCheck(data, conds)
 	searchORBool = false;
 	for (const cond of conds)
 	{
+		if (cond.cond == undefined)
+			break ;
 		//@ts-ignore
 		next = enumCondBooleans[cond.next];
 		if (searchORBool == true)
@@ -150,6 +152,15 @@ function condSanifier(conds)
 		if (cond.expect != false && cond.expect != true)
 			return (console.log("condSanify: bad expect: " + cond), false);
 	}
+	conds.push(
+		{//@ts-ignore
+			cond: undefined,
+			expect: false,
+			field: "",
+			next: "",
+			value: ""
+		}
+	);
 	return (true);
 }
 
