@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="/html/style.css">
-    <title>PokéDex Advanced Query Engine</title>
+    <title>Database</title>
     <style>
         /* ==========================================================================
            ESTENSIONI STILE POKÉDEX (Costruite sopra lo stylesheet di base)
@@ -216,8 +216,8 @@
     <div class="container">
         <div class="pokedex-frame">
             <div class="pokedex-screen">
-                <h2>PokéDex Query Engine v1.0</h2>
-                <h3>Configura i filtri logici ed esegui la scansione dei dati</h3>
+                <h2>Query Engine</h2>
+                <h3>Seleziona uno o piu campi ed esegui la scansione</h3>
             </div>
         </div>
 
@@ -263,8 +263,6 @@
             { id: "HiddenAbility", label: "Abilità Nascosta" },
             { id: "RecommendedRank", label: "Grado Consigliato" },
             { id: "Legendary", label: "Leggendario (true/false)" },
-            { id: "GoodStarter", label: "Ottimo Starter (true/false)" },
-            { id: "DexCategory", label: "Categoria Pokédex" },
             { id: "Height.Meters", label: "Altezza (Metri)" },
             { id: "Weight.Kilograms", label: "Peso (Kg)" },
             { id: "Evolutions.To", label: "Si Evolve In (Nome)" },
@@ -350,39 +348,59 @@
         }
 
         // Esegue la ricerca avanzata inviando i dati strutturati al backend tramite POST
-        async function executeSearch() {
-            const keys = document.getElementById('searchInput').value.trim();
-            const resultsContainer = document.getElementById("searchResults");
-            
-            resultsContainer.innerHTML = `<p style="color: #3498db; grid-column: 1/-1; text-align: center; font-weight: bold;">Scansione in corso nell'archivio Pokédex...</p>`;
+async function executeSearch() {
+    const keys = document.getElementById('searchInput').value.trim();
+    const resultsContainer = document.getElementById("searchResults");
+    
+    resultsContainer.innerHTML = `<p style="color: #3498db; grid-column: 1/-1; text-align: center; font-weight: bold;">Scansione in corso nell'archivio Pokédex...</p>`;
 
-            const compiledConds = compileConditions();
-			compiledConds[compiledConds.length - 1].next = undefined;
-			console.log("go");
-            const payload = { conds: compiledConds };
+    const compiledConds = compileConditions();
+    
+    // Sicurezza: evita crash se l'array è vuoto
+    if (compiledConds.length > 0) {
+        compiledConds[compiledConds.length - 1].next = "";
+    }
+    
+    const payload = { conds: compiledConds };
+    const url = `/keyPressed/autoindex/pokedex/${keys}`;
 
-            // Endpoint strutturato basato sulle specifiche fornite
-            const url = `/keyPressed/autoindex/pokedex/${keys}`;
+    try {
+        console.log("Payload inviato:", JSON.stringify(payload));
+        
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
 
-            try {
-				console.log(payload);
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Errore Server: ${response.status}`);
-                }
-
-                const data = await response.json();
-                renderResults(data);
-
-            } catch (err) {
-                resultsContainer.innerHTML = `<p style="color: #e74c3c; grid-column: 1/-1; text-align: center; font-weight: bold;">⚠️ Errore di connessione o formato dati non valido.<br>${err.message}</p>`;
-            }
+        if (!response.ok) {
+            throw new Error(`Errore Server: ${response.status}`);
         }
+        
+        console.log("resp OK");
+
+        // DEBUG LOG: Vediamo la stringa grezza che risponde il server prima di fare il parse
+        const rawText = await response.text();
+        console.log("Testo grezzo ricevuto dal server:", rawText);
+
+        // Se il testo è vuoto o non è un JSON valido, ce ne accorgiamo qui
+        if (!rawText || rawText.trim() === "") {
+            throw new Error("Il server ha risposto con un body completamente vuoto.");
+        }
+
+        const data = JSON.parse(rawText);
+        console.log("Dati parsati con successo:", data);
+        
+        // Se i dati sono incapsulati in un sotto-oggetto (es. data.pokemon o data.results)
+        const pokemonArray = Array.isArray(data) ? data : (data.results || data.data || []);
+        
+        renderResults(pokemonArray);
+
+    } catch (err) {
+        console.error("Errore nel processo di fetch/parse:", err);
+        resultsContainer.innerHTML = `<p style="color: #e74c3c; grid-column: 1/-1; text-align: center; font-weight: bold;">⚠️ Errore di formato dati.<br>${err.message}</p>`;
+    }
+}
 
         // Genera i blocchi grafici per ogni pokémon trovato
         function renderResults(pokemonList) {

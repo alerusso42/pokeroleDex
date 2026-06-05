@@ -209,7 +209,8 @@ function searchByKey(key, data, validArray = [])
 /** @typedef {import("../metadata/cond.json")} Cond*/
 /** @typedef {Array<Cond>} Conds*/
 /** @typedef {import('./utils/classes/DataList.js').ExpPrototype} ExpData*/
-/** @typedef {Map<string, ExpData>} ExpDataSet*/
+/** @typedef {Map<string, ExpData>} ExpDataMap*/
+/** @typedef {Array<ExpData>} ExpDataArray*/
 
 /**
  * 
@@ -274,13 +275,13 @@ function searchByDataExpanded(server, client, field="", checkValidBool=true)
  * @param {Client} client
  * @param {string} input
  * @param {boolean} checkValidBool
- * @returns {ExpDataSet}
+ * @returns {ExpDataArray}
  */
 function searchByDirExpanded(server, client, input, checkValidBool=true)
 {
 	/** @type {Conds} */	let	conds;
-	/** @type {ExpDataSet}*/let	dataSet;
-	/** @type {ExpDataSet}*/let match;
+	/** @type {ExpDataMap}*/let	dataSet;
+	/** @type {ExpDataArray}*/let match;
 	let	json;
 	let	dir;
 
@@ -293,25 +294,26 @@ function searchByDirExpanded(server, client, input, checkValidBool=true)
 	dir = client.dirName.toLocaleLowerCase();
 	if (!includesOneOf(dir, expLowCaseTypes) && !includesOneOf(dir, lowCaseTypes))
 		throw Error(`searchByKeyExp: invalid dir => ${dir}`);
-	match = new Set();
+	match = new Array();
 	//@ts-ignore
 	dataSet = server.expandedData[dir];
 	if (!dataSet)
 		throw Error(`searchByKeyExp: error getting dataSet for => ${dir}`);
 	for (const [key, data] of dataSet)
 	{
-		if (!data.Id)
-			data.Id = key;
+		data.Id = key;
 		if (input && data.Id.startsWith(input, 0) == false)
 			continue ;
 		if (checkValidBool == true && !validSearch(server, client, data.Id))
 			continue ;
-		json = server.expandedData.GetData(data.Id, dir);
+		json = getJson(key, dir, server);
 		if (typeof(json) != "object")
 			throw Error(`searchByKeyExp: trash data => ${json}`);
+		if (key == "Eevee")
+			console.log(key);
 		if (condCheck(json, conds) == false)
 			continue ;
-		match.add(json);
+		match.push(json);
 	}
 	return (match);
 }

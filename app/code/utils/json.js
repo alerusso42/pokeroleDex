@@ -1,5 +1,7 @@
 const fs = require("fs");
 
+/** @typedef {import('./classes/Server.js').Server} Server*/
+
 /**
  * 
  * @param {String | JSON} path path to the json file, or the JSON parsed data 
@@ -33,12 +35,18 @@ function editJson(path, data, addBool=false)
 /**
  * 
  * @param {String} path path to the json file
+ * @param {String} dir this allow to find file root path
+ * @param {Server | null} server
  */
-function getJson(path)
+function getJson(path, dir="", server=null)
 {
 	let	rawData;
 	let	data;
 
+	if (dir && server)
+	{
+		path = server.data.GetPath(dir) + path;
+	}
 	if (path.indexOf(".json") == -1)
 		path = path + ".json";
 	rawData = fs.readFileSync(path);

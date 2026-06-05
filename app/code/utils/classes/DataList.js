@@ -109,7 +109,8 @@ const dataListPath =
 	"ability" : dataPath + "Ability/",
 	"user" : questDataPath + "user/",
 	"trainer" : questDataPath + "trainer/",
-	"pokemon" : questDataPath + "pokemon/"
+	"pokemon" : questDataPath + "pokemon/",
+	"category": questDataPath + "category/"
 };
 
 /**
@@ -419,4 +420,4 @@ function setIco(id, dir, newData, oldId="")
 	}
 }
 
-module.exports = {dataList, expandedDataList};
+module.exports = {dataList, expandedDataList, dataListPath};

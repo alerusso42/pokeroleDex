@@ -162,14 +162,17 @@ function evalCond(data, cond)
 {
 	let	metadata;
 	let	field;
+	let	i;
 
 	metadata = {counter: 0, end: false};
 	field = resolveField(data, cond.field, metadata);
 	if (field != undefined && evalCondOne(field, cond) == true)
 		return (true);
+	i = 0;
 	while (metadata.end == false)
 	{
-		metadata.counter += 1;
+		i++;
+		metadata.counter = i;
 		field = resolveField(data, cond.field, metadata);
 		if (field != undefined && evalCondOne(field, cond) == true)
 			return (true);

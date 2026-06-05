@@ -101,7 +101,7 @@ lib.app.post("/keyPressed/data/:dir/:name/:field", (req, res) =>
 	client.dirName = req.params.dir;
 	field = req.params.field;
 	match = locationSearch.searchByDataExpanded(server, client, field, true);
-	res.end();
+	res.send(match);
 }
 );
 
@@ -111,13 +111,12 @@ lib.app.post("/keyPressed/autoindex/:dir{/:keys}", (req, res) =>
 	let match;
 	let	field;
 
-	debugger;
 	if (!req.body)
 		res.status(400).send("missing body");
 	client.dirName = req.params.dir;
 	field = req.params.field;
 	match = locationSearch.searchByDirExpanded(server, client, field, true);
-	res.end();
+	res.send(match);
 }
 );
 
