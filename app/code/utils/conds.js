@@ -102,6 +102,8 @@ function condCheck(data, conds)
 	let	currBoolean;
 	let	searchORBool;
 
+	if (conds.length <= 1)
+		return (true);
 	currBoolean = enumCondBooleans.OR;
 	searchORBool = false;
 	for (const cond of conds)

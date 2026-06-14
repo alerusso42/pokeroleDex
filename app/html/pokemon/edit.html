@@ -54,9 +54,10 @@
             </div>
             
             <div class="stats-grid">
-                <div class="form-group">
+                <div class="form-group" style="position: relative;">
                     <label>Specie</label>
-                    <input type="text" id="f-species" readonly style="background:#eee;">
+                    <input type="text" id="f-species" autocomplete="off" placeholder="Cerca una specie..." required>
+                    <div id="species-autocomplete-container" style="position: absolute; width: 100%; top: 100%; left: 0; z-index: 1000; max-height: 250px; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.15);"></div>
                 </div>
                 <div class="form-group">
                     <label>HP (Attuali / Max)</label>
@@ -95,7 +96,6 @@
 
     <script>
         const attrNames = ["Strength", "Dexterity", "Vitality", "Special", "Insight"];
-        // Ho aggiunto Initiative qui così lo gestisce in automatico nella griglia Skills
         const skillNames = ["Brawl", "Channel", "Clash", "Evasion", "Alert", "Athletics", "Nature", "Stealth", "Initiative"];
         let originalData = null;
 
@@ -120,6 +120,101 @@
                 </div>`;
         });
 
+        // =========================================================================
+        // LOGICA DI LIVE SEARCH PER IL CAMPO SPECIE (FIXED PER ARRAY DI OGGETTI)
+        // =========================================================================
+        const speciesInput = document.getElementById('f-species');
+        const speciesContainer = document.getElementById('species-autocomplete-container');
+
+        function pokemonToSnakeCase(name) {
+            return name.toLowerCase()
+                       .replace(/[^a-z0-9\s-]/g, '')
+                       .trim()
+                       .replace(/\s+/g, '-');
+        }
+
+        speciesInput.addEventListener('input', async function() {
+            const keyPressed = this.value.trim();
+
+            if (!keyPressed) {
+                speciesContainer.innerHTML = '';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/keyPressed/autoindex/pokedex/${encodeURIComponent(keyPressed)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ conds: [] })
+                });
+
+                if (!response.ok) throw new Error("Errore nel recupero delle specie");
+
+                const match = await response.json();
+                renderSpeciesResults(match);
+
+            } catch (error) {
+                console.error("Errore fetch autoindex:", error);
+                speciesContainer.innerHTML = `<div class="search-category-title" style="background: var(--poke-red);">Errore di rete</div>`;
+            }
+        });
+
+        function renderSpeciesResults(match) {
+            speciesContainer.innerHTML = '';
+
+            // Se l'array è vuoto, non fare nulla
+            if (!match || match.length === 0) return;
+
+            // Essendo una ricerca specifica su pokedex, usiamo "pokedex" come titolo di categoria statico
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'search-category-title';
+            titleDiv.textContent = 'pokedex';
+            speciesContainer.appendChild(titleDiv);
+
+            const listDiv = document.createElement('div');
+            listDiv.className = 'search-results-list';
+
+            // Cicliamo direttamente l'array di oggetti ricevuto
+            match.forEach(pokemon => {
+                const name = pokemon.Name; // Estraiamo il nome dall'oggetto
+                const imgFile = pokemonToSnakeCase(name) + ".png";
+                
+                const itemAnchor = document.createElement('a');
+                itemAnchor.href = '#';
+                itemAnchor.className = 'search-item';
+                
+                const imgHtml = `<img src="https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/BoxSprites/${imgFile}" class="item-icon" style="width: 32px; height: 32px; margin-right: 8px; object-fit: contain;">`;
+
+                itemAnchor.innerHTML = `
+                    <div style="display: flex; align-items: center;">
+                        ${imgHtml}
+                        <span class="item-name">${name}</span>
+                    </div>
+                    <span class="item-type-label">pokedex</span>
+                `;
+
+                // Al click sul suggerimento, aggiorniamo il valore e chiudiamo la tendina
+                itemAnchor.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    speciesInput.value = name;
+                    speciesContainer.innerHTML = '';
+                });
+
+                listDiv.appendChild(itemAnchor);
+            });
+
+            speciesContainer.appendChild(listDiv);
+        }
+
+        document.addEventListener('click', (e) => {
+            if (e.target !== speciesInput && !speciesContainer.contains(e.target)) {
+                speciesContainer.innerHTML = '';
+            }
+        });
+
+        // =========================================================================
+        // CARICAMENTO E SALVATAGGIO DATI ORIGINARI
+        // =========================================================================
         async function loadData() {
             const pathParts = window.location.pathname.split('/');
             const pkmnId = pathParts[pathParts.length - 1];
@@ -186,6 +281,7 @@
             
             // Sync Base
             updatedData.Name = document.getElementById('f-name').value;
+            updatedData.Species = document.getElementById('f-species').value;
             updatedData.HP = {
                 current: parseInt(document.getElementById('f-hp-curr').value),
                 max: parseInt(document.getElementById('f-hp-max').value)

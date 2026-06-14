@@ -2,3 +2,5 @@ node_modules
 .tools/
 logs/
 app/.install-fingerprint
+data/questData/
+data/questPictures/

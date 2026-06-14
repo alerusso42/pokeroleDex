@@ -57,3 +57,681 @@ CRITICAL CHAINING RULES FOR JAVASCRIPT GENERATION:
 * Do NOT write any code until all 6 questions are answered.
 * Never hardcode mock data in the UI state; always drive the UI from the API fetch responses.
 * Handle network errors gracefully in the UI, showing a human-readable message if fetch fails or returns non-JSON data.
+
+### DIRS LIST
+
+"pokedex" : list of all species data
+"nature" : list of all natures data
+"move" : list of all moves data
+"item" : list of all item data
+"ability" : list of all ability data
+"user" : list of all user data
+"trainer" : list of all trainer data
+"pokemon" : list of all pokemon data
+
+#### TEMPLATE pokedex
+{
+    "Number": 460,
+    "DexID": "0460M1",
+    "Name": "Abomasnow (Mega Form)",
+    "Type1": "Grass",
+    "Type2": "Ice",
+    "BaseHP": 6,
+    "Strength": 3,
+    "MaxStrength": 7,
+    "Dexterity": 1,
+    "MaxDexterity": 3,
+    "Vitality": 3,
+    "MaxVitality": 6,
+    "Special": 3,
+    "MaxSpecial": 7,
+    "Insight": 3,
+    "MaxInsight": 6,
+    "Ability1": "Snow Warning",
+    "Ability2": "",
+    "HiddenAbility": "",
+    "EventAbilities": "",
+    "RecommendedRank": "Ace",
+    "GenderType": "",
+    "Legendary": false,
+    "GoodStarter": false,
+    "_id": "abomasnow-mega-form",
+    "DexCategory": "Frosted Tree Pokémon",
+    "Height": {
+        "Meters": 2.7,
+        "Feet": 9.0
+    },
+    "Weight": {
+        "Kilograms": 185.0,
+        "Pounds": 407.0
+    },
+    "DexDescription": "The power of the Mega Stone freezes part of its body, creating pointy icicles that hail upon its enemies in a blizzard. The angrier it becomes, the longer the storm will last.",
+    "Evolutions": [
+        {
+            "From": "Abomasnow",
+            "Kind": "Mega",
+            "Item": "Abomasite"
+        }
+    ],
+    "Image": "abomasnow-mega-form.png",
+    "Moves": [
+        {
+            "Learned": "Starter",
+            "Name": "Powder Snow"
+        },
+        {
+            "Learned": "Starter",
+            "Name": "Leer"
+        },
+        {
+            "Learned": "Rookie",
+            "Name": "Leafage"
+        },
+        {
+            "Learned": "Rookie",
+            "Name": "Mist"
+        },
+        {
+            "Learned": "Standard",
+            "Name": "Ice Shard"
+        },
+        {
+            "Learned": "Standard",
+            "Name": "Razor Leaf"
+        },
+        {
+            "Learned": "Standard",
+            "Name": "Icy Wind"
+        },
+        {
+            "Learned": "Standard",
+            "Name": "Bulldoze"
+        },
+        {
+            "Learned": "Standard",
+            "Name": "Rock Smash"
+        },
+        {
+            "Learned": "Standard",
+            "Name": "Swagger"
+        },
+        {
+            "Learned": "Advanced",
+            "Name": "Grass Whistle"
+        },
+        {
+            "Learned": "Advanced",
+            "Name": "Energy Ball"
+        },
+        {
+            "Learned": "Advanced",
+            "Name": "Ingrain"
+        },
+        {
+            "Learned": "Advanced",
+            "Name": "Icicle Crash"
+        },
+        {
+            "Learned": "Advanced",
+            "Name": "Ice Punch"
+        },
+        {
+            "Learned": "Advanced",
+            "Name": "Aurora Veil"
+        },
+        {
+            "Learned": "Expert",
+            "Name": "Blizzard"
+        },
+        {
+            "Learned": "Expert",
+            "Name": "Wood Hammer"
+        },
+        {
+            "Learned": "Expert",
+            "Name": "Sheer Cold"
+        },
+        {
+            "Learned": "Ace",
+            "Name": "Avalanche"
+        },
+        {
+            "Learned": "Ace",
+            "Name": "Giga Impact"
+        },
+        {
+            "Learned": "Ace",
+            "Name": "Outrage"
+        }
+    ]
+}
+{
+    "Number": 133,
+    "DexID": "0133",
+    "Name": "Eevee",
+    "Type1": "Normal",
+    "Type2": "",
+    "BaseHP": 3,
+    "Strength": 2,
+    "MaxStrength": 4,
+    "Dexterity": 2,
+    "MaxDexterity": 4,
+    "Vitality": 2,
+    "MaxVitality": 4,
+    "Special": 2,
+    "MaxSpecial": 4,
+    "Insight": 2,
+    "MaxInsight": 4,
+    "Ability1": "Run Away",
+    "Ability2": "Adaptability",
+    "HiddenAbility": "Anticipation",
+    "EventAbilities": "",
+    "RecommendedRank": "Rookie",
+    "GenderType": "",
+    "Legendary": false,
+    "GoodStarter": true,
+    "_id": "eevee",
+    "DexCategory": "Evolution Pokemon",
+    "Height": {
+        "Meters": 0.3,
+        "Feet": 1.0
+    },
+    "Weight": {
+        "Kilograms": 6.0,
+        "Pounds": 14.0
+    },
+    "DexDescription": "This Pokemon is extremely rare to find. Eevee has an unstable genetic makeup that suddenly mutates to fit its environment. Radiation from various stones causes this Pokemon to evolve.",
+    "Evolutions": [
+        {
+            "To": "Vaporeon",
+            "Kind": "Stone",
+            "Item": "Water Stone"
+        },
+        {
+            "To": "Jolteon",
+            "Kind": "Stone",
+            "Item": "Thunder Stone"
+        },
+        {
+            "To": "Flareon",
+            "Kind": "Stone",
+            "Item": "Fire Stone"
+        },
+        {
+            "To": "Espeon",
+            "Kind": "Special",
+            "Stat": "Happiness",
+            "Value": 4,
+            "Special": "Sunlight"
+        },
+        {
+            "To": "Umbreon",
+            "Kind": "Special",
+            "Stat": "Happiness",
+            "Value": 4,
+            "Special": "Moonlight"
+        },
+        {
+            "To": "Leafeon",
+            "Kind": "Stone",
+            "Item": "Leaf Stone"
+        },
+        {
+            "To": "Glaceon",
+            "Kind": "Stone",
+            "Item": "Ice Stone"
+        },
+        {
+            "To": "Sylveon",
+            "Kind": "Stat",
+            "Stat": "Loyalty",
+            "Value": 5
+        }
+    ],
+    "Image": "eevee.png",
+    "Moves": [
+        {
+            "Learned": "Starter",
+            "Name": "Tackle"
+        },
+        {
+            "Learned": "Starter",
+            "Name": "Growl"
+        },
+        {
+            "Learned": "Rookie",
+            "Name": "Tail Whip"
+        },
+        {
+            "Learned": "Rookie",
+            "Name": "Sand Attack"
+        },
+        {
+            "Learned": "Rookie",
+            "Name": "Quick Attack"
+        },
+        {
+            "Learned": "Standard",
+            "Name": "Baby-Doll Eyes"
+        },
+        {
+            "Learned": "Standard",
+            "Name": "Helping Hand"
+        },
+        {
+            "Learned": "Standard",
+            "Name": "Swift"
+        },
+        {
+            "Learned": "Standard",
+            "Name": "Bite"
+        },
+        {
+            "Learned": "Standard",
+            "Name": "Covet"
+        },
+        {
+            "Learned": "Standard",
+            "Name": "Copycat"
+        },
+        {
+            "Learned": "Advanced",
+            "Name": "Refresh"
+        },
+        {
+            "Learned": "Advanced",
+            "Name": "Charm"
+        },
+        {
+            "Learned": "Advanced",
+            "Name": "Take Down"
+        },
+        {
+            "Learned": "Advanced",
+            "Name": "Double-Edge"
+        },
+        {
+            "Learned": "Advanced",
+            "Name": "Baton Pass"
+        },
+        {
+            "Learned": "Expert",
+            "Name": "Trump Card"
+        },
+        {
+            "Learned": "Expert",
+            "Name": "Last Resort"
+        },
+        {
+            "Learned": "Ace",
+            "Name": "Wish"
+        },
+        {
+            "Learned": "Ace",
+            "Name": "Veevee Volley"
+        },
+        {
+            "Learned": "Ace",
+            "Name": "Baddy Bad"
+        },
+        {
+            "Learned": "Ace",
+            "Name": "Buzzy Buzz"
+        },
+        {
+            "Learned": "Ace",
+            "Name": "Sparkly Swirl"
+        },
+        {
+            "Learned": "Ace",
+            "Name": "Sizzly Slide"
+        },
+        {
+            "Learned": "Ace",
+            "Name": "Sappy Seed"
+        },
+        {
+            "Learned": "Ace",
+            "Name": "Freezy Frost"
+        },
+        {
+            "Learned": "Ace",
+            "Name": "Glitzy Glow"
+        },
+        {
+            "Learned": "Ace",
+            "Name": "Bouncy Bubble"
+        }
+    ]
+}
+#### TEMPLATE nature
+{
+    "Name": "Adamant",
+    "Nature": "Adamant (4)",
+    "Confidence": 4,
+    "Keywords": "Powerful, Fierce, Relentless",
+    "Description": "An indomitable will that won't falter. Those with Adamant nature are belligerent and impassive. Only the strong survive in this world, that's why power and strength are what they respect the most. You are either their equal or you're inferior. Working as a team does not fit them well. They believe everyone must carry their own weight and those who can't will be left behind. They also lash out when they feel threatened and rarely care for social norms.",
+    "_id": "adamant"
+}
+#### TEMPLATE move
+{
+    "Name": "Acid Spray",
+    "Type": "Poison",
+    "Power": 2,
+    "Damage1": "Special",
+    "Damage2": "",
+    "Accuracy1": "Dexterity",
+    "Accuracy2": "Channel",
+    "Target": "Foe",
+    "Effect": "Single Target. Projectile Move. Reduce the Target's Sp. Defense by 2.",
+    "Description": "Do not point at face or eyes. Keep away from children.",
+    "_id": "acid-spray",
+    "Attributes": {},
+    "AddedEffects": {
+	        "StatChanges": [
+		            {
+			                "Stats": [
+				                    "Special"
+				                ],
+			                "Stages": -2,
+			                "Affects": "Targets"
+			            }
+		        ]
+	    },
+    "Category": "Special"
+} {
+    "Name": "Swords Dance",
+    "Type": "Normal",
+    "Power": 0,
+    "Damage1": "",
+    "Damage2": "",
+    "Accuracy1": "Tough",
+    "Accuracy2": "Perform",
+    "Target": "Self",
+    "Effect": "Target Self. Increase the User's Strength by 2.",
+    "Description": "The Pokémon dances with strong steps and a fierce attitude as a ritual to prepare for battle.",
+    "_id": "swords-dance",
+    "Attributes": {},
+    "AddedEffects": {
+	        "StatChanges": [
+		            {
+			                "Stats": [
+				                    "Strength"
+				                ],
+			                "Stages": 2,
+			                "Affects": "User"
+			            }
+		        ]
+	    },
+    "Category": "Support"
+} {
+    "Name": "Tailwind",
+    "Type": "Flying",
+    "Power": 0,
+    "Damage1": "",
+    "Damage2": "",
+    "Accuracy1": "Clever",
+    "Accuracy2": "Nature",
+    "Target": "Ally's Battlefield",
+    "Effect": "Target User's side of the Field. Wind Move. Increase by 2 the Dexterity of everyone on the User's side of the field. Duration 4 Rounds.",
+    "Description": "Flying Pokémon know better than anyone how to use the wind in their favor. Let its draft carry you to victory.",
+    "_id": "tailwind",
+    "Attributes": {
+	        "Duration": 4,
+	        "WindMove": true
+	    },
+    "AddedEffects": {
+	        "Ailments": [
+		            {
+			                "Type": "Tailwind",
+			                "Affects": "Targets"
+			            }
+		        ]
+	    },
+    "Category": "Support"
+}{
+    "Name": "Toxic Spikes",
+    "Type": "Poison",
+    "Power": 0,
+    "Damage1": "",
+    "Damage2": "",
+    "Accuracy1": "Dexterity",
+    "Accuracy2": "Stealth",
+    "Target": "Foe's Battlefield",
+    "Effect": "Target Foe's side of the Field. Entry Hazard. Foes who enter the battlefield become Poisoned. Roll 1 Chance Die for them to become Badly Poisoned instead. Pokemon with immunity to Ground-Type Moves are not affected.",
+    "Description": "The Pokémon lays a trap of tiny venom-drenched spikes through the battlefield. The battle has not yet begun and the foes are already defeated.",
+    "_id": "toxic-spikes",
+    "Attributes": {},
+    "AddedEffects": {
+	        "TerrainEffect": "ToxicSpikes"
+	    },
+    "Category": "Support"
+}{
+    "Name": "Trick Room",
+    "Type": "Psychic",
+    "Power": 0,
+    "Damage1": "",
+    "Damage2": "",
+    "Accuracy1": "Special",
+    "Accuracy2": "Channel",
+    "Target": "Battlefield",
+    "Effect": "Target the Battlefield. Invert the order of Initiative. Duration 4 Rounds.",
+    "Description": "Reality inside the battlefielfield is distorted, time bends and flows differently for everyone. Those who don’t rush through manage to adapt easier.",
+    "_id": "trick-room",
+    "Attributes": {
+	        "Duration": 4
+	    },
+    "AddedEffects": {},
+    "Category": "Support"
+}{
+    "Name": "Rain Dance",
+    "Type": "Water",
+    "Power": 0,
+    "Damage1": "",
+    "Damage2": "",
+    "Accuracy1": "Special",
+    "Accuracy2": "Perform/Nature",
+    "Target": "Battlefield",
+    "Effect": "Target Battlefield. Activate Rain Weather. Duration 4 Rounds.",
+    "Description": "The Pokémon performs a peculiar dance in the middle of the field, everyone thinks it silly until the first thunder rumbles.",
+    "_id": "rain-dance",
+    "Attributes": {
+	        "Duration": 4
+	    },
+    "AddedEffects": {
+	        "TerrainEffect": "Rain"
+	    },
+    "Category": "Support"
+}#### TEMPLATE item
+{
+    "Name": "Charcoal",
+    "_id": "charcoal",
+    "Source": "Core 3.0",
+    "PMD": false,
+    "Pocket": "HeldItems",
+    "Category": "TypeBoosting",
+    "Description": "Special charcoal to keep a flame strong. Add 1 Extra die to the Damage pool of Fire-Type Moves.",
+    "OneUse": false,
+    "TrainerPrice": "Not for Sale",
+    "ForTypes": "Fire",
+    "Boost": "Damage",
+    "Value": 1,
+    "Image": "charcoal.png"
+}
+{
+    "Name": "Burn Heal",
+    "_id": "burn-heal",
+    "Source": "Core 3.0",
+    "PMD": false,
+    "Pocket": "Medicine",
+    "Category": "Status",
+    "Description": "A powder that extinguishes the fire and aids with the healing of the burnt area. Heal all Burn degrees.",
+    "OneUse": true,
+    "TrainerPrice": "250",
+    "Cures": "Burn",
+    "Image": "burn-heal.png"
+}
+#### TEMPLATE ability
+{
+    "Name": "Aerilate",
+    "Effect": "Normal-Type Moves that the Pokemon uses will deal damage as if they were Flying-Type, affecting STAB, weakness and resistance. Add 1 Extra die to the Damage Pool of Flying moves.",
+    "Description": "The Pokemon never touches the ground, a neverending wind current can be felt swirling around it.",
+    "_id": "aerilate"
+}
+#### TEMPLATE user
+{
+	"Id": 0,
+	"IsAdmin": false,
+	"File": "",
+	"Password": "password",
+	"Name": "giorgio",
+	"Category": "I bro",
+	"Img": "",
+	"Ico": "",
+	"Trainers": ["Devil Ryugi", "ROCKY"]
+}
+#### TEMPLATE trainer
+{
+	"Id": 0,
+	"File": "",
+	"User" : "",
+	"Name": "ROCKY",
+	"Category": "team_black",
+	"Img": "",
+	"Ico": "",
+	"Pokemon": []
+}
+#### TEMPLATE pokemon
+{
+    "Species": "Abomasnow (Mega Form)",
+    "Name": "PiccoloPerry",
+    "Trainer": "ROCKY",
+	"Category": "The caves near the school",
+	"Img": "",
+	"Ico": "",
+	"Rank": "Beginner",
+    "Type1": "Grass",
+    "Type2": "Ice",
+    "HP": { "current": 3, "max": 7 },
+    "Will": { "current": 5, "max": 5 },
+    "Strength": { "current": 3, "max": 7 },
+    "Dexterity": { "current": 1, "max": 2 },
+    "Vitality": { "current": 3, "max": 6 },
+    "Special": { "current": 3, "max": 7 },
+    "Insight": { "current": 3, "max": 6 },
+    "Ability": 
+	{
+    	"Name": "Snow Warning",
+    	"Effect": "When this Pokemon comes out, it automatically starts the effects of Hail Weather. The effects end when the Pokemon leaves the battle. (In case of stalemate the Pokemon with higher Will might keep the dominant weather)",
+    	"Description": "The Pokemon is able to call a terrible hailstorm at will. Snow will cover the battlefield and sharp ice shards will come plummeting from the sky."
+	},
+    "Brawl": 6,
+    "Channel": 6,
+    "Clash": 4,
+    "Evasion": 1,
+    "Alert": 6,
+    "Athletics": 4,
+    "Nature": 6,
+    "Stealth": 1,
+    "Initiative": 6,
+    "void": 0,
+    "Height": {
+        "Meters": 2.7,
+        "Feet": 8.9
+    },
+    "Weight": {
+        "Kilograms": 185.0,
+        "Pounds": 407.9
+    },
+    "DexDescription": "The power of the Mega Stone freezes part of its body creating pointy icicles that hail upon its enemies in a blizzard. The angrier it becomes the longer the storm will last.",
+    "Evolutions": [
+        {
+            "From": "Abomasnow",
+            "Kind": "Mega",
+            "Item": "Abomasite"
+        }
+    ],
+    "Moves": [
+        {
+            "Name": "Ice Punch",
+            "Type": "Ice",
+            "Power": 2,
+            "Damage1": "Strength",
+            "Damage2": "",
+            "Accuracy1": "Dexterity",
+            "Accuracy2": "Brawl",
+            "Target": "Foe",
+            "Effect": "May freeze the target.",
+            "Description": "The user attacks with a frigid punch.",
+            "Attributes": { "Freeze": 2 },
+            "AddedEffects": {},
+            "Category": "Physical"
+        },
+        {
+            "Name": "Razor Leaf",
+            "Type": "Grass",
+            "Power": 2,
+            "Damage1": "Strength",
+            "Damage2": "",
+            "Accuracy1": "Dexterity",
+            "Accuracy2": "Brawl",
+            "Target": "Foe",
+            "Effect": "High Critical Hit ratio.",
+            "Description": "Sharp-edged leaves are launched to slash at the foe.",
+            "Attributes": { "High-Critical": true },
+            "AddedEffects": {},
+            "Category": "Physical"
+        },
+        {
+            "Name": "Blizzard",
+            "Type": "Ice",
+            "Power": 4,
+            "Damage1": "Special",
+            "Damage2": "",
+            "Accuracy1": "Dexterity",
+            "Accuracy2": "Channel",
+            "Target": "All Foes",
+            "Effect": "May freeze the targets. Never misses in Hail.",
+            "Description": "A howling blizzard is summoned to strike the opposing team.",
+            "Attributes": { "Freeze": 2, "Area": true },
+            "AddedEffects": {},
+            "Category": "Special"
+        },
+        {
+            "Name": "Wood Hammer",
+            "Type": "Grass",
+            "Power": 4,
+            "Damage1": "Strength",
+            "Damage2": "",
+            "Accuracy1": "Dexterity",
+            "Accuracy2": "Brawl",
+            "Target": "Foe",
+            "Effect": "The user sustains Recoil damage equal to 1/3 of the damage dealt.",
+            "Description": "The user slams its rugged body into the foe.",
+            "Attributes": { "Recoil": 0.33 },
+            "AddedEffects": {},
+            "Category": "Physical"
+        },
+        {
+            "Name": "Absorb",
+            "Type": "Grass",
+            "Power": 1,
+            "Damage1": "Special",
+            "Damage2": "",
+            "Accuracy1": "Dexterity",
+            "Accuracy2": "Channel",
+            "Target": "Foe",
+            "Effect": "The user restores HP equal to half the damage dealt rounded down.",
+            "Description": "The user absorbs the vital energy of the foe.",
+            "Attributes": {},
+            "AddedEffects": {
+                "Heal": {
+                    "Type": "Leech",
+                    "Percentage": 0.5,
+                    "Target": "User"
+                }
+            },
+            "Category": "Special"
+        }
+    ]
+}
