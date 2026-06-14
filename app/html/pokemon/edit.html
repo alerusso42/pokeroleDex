@@ -37,6 +37,17 @@
         }
         .btn-save:hover { background: #219150; transform: translateY(-2px); }
         .section-title { border-bottom: 2px solid var(--poke-red); padding-bottom: 5px; margin-top: 20px; font-weight: bold; }
+        
+        .autocomplete-box {
+            position: absolute; width: 100%; top: 100%; left: 0; z-index: 1000; 
+            max-height: 250px; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            background: white; border-radius: 0 0 8px 8px;
+        }
+        
+        .item-desc-preview {
+            display: block; font-size: 0.75em; color: #666; margin-top: 2px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -57,7 +68,7 @@
                 <div class="form-group" style="position: relative;">
                     <label>Specie</label>
                     <input type="text" id="f-species" autocomplete="off" placeholder="Cerca una specie..." required>
-                    <div id="species-autocomplete-container" style="position: absolute; width: 100%; top: 100%; left: 0; z-index: 1000; max-height: 250px; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.15);"></div>
+                    <div id="species-autocomplete-container" class="autocomplete-box"></div>
                 </div>
                 <div class="form-group">
                     <label>HP (Attuali / Max Specie)</label>
@@ -80,10 +91,11 @@
             <div class="stats-grid" id="skills-container"></div>
 
             <div class="section-title">Abilità</div>
-            <div class="form-group">
+            <div class="form-group" style="position: relative;">
                 <label>Nome Abilità</label>
-                <input type="text" id="f-abil-name">
-                <label>Effetto</label>
+                <input type="text" id="f-abil-name" autocomplete="off" placeholder="Clicca o cerca un'abilità...">
+                <div id="ability-autocomplete-container" class="autocomplete-box"></div>
+                <label style="margin-top: 10px;">Effetto</label>
                 <textarea id="f-abil-effect" rows="3"></textarea>
             </div>
 
@@ -98,7 +110,7 @@
         const attrNames = ["Strength", "Dexterity", "Vitality", "Special", "Insight"];
         const skillNames = ["Brawl", "Channel", "Clash", "Evasion", "Alert", "Athletics", "Nature", "Stealth", "Initiative"];
         let originalData = null;
-        let currentSpeciesData = null; // Contiene l'oggetto Pokedex locale del pokemon attuale
+        let currentSpeciesData = null; 
 
         // Inizializzazione UI statica
         const attrContainer = document.getElementById('attributes-container');
@@ -122,26 +134,21 @@
         });
 
         // =========================================================================
-        // LOGICA DI AGGIORNAMENTO DATI SPECIE (MAX ATTRIBUTI / SKILLS / HP)
+        // LOGICA DI AGGIORNAMENTO DATI SPECIE (MAX ATTRIBUTI / HP)
         // =========================================================================
-        
-        // Cerca i dati del pokemon sul server e aggiorna i tetti massimi della scheda
         async function updateSpeciesMaxData(speciesName) {
             if (!speciesName) {
                 clearMaxFields();
                 return;
             }
-
             try {
                 const response = await fetch(`/keyPressed/autoindex/pokedex/${encodeURIComponent(speciesName)}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ conds: [] })
                 });
-
                 if (response.ok) {
                     const match = await response.json();
-                    // Controlliamo se c'è un match valido nell'array e prendiamo il primo elemento
                     if (match && match.length > 0) {
                         currentSpeciesData = match[0];
                         applyMaxValues(currentSpeciesData);
@@ -150,27 +157,20 @@
                 }
                 clearMaxFields();
             } catch (error) {
-                console.error("Errore nel recupero dei limiti di specie:", error);
+                console.error(error);
                 clearMaxFields();
             }
         }
 
-        // Applica i valori massimi presi dall'oggetto del pokedex recuperato
         function applyMaxValues(data) {
-            // HP di base della specie
             document.getElementById('f-hp-max').value = data.BaseHP !== undefined ? data.BaseHP : "???";
-
-            // Sincronizza i massimi degli attributi usando la chiave "Max" + NomeAttributo (es: MaxStrength)
             attrNames.forEach(attr => {
                 const maxKey = "Max" + attr;
                 const maxField = document.getElementById(`max-${attr}`);
-                if (maxField) {
-                    maxField.value = data[maxKey] !== undefined ? data[maxKey] : "???";
-                }
+                if (maxField) maxField.value = data[maxKey] !== undefined ? data[maxKey] : "???";
             });
         }
 
-        // Se l'indice è vuoto o fallisce, riempie i campi di "???"
         function clearMaxFields() {
             currentSpeciesData = null;
             document.getElementById('f-hp-max').value = "???";
@@ -187,44 +187,34 @@
         const speciesContainer = document.getElementById('species-autocomplete-container');
 
         function pokemonToSnakeCase(name) {
-            return name.toLowerCase()
-                       .replace(/[^a-z0-9\s-]/g, '')
-                       .trim()
-                       .replace(/\s+/g, '-');
+            return name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
         }
 
         speciesInput.addEventListener('input', async function() {
             const keyPressed = this.value.trim();
-
             if (!keyPressed) {
                 speciesContainer.innerHTML = '';
                 clearMaxFields();
                 return;
             }
-
             try {
                 const response = await fetch(`/keyPressed/autoindex/pokedex/${encodeURIComponent(keyPressed)}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ conds: [] })
                 });
-
-                if (!response.ok) throw new Error("Errore nel recupero delle specie");
-
+                if (!response.ok) throw new Error();
                 const match = await response.json();
                 renderSpeciesResults(match);
 
-                // Se l'utente digita esattamente il nome di un pokemon valido della lista, aggiorna i massimi al volo
                 if (match && match.length > 0 && match[0].Name.toLowerCase() === keyPressed.toLowerCase()) {
                     currentSpeciesData = match[0];
                     applyMaxValues(currentSpeciesData);
                 } else if (!match || match.length === 0) {
                     clearMaxFields();
                 }
-
             } catch (error) {
-                console.error("Errore fetch autoindex:", error);
-                speciesContainer.innerHTML = `<div class="search-category-title" style="background: var(--poke-red);">Errore di rete</div>`;
+                console.error(error);
             }
         });
 
@@ -243,7 +233,6 @@
             match.forEach(pokemon => {
                 const name = pokemon.Name;
                 const imgFile = pokemonToSnakeCase(name) + ".png";
-                
                 const itemAnchor = document.createElement('a');
                 itemAnchor.href = '#';
                 itemAnchor.className = 'search-item';
@@ -253,30 +242,271 @@
                 itemAnchor.innerHTML = `
                     <div style="display: flex; align-items: center;">
                         ${imgHtml}
-                        <span class="item-name">${name}</span>
+                        <div>
+                            <span class="item-name">${name}</span>
+                            <span class="item-desc-preview">${pokemon.Type1} ${pokemon.Type2 ? '/ ' + pokemon.Type2 : ''} - ${pokemon.DexCategory}</span>
+                        </div>
                     </div>
-                    <span class="item-type-label">pokedex</span>
                 `;
 
                 itemAnchor.addEventListener('click', (e) => {
                     e.preventDefault();
                     speciesInput.value = name;
                     speciesContainer.innerHTML = '';
-                    
-                    // Salviamo l'oggetto pokemon selezionato e aggiorniamo i massimi della UI
                     currentSpeciesData = pokemon;
                     applyMaxValues(currentSpeciesData);
                 });
-
                 listDiv.appendChild(itemAnchor);
             });
-
             speciesContainer.appendChild(listDiv);
         }
 
+        // =========================================================================
+        // LOGICA AUTOMATICA ABILITÀ (LOCAL-FIRST SE VUOTO)
+        // =========================================================================
+        const abilityInput = document.getElementById('f-abil-name');
+        const abilityEffectArea = document.getElementById('f-abil-effect');
+        const abilityContainer = document.getElementById('ability-autocomplete-container');
+
+        async function fetchAndUpdateAbilityEffect(abilityName) {
+            if (!abilityName) {
+                abilityEffectArea.value = "???";
+                return;
+            }
+            try {
+                const response = await fetch(`/keyPressed/autoindex/ability/${encodeURIComponent(abilityName)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ conds: [] })
+                });
+                if (response.ok) {
+                    const match = await response.json();
+                    const exactMatch = match.find(a => a.Name.toLowerCase() === abilityName.toLowerCase());
+                    if (exactMatch) {
+                        abilityEffectArea.value = exactMatch.Effect || "Nessun effetto descritto.";
+                        return;
+                    }
+                }
+                abilityEffectArea.value = "???";
+            } catch (error) {
+                abilityEffectArea.value = "???";
+            }
+        }
+
+        async function triggerAbilitySearch(inputValue) {
+            const trimmedValue = inputValue.trim();
+
+            // CASO CAMPO VUOTO: Generiamo la lista prendendola dall'oggetto locale senza fetch
+            if (!trimmedValue) {
+                if (!currentSpeciesData) {
+                    abilityContainer.innerHTML = '';
+                    abilityEffectArea.value = "???";
+                    return;
+                }
+                // Costruiamo un array finto di abilità basato sui dati Pokedex locali della specie
+                const localAbilities = [
+                    { Name: currentSpeciesData.Ability1, Effect: "Abilità Primaria della specie" },
+                    { Name: currentSpeciesData.Ability2, Effect: "Abilità Secondaria della specie" },
+                    { Name: currentSpeciesData.HiddenAbility, Effect: "Abilità Nascosta" },
+                    { Name: currentSpeciesData.EventAbilities, Effect: "Abilità Evento / Speciale" }
+                ].filter(a => a.Name && a.Name.trim() !== "");
+
+                renderAbilityResults(localAbilities);
+                abilityEffectArea.value = "???";
+                return;
+            }
+
+            // CASO CAMPO COMPILATO: Fetch filtri standard
+            try {
+                const response = await fetch(`/keyPressed/autoindex/ability/${encodeURIComponent(trimmedValue)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ conds: [] })
+                });
+
+                if (!response.ok) return;
+                const match = await response.json();
+
+                let allowedAbilities = [];
+                if (currentSpeciesData) {
+                    allowedAbilities = [
+                        currentSpeciesData.Ability1, currentSpeciesData.Ability2,
+                        currentSpeciesData.HiddenAbility, currentSpeciesData.EventAbilities
+                    ].filter(name => name && name.trim() !== "").map(name => name.toLowerCase());
+                }
+
+                const filteredMatch = match.filter(ability => {
+                    return allowedAbilities.length === 0 || allowedAbilities.includes(ability.Name.toLowerCase());
+                });
+
+                renderAbilityResults(filteredMatch);
+
+                const preciseMatch = filteredMatch.find(a => a.Name.toLowerCase() === trimmedValue.toLowerCase());
+                if (preciseMatch) abilityEffectArea.value = preciseMatch.Effect;
+                else abilityEffectArea.value = "???";
+
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        abilityInput.addEventListener('focus', function() { triggerAbilitySearch(this.value); });
+        abilityInput.addEventListener('input', function() { triggerAbilitySearch(this.value); });
+
+        function renderAbilityResults(abilities) {
+            abilityContainer.innerHTML = '';
+            if (!abilities || abilities.length === 0) return;
+
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'search-category-title';
+            titleDiv.textContent = 'Abilità Compatibili';
+            abilityContainer.appendChild(titleDiv);
+
+            const listDiv = document.createElement('div');
+            listDiv.className = 'search-results-list';
+
+            abilities.forEach(ability => {
+                const itemAnchor = document.createElement('a');
+                itemAnchor.href = '#';
+                itemAnchor.className = 'search-item';
+                itemAnchor.innerHTML = `
+                    <div>
+                        <span class="item-name">${ability.Name}</span>
+                        <span class="item-desc-preview">${ability.Effect || 'Nessuna descrizione.'}</span>
+                    </div>
+                `;
+
+                itemAnchor.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    abilityInput.value = ability.Name;
+                    fetchAndUpdateAbilityEffect(ability.Name); // Forza fetch dell'effetto completo se era quello "finto" del template locale
+                    abilityContainer.innerHTML = '';
+                });
+                listDiv.appendChild(itemAnchor);
+            });
+            abilityContainer.appendChild(listDiv);
+        }
+
+        // =========================================================================
+        // LOGICA AUTOMATICA MOSSE (LOCAL-FIRST SE VUOTO)
+        // =========================================================================
+        async function triggerMoveSearch(index, inputValue) {
+            const trimmedValue = inputValue.trim();
+            const mContainer = document.getElementById(`move-autocomplete-${index}`);
+
+            // CASO CAMPO VUOTO: Mostra le mosse attuali del Pokémon salvate in localData.Moves
+            if (!trimmedValue) {
+                if (!currentSpeciesData || !currentSpeciesData.Moves) {
+                    // Fallback sulle mosse correnti del file originale se la specie non ha l'albero mosse caricato
+                    renderLocalMoveList(index, originalData.Moves.map(m => ({ Name: m.Name, Type: m.Type, Power: m.Power, Effect: m.Effect })));
+                    return;
+                }
+                // Se la specie ha un albero mosse (es: un array di oggetti o stringhe), le usiamo
+                // In questo scenario, mostriamo l'elenco predefinito delle mosse dell'istanza per riempire l'indice
+                renderLocalMoveList(index, originalData.Moves);
+                return;
+            }
+
+            // CASO CAMPO COMPILATO: Fetch standard
+            try {
+                const response = await fetch(`/keyPressed/autoindex/move/${encodeURIComponent(trimmedValue)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ conds: [] })
+                });
+
+                if (!response.ok) return;
+                const match = await response.json();
+                
+                mContainer.innerHTML = '';
+                if (!match || match.length === 0) return;
+
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'search-category-title';
+                titleDiv.textContent = 'Mosse Trovate';
+                mContainer.appendChild(titleDiv);
+
+                const listDiv = document.createElement('div');
+                listDiv.className = 'search-results-list';
+
+                match.forEach(move => {
+                    const itemAnchor = document.createElement('a');
+                    itemAnchor.href = '#';
+                    itemAnchor.className = 'search-item';
+                    itemAnchor.innerHTML = `
+                        <div>
+                            <span class="item-name">${move.Name}</span>
+                            <span class="item-desc-preview">Tipo: ${move.Type} | Potenza: ${move.Power || 0} | Effetto: ${move.Effect || ''}</span>
+                        </div>
+                    `;
+
+                    itemAnchor.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        document.getElementById(`move-name-${index}`).value = move.Name;
+                        document.getElementById(`move-type-${index}`).value = move.Type || '';
+                        document.getElementById(`move-power-${index}`).value = move.Power || 0;
+                        document.getElementById(`move-effect-${index}`).value = move.Effect || '';
+                        mContainer.innerHTML = '';
+                    });
+                    listDiv.appendChild(itemAnchor);
+                });
+                mContainer.appendChild(listDiv);
+
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function renderLocalMoveList(index, movesList) {
+            const mContainer = document.getElementById(`move-autocomplete-${index}`);
+            mContainer.innerHTML = '';
+            if (!movesList || movesList.length === 0) return;
+
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'search-category-title';
+            titleDiv.textContent = 'Mosse Suggerite';
+            mContainer.appendChild(titleDiv);
+
+            const listDiv = document.createElement('div');
+            listDiv.className = 'search-results-list';
+
+            movesList.forEach(move => {
+                if (!move.Name) return;
+                const itemAnchor = document.createElement('a');
+                itemAnchor.href = '#';
+                itemAnchor.className = 'search-item';
+                itemAnchor.innerHTML = `
+                    <div>
+                        <span class="item-name">${move.Name}</span>
+                        <span class="item-desc-preview">Tipo: ${move.Type || '???'} | Potenza: ${move.Power || 0}</span>
+                    </div>
+                `;
+
+                itemAnchor.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById(`move-name-${index}`).value = move.Name;
+                    document.getElementById(`move-type-${index}`).value = move.Type || '';
+                    document.getElementById(`move-power-${index}`).value = move.Power || 0;
+                    document.getElementById(`move-effect-${index}`).value = move.Effect || '';
+                    mContainer.innerHTML = '';
+                });
+                listDiv.appendChild(itemAnchor);
+            });
+            mContainer.appendChild(listDiv);
+        }
+
         document.addEventListener('click', (e) => {
-            if (e.target !== speciesInput && !speciesContainer.contains(e.target)) {
-                speciesContainer.innerHTML = '';
+            if (e.target !== speciesInput && !speciesContainer.contains(e.target)) speciesContainer.innerHTML = '';
+            if (e.target !== abilityInput && !abilityContainer.contains(e.target)) abilityContainer.innerHTML = '';
+            
+            if (originalData && originalData.Moves) {
+                originalData.Moves.forEach((_, i) => {
+                    const mInput = document.getElementById(`move-name-${i}`);
+                    const mBox = document.getElementById(`move-autocomplete-${i}`);
+                    if (mInput && mBox && e.target !== mInput && !mBox.contains(e.target)) {
+                        mBox.innerHTML = '';
+                    }
+                });
             }
         });
 
@@ -290,42 +520,41 @@
             const response = await fetch(`/api/pokemon/${pkmnId}`);
             originalData = await response.json();
 
-            // Popola Dati Base
             document.getElementById('f-name').value = originalData.Name;
             document.getElementById('f-species').value = originalData.Species;
             
-            // Popola i massimi iniziali mandando la richiesta con la specie corrente caricata
             await updateSpeciesMaxData(originalData.Species);
 
-            // Gestione HP e Will
             document.getElementById('f-hp-curr').value = originalData.HP.current || 0;
             document.getElementById('f-will-curr').value = originalData.Will ? originalData.Will.current : 0;
             document.getElementById('f-will-max').value = originalData.Will ? originalData.Will.max : 0;
 
-            // Popola Attributi Correnti
             attrNames.forEach(attr => {
                 document.getElementById(`curr-${attr}`).value = originalData[attr].current;
             });
 
-            // Popola Skills
             skillNames.forEach(skill => {
                 document.getElementById(`skill-${skill}`).value = originalData[skill] || 0;
             });
 
-            // Popola Abilità
-            document.getElementById('f-abil-name').value = originalData.Ability.Name;
-            document.getElementById('f-abil-effect').value = originalData.Ability.Effect;
+            if (originalData.Ability && originalData.Ability.Name) {
+                document.getElementById('f-abil-name').value = originalData.Ability.Name;
+                await fetchAndUpdateAbilityEffect(originalData.Ability.Name);
+            } else {
+                document.getElementById('f-abil-name').value = "";
+                abilityEffectArea.value = "???";
+            }
 
-            // Genera e Popola Mosse
             const movesContainer = document.getElementById('moves-container');
             movesContainer.innerHTML = '';
             originalData.Moves.forEach((move, i) => {
                 movesContainer.innerHTML += `
                     <div class="move-card">
                         <div class="stats-grid">
-                            <div class="form-group" style="grid-column: span 2;">
+                            <div class="form-group" style="grid-column: span 2; position: relative;">
                                 <label>Nome Mossa ${i+1}</label>
-                                <input type="text" id="move-name-${i}" value="${move.Name}">
+                                <input type="text" id="move-name-${i}" autocomplete="off" value="${move.Name}" placeholder="Clicca o cerca una mossa...">
+                                <div id="move-autocomplete-${i}" class="autocomplete-box"></div>
                             </div>
                             <div class="form-group">
                                 <label>Tipo</label>
@@ -342,17 +571,21 @@
                         </div>
                     </div>`;
             });
+
+            originalData.Moves.forEach((_, i) => {
+                const mInput = document.getElementById(`move-name-${i}`);
+                mInput.addEventListener('focus', function() { triggerMoveSearch(i, this.value); });
+                mInput.addEventListener('input', function() { triggerMoveSearch(i, this.value); });
+            });
         }
 
         document.getElementById('pokemon-form').onsubmit = async (e) => {
             e.preventDefault();
             const updatedData = { ...originalData };
             
-            // Sync Base
             updatedData.Name = document.getElementById('f-name').value;
             updatedData.Species = document.getElementById('f-species').value;
             
-            // Salviamo l'HP calcolato / o quello presente
             updatedData.HP = {
                 current: parseInt(document.getElementById('f-hp-curr').value),
                 max: parseInt(document.getElementById('f-hp-max').value) || originalData.HP.max
@@ -362,7 +595,6 @@
                 max: parseInt(document.getElementById('f-will-max').value)
             };
 
-            // Sync Attributi
             attrNames.forEach(attr => {
                 updatedData[attr] = {
                     current: parseInt(document.getElementById(`curr-${attr}`).value),
@@ -370,16 +602,13 @@
                 };
             });
 
-            // Sync Skills
             skillNames.forEach(skill => {
                 updatedData[skill] = parseInt(document.getElementById(`skill-${skill}`).value);
             });
 
-            // Sync Abilità
             updatedData.Ability.Name = document.getElementById('f-abil-name').value;
             updatedData.Ability.Effect = document.getElementById('f-abil-effect').value;
 
-            // Sync Mosse
             updatedData.Moves = originalData.Moves.map((move, i) => ({
                 ...move,
                 Name: document.getElementById(`move-name-${i}`).value,
