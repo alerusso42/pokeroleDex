@@ -3,7 +3,7 @@ const lib = require('./utils/lib.js');
 const html = require('./html.js');
 const { getJson } = require('./utils/json.js');
 const {validSearch} = require("./login.js");
-const { includesOneOf } = require('./utils/string.js');
+const { includesOneOf, pokemonToSnakeCase } = require('./utils/string.js');
 const { questDataPath } = require('./utils/macro.js');
 const { Server } = require('./utils/classes/Server.js');
 const { Client } = require('./utils/classes/Client.js');
@@ -224,7 +224,7 @@ function searchByDataExpanded(server, client, field="", checkValidBool=true)
 {
 	/** @type {Conds} */	let	conds;
 	/** @type {ExpData}*/let	data;
-	/** @type {Set<*>}*/let match;
+	/** @type {Array<*>}*/let match;
 	let	json;
 	let	key;
 	let	dir;
@@ -236,35 +236,35 @@ function searchByDataExpanded(server, client, field="", checkValidBool=true)
 	if (condSanifier(conds) == false)
 		throw Error(`searchByKeyExp: cannot sanify => ${conds}`);
 	key = dataNormalize(client.dataName);
-	dir = dataNormalize(client.dirName);
+	dir = client.dirName.toLocaleLowerCase();
 	if (!includesOneOf(dir, expLowCaseTypes) && !includesOneOf(dir, lowCaseTypes))
 		throw Error(`searchByKeyExp: invalid dir => ${dir}`);
-	match = new Set();
+	match = new Array();
 	//@ts-ignore
 	data = server.expandedData[dir];
 	if (!data)
 		throw Error(`searchByKeyExp: error getting dataSet for => ${dir}`);
 	//@ts-ignore
-	data = server.expandedData[dir][key];
+	data = data.get(key);
 	if (!data)
 		throw Error(`searchByKeyExp: error getting dataSet for => ${dir}`);
 	if (!data.Id)
 		Error(`searchByKeyExp: invalid data => ${data}`);
 	if (checkValidBool == true && !validSearch(server, client, data.Id))
 		return (undefined);
-	json = server.expandedData.GetData(data.Id, dir);
+	json = getJson(data.Id, dir, server);
 	if (typeof(json) != "object")
 		throw Error(`searchByKeyExp: trash data => ${json}`);
 	if (field)
-		json = resolveField(json, field);
-	if (!json)
+		json = resolveField(json, field, null, false);
+	if (!json || typeof(json) == "string")
 		return (undefined);
 	//@ts-ignore
 	for (const field of json)
 	{
 		if (condCheck(field, conds) == false)
 			continue ;
-		match.add(field);
+		match.push(field);
 	}
 	return (match);
 }

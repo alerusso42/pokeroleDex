@@ -3,6 +3,7 @@ const fs = require("fs");
 const {dataPath, metaDataPath, questDataPath, questImgPath} = require("../macro.js");
 const {dataListDirName, dataListPath, protectedDirList} = require("../enums.js");
 const {getJson} = require("../json.js");
+const { kMaxLength } = require("buffer");
 
 //SECTION - dataList class definition
 
@@ -165,8 +166,6 @@ function fillDataListExpanded(list, type, root=questDataPath)
 	let	filename;
 	let	json;
 
-	// @ts-ignore
-	expData = {};
 	mapExpData = new Map();
 	// @ts-ignore
 	arrayFiles = list[type];
@@ -174,6 +173,8 @@ function fillDataListExpanded(list, type, root=questDataPath)
 		throw ("fillDataListExpanded: cannot init type " + type);
 	for (let data of arrayFiles)
 	{
+		// @ts-ignore
+		expData = {};
 		filename = getfilename(data, getDirName(type), root);
 		json = getJson(filename);
 		expData.filename = filename;

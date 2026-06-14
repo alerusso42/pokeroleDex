@@ -1,7 +1,7 @@
 {
   "Species": "Pikachu",
   "Name": "Pikachu",
-  "Trainer": "Giorgio",
+  "Trainer": "Giorgione",
   "Category": "The caves near the school",
   "Img": "",
   "Ico": "",
@@ -38,7 +38,7 @@
   },
   "Ability": {
     "Name": "Static",
-    "Effect": "",
+    "Effect": "Whenever this Pokemon is hit with a Non-Ranged Physical Attack, roll 3 Chance Dice to Paralyze its foe.",
     "Description": ""
   },
   "Brawl": 1,
@@ -82,20 +82,53 @@
   "Moves": [
     {
       "Name": "Thunder Shock",
-      "Learned": "Starter"
+      "Learned": "Starter",
+      "Type": "",
+      "Power": 0,
+      "Target": "",
+      "Accuracy1": "",
+      "Accuracy2": "",
+      "Damage1": "",
+      "Damage2": "",
+      "Effect": ""
     },
     {
       "Name": "Tail Whip",
-      "Learned": "Starter"
+      "Learned": "Starter",
+      "Type": "",
+      "Power": 0,
+      "Target": "",
+      "Accuracy1": "",
+      "Accuracy2": "",
+      "Damage1": "",
+      "Damage2": "",
+      "Effect": ""
     },
     {
       "Name": "Growl",
-      "Learned": "Beginner"
+      "Learned": "Beginner",
+      "Type": "",
+      "Power": 0,
+      "Target": "",
+      "Accuracy1": "",
+      "Accuracy2": "",
+      "Damage1": "",
+      "Damage2": "",
+      "Effect": ""
     },
     {
       "Name": "Play Nice",
-      "Learned": "Beginner"
+      "Learned": "Beginner",
+      "Type": "",
+      "Power": 0,
+      "Target": "",
+      "Accuracy1": "",
+      "Accuracy2": "",
+      "Damage1": "",
+      "Damage2": "",
+      "Effect": ""
     }
   ],
-  "Id": "Pikachu"
+  "Id": "Pikachu",
+  "id": "Pikachu"
 }

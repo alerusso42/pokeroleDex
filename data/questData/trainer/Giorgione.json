@@ -7,9 +7,9 @@
   "Img": ".jpg",
   "Ico": ".jpg",
   "Pokemon": [
-    "Articuno (Galarian Form)",
-    "Rayquaza (Mega Form)",
-    "Pikachu"
+    "Pikachu",
+    "Pikachu_1",
+    "Rayquaza (Mega Form)"
   ],
   "id": ""
 }

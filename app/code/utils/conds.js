@@ -245,16 +245,19 @@ function evalCondOne(field, cond)
  * ```
  * @param {{}} data 
  * @param {string} field 
- * @param {{counter: number, end: boolean}} skip
+ * @param {{counter: number, end: boolean} | null} skip
+ * @param {boolean} stringBool
  * @returns {string | undefined}
  */
-function resolveField(data, field, skip={counter: 0, end: false})
+function resolveField(data, field, skip=null, stringBool=true)
 {
 	let	index;
 	let	currKey;
 	let	input;
 	let	foundField;
 
+	if (!skip)
+		skip = {counter: 0, end: false};
 	input = field;
 	index = input.indexOf(".");
 	skip.end = true;
@@ -303,7 +306,7 @@ function resolveField(data, field, skip={counter: 0, end: false})
 		}
 		index = input.indexOf(".");
 	}
-	if (typeof(data) == "string")
+	if (typeof(data) == "string" || stringBool == false)
 		return (data);
 	return (JSON.stringify(data, null, 0));
 }

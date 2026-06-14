@@ -27,7 +27,17 @@
             padding: 15px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            margin-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .move-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            background: #f1f1f1;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 10px;
         }
 
         .btn-save {
@@ -47,6 +57,17 @@
         .item-desc-preview {
             display: block; font-size: 0.75em; color: #666; margin-top: 2px;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+        }
+
+        .rank-badge {
+            font-size: 0.75em;
+            background: #e0e0e0;
+            color: #333;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-left: auto;
+            text-transform: uppercase;
         }
     </style>
 </head>
@@ -134,7 +155,7 @@
         });
 
         // =========================================================================
-        // LOGICA DI AGGIORNAMENTO DATI SPECIE (MAX ATTRIBUTI / HP)
+        // LOGICA DI AGGIORNAMENTO DATI SPECIE
         // =========================================================================
         async function updateSpeciesMaxData(speciesName) {
             if (!speciesName) {
@@ -262,7 +283,7 @@
         }
 
         // =========================================================================
-        // LOGICA AUTOMATICA ABILITÀ (LOCAL-FIRST SE VUOTO)
+        // LOGICA ABILITÀ
         // =========================================================================
         const abilityInput = document.getElementById('f-abil-name');
         const abilityEffectArea = document.getElementById('f-abil-effect');
@@ -296,27 +317,23 @@
         async function triggerAbilitySearch(inputValue) {
             const trimmedValue = inputValue.trim();
 
-            // CASO CAMPO VUOTO: Generiamo la lista prendendola dall'oggetto locale senza fetch
             if (!trimmedValue) {
                 if (!currentSpeciesData) {
                     abilityContainer.innerHTML = '';
                     abilityEffectArea.value = "???";
                     return;
                 }
-                // Costruiamo un array finto di abilità basato sui dati Pokedex locali della specie
                 const localAbilities = [
-                    { Name: currentSpeciesData.Ability1, Effect: "Abilità Primaria della specie" },
-                    { Name: currentSpeciesData.Ability2, Effect: "Abilità Secondaria della specie" },
+                    { Name: currentSpeciesData.Ability1, Effect: "Abilità Primaria" },
+                    { Name: currentSpeciesData.Ability2, Effect: "Abilità Secondaria" },
                     { Name: currentSpeciesData.HiddenAbility, Effect: "Abilità Nascosta" },
-                    { Name: currentSpeciesData.EventAbilities, Effect: "Abilità Evento / Speciale" }
+                    { Name: currentSpeciesData.EventAbilities, Effect: "Abilità Speciale/Evento" }
                 ].filter(a => a.Name && a.Name.trim() !== "");
 
                 renderAbilityResults(localAbilities);
-                abilityEffectArea.value = "???";
                 return;
             }
 
-            // CASO CAMPO COMPILATO: Fetch filtri standard
             try {
                 const response = await fetch(`/keyPressed/autoindex/ability/${encodeURIComponent(trimmedValue)}`, {
                     method: 'POST',
@@ -379,7 +396,7 @@
                 itemAnchor.addEventListener('click', (e) => {
                     e.preventDefault();
                     abilityInput.value = ability.Name;
-                    fetchAndUpdateAbilityEffect(ability.Name); // Forza fetch dell'effetto completo se era quello "finto" del template locale
+                    fetchAndUpdateAbilityEffect(ability.Name); 
                     abilityContainer.innerHTML = '';
                 });
                 listDiv.appendChild(itemAnchor);
@@ -388,26 +405,46 @@
         }
 
         // =========================================================================
-        // LOGICA AUTOMATICA MOSSE (LOCAL-FIRST SE VUOTO)
+        // LOGICA MOSSE (DIRETTA, ORDINATA PER RANK E AGGIORNAMENTO DIZIONARIO ESTESO)
         // =========================================================================
         async function triggerMoveSearch(index, inputValue) {
             const trimmedValue = inputValue.trim();
             const mContainer = document.getElementById(`move-autocomplete-${index}`);
+            const pokemonName = document.getElementById('f-species').value.trim();
+            
+            const dbRankOrder = ["Starter", "Beginner", "Amateur", "Ace", "Pro", "Master"];
 
-            // CASO CAMPO VUOTO: Mostra le mosse attuali del Pokémon salvate in localData.Moves
             if (!trimmedValue) {
-                if (!currentSpeciesData || !currentSpeciesData.Moves) {
-                    // Fallback sulle mosse correnti del file originale se la specie non ha l'albero mosse caricato
-                    renderLocalMoveList(index, originalData.Moves.map(m => ({ Name: m.Name, Type: m.Type, Power: m.Power, Effect: m.Effect })));
+                if (!pokemonName) {
+                    mContainer.innerHTML = '';
                     return;
                 }
-                // Se la specie ha un albero mosse (es: un array di oggetti o stringhe), le usiamo
-                // In questo scenario, mostriamo l'elenco predefinito delle mosse dell'istanza per riempire l'indice
-                renderLocalMoveList(index, originalData.Moves);
+
+                try {
+                    const response = await fetch(`/keyPressed/data/pokedex/${encodeURIComponent(pokemonName)}/Moves`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ conds: [] })
+                    });
+
+                    if (!response.ok) return;
+                    let speciesMoves = await response.json();
+
+                    speciesMoves.sort((a, b) => {
+                        let indexA = dbRankOrder.indexOf(a.Learned);
+                        let indexB = dbRankOrder.indexOf(b.Learned);
+                        if (indexA === -1) indexA = 99;
+                        if (indexB === -1) indexB = 99;
+                        return indexA - indexB;
+                    });
+
+                    renderFetchedMoveList(index, speciesMoves, "Mosse della Specie (per Rank)", true);
+                } catch (error) {
+                    console.error("Errore fetch mosse:", error);
+                }
                 return;
             }
 
-            // CASO CAMPO COMPILATO: Fetch standard
             try {
                 const response = await fetch(`/keyPressed/autoindex/move/${encodeURIComponent(trimmedValue)}`, {
                     method: 'POST',
@@ -417,77 +454,85 @@
 
                 if (!response.ok) return;
                 const match = await response.json();
-                
-                mContainer.innerHTML = '';
-                if (!match || match.length === 0) return;
-
-                const titleDiv = document.createElement('div');
-                titleDiv.className = 'search-category-title';
-                titleDiv.textContent = 'Mosse Trovate';
-                mContainer.appendChild(titleDiv);
-
-                const listDiv = document.createElement('div');
-                listDiv.className = 'search-results-list';
-
-                match.forEach(move => {
-                    const itemAnchor = document.createElement('a');
-                    itemAnchor.href = '#';
-                    itemAnchor.className = 'search-item';
-                    itemAnchor.innerHTML = `
-                        <div>
-                            <span class="item-name">${move.Name}</span>
-                            <span class="item-desc-preview">Tipo: ${move.Type} | Potenza: ${move.Power || 0} | Effetto: ${move.Effect || ''}</span>
-                        </div>
-                    `;
-
-                    itemAnchor.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        document.getElementById(`move-name-${index}`).value = move.Name;
-                        document.getElementById(`move-type-${index}`).value = move.Type || '';
-                        document.getElementById(`move-power-${index}`).value = move.Power || 0;
-                        document.getElementById(`move-effect-${index}`).value = move.Effect || '';
-                        mContainer.innerHTML = '';
-                    });
-                    listDiv.appendChild(itemAnchor);
-                });
-                mContainer.appendChild(listDiv);
-
+                renderFetchedMoveList(index, match, "Risultati Ricerca Globale", false);
             } catch (error) {
                 console.error(error);
             }
         }
 
-        function renderLocalMoveList(index, movesList) {
+        function renderFetchedMoveList(index, movesList, titleText, isFromSpeciesEmptyInput) {
             const mContainer = document.getElementById(`move-autocomplete-${index}`);
             mContainer.innerHTML = '';
             if (!movesList || movesList.length === 0) return;
 
             const titleDiv = document.createElement('div');
             titleDiv.className = 'search-category-title';
-            titleDiv.textContent = 'Mosse Suggerite';
+            titleDiv.textContent = titleText;
             mContainer.appendChild(titleDiv);
 
             const listDiv = document.createElement('div');
             listDiv.className = 'search-results-list';
 
             movesList.forEach(move => {
-                if (!move.Name) return;
                 const itemAnchor = document.createElement('a');
                 itemAnchor.href = '#';
                 itemAnchor.className = 'search-item';
+                itemAnchor.style.display = 'flex';
+                itemAnchor.style.justifyContent = 'space-between';
+                itemAnchor.style.alignItems = 'center';
+                
+                const moveName = move.Name;
+                const moveType = move.Type || "Generico";
+                const movePower = move.Power !== undefined ? move.Power : 0;
+                const moveEffect = move.Effect || "Clicca per caricare i dati della mossa";
+
+                const rankBadgeHtml = move.Learned ? `<span class="rank-badge">${move.Learned}</span>` : '';
+
                 itemAnchor.innerHTML = `
-                    <div>
-                        <span class="item-name">${move.Name}</span>
-                        <span class="item-desc-preview">Tipo: ${move.Type || '???'} | Potenza: ${move.Power || 0}</span>
+                    <div style="flex-grow: 1; min-width: 0;">
+                        <span class="item-name">${moveName}</span>
+                        <span class="item-desc-preview">Tipo: ${moveType} | Potenza: ${movePower} | ${moveEffect}</span>
                     </div>
+                    ${rankBadgeHtml}
                 `;
 
-                itemAnchor.addEventListener('click', (e) => {
+                itemAnchor.addEventListener('click', async (e) => {
                     e.preventDefault();
-                    document.getElementById(`move-name-${index}`).value = move.Name;
-                    document.getElementById(`move-type-${index}`).value = move.Type || '';
-                    document.getElementById(`move-power-${index}`).value = move.Power || 0;
-                    document.getElementById(`move-effect-${index}`).value = move.Effect || '';
+                    
+                    let finalMoveData = move;
+
+                    if (isFromSpeciesEmptyInput) {
+                        try {
+                            const res = await fetch(`/keyPressed/autoindex/move/${encodeURIComponent(moveName)}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ conds: [] })
+                            });
+                            if (res.ok) {
+                                const globalMatches = await res.json();
+                                const exactMatch = globalMatches.find(m => m.Name.toLowerCase() === moveName.toLowerCase());
+                                if (exactMatch) {
+                                    finalMoveData = exactMatch;
+                                }
+                            }
+                        } catch (err) {
+                            console.error("Errore nel recupero dettagli mossa:", err);
+                        }
+                    }
+
+                    // Inserimento dati standard
+                    document.getElementById(`move-name-${index}`).value = finalMoveData.Name || '';
+                    document.getElementById(`move-type-${index}`).value = finalMoveData.Type || '';
+                    document.getElementById(`move-power-${index}`).value = finalMoveData.Power !== undefined ? finalMoveData.Power : 0;
+                    document.getElementById(`move-effect-${index}`).value = finalMoveData.Effect || '';
+                    
+                    // Inserimento campi del template esteso Pokerole
+                    document.getElementById(`move-damage1-${index}`).value = finalMoveData.Damage1 || '';
+                    document.getElementById(`move-damage2-${index}`).value = finalMoveData.Damage2 || '';
+                    document.getElementById(`move-accuracy1-${index}`).value = finalMoveData.Accuracy1 || '';
+                    document.getElementById(`move-accuracy2-${index}`).value = finalMoveData.Accuracy2 || '';
+                    document.getElementById(`move-target-${index}`).value = finalMoveData.Target || '';
+                    
                     mContainer.innerHTML = '';
                 });
                 listDiv.appendChild(itemAnchor);
@@ -511,7 +556,7 @@
         });
 
         // =========================================================================
-        // CARICAMENTO E SALVATAGGIO DATI ORIGINARI
+        // CARICAMENTO E SALVATAGGIO CON ESTENSIONE DETTAGLI TEMPLATE
         // =========================================================================
         async function loadData() {
             const pathParts = window.location.pathname.split('/');
@@ -553,20 +598,46 @@
                         <div class="stats-grid">
                             <div class="form-group" style="grid-column: span 2; position: relative;">
                                 <label>Nome Mossa ${i+1}</label>
-                                <input type="text" id="move-name-${i}" autocomplete="off" value="${move.Name}" placeholder="Clicca o cerca una mossa...">
+                                <input type="text" id="move-name-${i}" autocomplete="off" value="${move.Name || ''}" placeholder="Clicca o cerca una mossa...">
                                 <div id="move-autocomplete-${i}" class="autocomplete-box"></div>
                             </div>
                             <div class="form-group">
                                 <label>Tipo</label>
-                                <input type="text" id="move-type-${i}" value="${move.Type}">
+                                <input type="text" id="move-type-${i}" value="${move.Type || ''}">
                             </div>
                             <div class="form-group">
                                 <label>Potenza</label>
-                                <input type="number" id="move-power-${i}" value="${move.Power}">
+                                <input type="number" id="move-power-${i}" value="${move.Power !== undefined ? move.Power : 0}">
                             </div>
+                            
+                            <div class="form-group" style="grid-column: span 2;">
+                                <div class="move-details-grid">
+                                    <div class="form-group">
+                                        <label>Bersaglio (Target)</label>
+                                        <input type="text" id="move-target-${i}" value="${move.Target || ''}" placeholder="es. Foe, Self">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Prec. 1 (Accuracy1)</label>
+                                        <input type="text" id="move-accuracy1-${i}" value="${move.Accuracy1 || ''}" placeholder="es. Dexterity">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Prec. 2 (Accuracy2)</label>
+                                        <input type="text" id="move-accuracy2-${i}" value="${move.Accuracy2 || ''}" placeholder="es. Channel">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Danno 1 (Damage1)</label>
+                                        <input type="text" id="move-damage1-${i}" value="${move.Damage1 || ''}" placeholder="es. Special">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Danno 2 (Damage2)</label>
+                                        <input type="text" id="move-damage2-${i}" value="${move.Damage2 || ''}">
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="form-group" style="grid-column: span 2;">
                                 <label>Effetto</label>
-                                <textarea id="move-effect-${i}" rows="2">${move.Effect}</textarea>
+                                <textarea id="move-effect-${i}" rows="2">${move.Effect || ''}</textarea>
                             </div>
                         </div>
                     </div>`;
@@ -609,11 +680,17 @@
             updatedData.Ability.Name = document.getElementById('f-abil-name').value;
             updatedData.Ability.Effect = document.getElementById('f-abil-effect').value;
 
+            // Mapping completo e pulito di tutte le proprietà del template move
             updatedData.Moves = originalData.Moves.map((move, i) => ({
                 ...move,
                 Name: document.getElementById(`move-name-${i}`).value,
                 Type: document.getElementById(`move-type-${i}`).value,
-                Power: parseInt(document.getElementById(`move-power-${i}`).value),
+                Power: parseInt(document.getElementById(`move-power-${i}`).value) || 0,
+                Target: document.getElementById(`move-target-${i}`).value,
+                Accuracy1: document.getElementById(`move-accuracy1-${i}`).value,
+                Accuracy2: document.getElementById(`move-accuracy2-${i}`).value,
+                Damage1: document.getElementById(`move-damage1-${i}`).value,
+                Damage2: document.getElementById(`move-damage2-${i}`).value,
                 Effect: document.getElementById(`move-effect-${i}`).value
             }));
 

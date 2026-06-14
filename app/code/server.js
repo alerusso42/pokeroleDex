@@ -101,6 +101,8 @@ lib.app.post("/keyPressed/data/:dir/:name/:field", (req, res) =>
 	client.dirName = req.params.dir;
 	field = req.params.field;
 	match = locationSearch.searchByDataExpanded(server, client, field, true);
+	console.clear();
+	console.log(match);
 	res.send(match);
 }
 );
