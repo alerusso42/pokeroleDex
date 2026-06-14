@@ -299,6 +299,7 @@ function searchByDirExpanded(server, client, input, checkValidBool=true)
 	dataSet = server.expandedData[dir];
 	if (!dataSet)
 		throw Error(`searchByKeyExp: error getting dataSet for => ${dir}`);
+	console.log("input =>", input);
 	input = dataNormalize(input);
 	for (const [key, data] of dataSet)
 	{

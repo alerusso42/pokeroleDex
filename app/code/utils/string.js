@@ -41,7 +41,7 @@ function pokemonToSnakeCase(name)
 
 function dataNormalize(dataName)
 {
-	if (dataName == "")
+	if (!dataName)
 		return ("");
 	dataName = dataName[0].toUpperCase() + dataName.substring(1, dataName.length);
 	if (dataName.startsWith("Mega ") == true && dataName.includes("drain") == false)

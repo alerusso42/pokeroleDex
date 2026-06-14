@@ -1,6 +1,7 @@
 // @ts-check
 const fs = require("fs");
 const {dataPath, metaDataPath, questDataPath, questImgPath} = require("../macro.js");
+const {dataListDirName, dataListPath, protectedDirList} = require("../enums.js");
 const {getJson} = require("../json.js");
 
 //SECTION - dataList class definition
@@ -85,33 +86,6 @@ function getfilename(dataName, dirName="", root=questDataPath, ext="json", check
 		throw ("getFilename: cannot find " + filename);
 	return (filename);
 }
-
-/** @enum {string} */
-const dataListDirName = 
-{
-	"pokedex" : "Pokemon",
-	"nature" : "Nature",
-	"move" : "Move",
-	"item" : "Item",
-	"ability" : "Ability",
-	"user" : "user",
-	"trainer" : "trainer",
-	"pokemon" : "pokemon"
-};
-
-/** @enum {string} */
-const dataListPath = 
-{
-	"pokedex" : dataPath + "Pokemon/",
-	"nature" : dataPath + "Nature/",
-	"move" : dataPath + "Move/",
-	"item" : dataPath + "Item/",
-	"ability" : dataPath + "Ability/",
-	"user" : questDataPath + "user/",
-	"trainer" : questDataPath + "trainer/",
-	"pokemon" : questDataPath + "pokemon/",
-	"category": questDataPath + "category/"
-};
 
 /**
  * 

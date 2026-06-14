@@ -414,30 +414,30 @@ async function executeSearch() {
 
             pokemonList.forEach(pokemon => {
                 // Gestione campi nulli o mancanti
-                const t1 = pokemon.Type1 || "Normal";
+                const t1 = pokemon.Type1 || "N/A";
                 const t2 = pokemon.Type2 ? `<span class="type-badge type-${pokemon.Type2}">${pokemon.Type2}</span>` : "";
                 const dexId = pokemon.DexID || "N/A";
                 
-                const cardHtml = `
-                    <div class="pokemon-card" onclick="console.log('ID Selezionato: ${pokemon._id}')">
-                        <span class="id-tag">#${dexId}</span>
-                        <h4 style="margin-top: 15px;">${pokemon.Name}</h4>
-                        <div style="margin-bottom: 10px;">
-                            <span class="type-badge type-${t1}">${t1}</span>${t2}
-                        </div>
-                        <div style="font-size: 0.85em; color: #555; font-style: italic; margin-bottom: 5px;">
-                            ${pokemon.DexCategory || ''}
-                        </div>
-                        <div class="stats-block">
-                            <div><strong>HP Base:</strong> ${pokemon.BaseHP || 0}</div>
-                            <div><strong>Grado:</strong> ${pokemon.RecommendedRank || 'Beginner'}</div>
-                            <div><strong>Forza:</strong> ${pokemon.Strength || 0}/${pokemon.MaxStrength || 0}</div>
-                            <div><strong>Destr:</strong> ${pokemon.Dexterity || 0}/${pokemon.MaxDexterity || 0}</div>
-                            <div><strong>Vital:</strong> ${pokemon.Vitality || 0}/${pokemon.MaxVitality || 0}</div>
-                            <div><strong>Intuito:</strong> ${pokemon.Insight || 0}/${pokemon.MaxInsight || 0}</div>
-                        </div>
-                    </div>
-                `;
+				const cardHtml = `
+				    <a class="pokemon-card" href="/search/${pokemon.Name}" onclick="console.log('ID Selezionato: ${pokemon._id}')" style="display: block; text-decoration: none; color: inherit;">
+				        <span class="id-tag">#${dexId}</span>
+				        <h4 style="margin-top: 15px;">${pokemon.Name}</h4>
+				        <div style="margin-bottom: 10px;">
+				            <span class="type-badge type-${t1}">${t1}</span>${t2}
+				        </div>
+				        <div style="font-size: 0.85em; color: #555; font-style: italic; margin-bottom: 5px;">
+				            ${pokemon.DexCategory || ''}
+				        </div>
+				        <div class="stats-block">
+				            <div><strong>HP Base:</strong> ${pokemon.BaseHP || 0}</div>
+				            <div><strong>Grado:</strong> ${pokemon.RecommendedRank || 'Beginner'}</div>
+				            <div><strong>Forza:</strong> ${pokemon.Strength || 0}/${pokemon.MaxStrength || 0}</div>
+				            <div><strong>Destr:</strong> ${pokemon.Dexterity || 0}/${pokemon.MaxDexterity || 0}</div>
+				            <div><strong>Vital:</strong> ${pokemon.Vitality || 0}/${pokemon.MaxVitality || 0}</div>
+				            <div><strong>Intuito:</strong> ${pokemon.Insight || 0}/${pokemon.MaxInsight || 0}</div>
+				        </div>
+				    </a>
+				`;
                 resultsContainer.insertAdjacentHTML('beforeend', cardHtml);
             });
         }
