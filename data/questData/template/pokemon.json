@@ -5,6 +5,7 @@
 	"Category": "The caves near the school",
 	"Img": "",
 	"Ico": "",
+	"Rank": "Beginner",
     "Type1": "Grass",
     "Type2": "Ice",
     "HP": { "current": 3, "max": 7 },

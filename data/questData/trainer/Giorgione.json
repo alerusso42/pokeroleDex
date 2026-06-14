@@ -1,0 +1,15 @@
+{
+  "Id": 0,
+  "File": "",
+  "User": "Giorgio",
+  "Name": "Giorgione",
+  "Category": "team_black",
+  "Img": ".jpg",
+  "Ico": ".jpg",
+  "Pokemon": [
+    "Articuno (Galarian Form)",
+    "Rayquaza (Mega Form)",
+    "Pikachu"
+  ],
+  "id": ""
+}

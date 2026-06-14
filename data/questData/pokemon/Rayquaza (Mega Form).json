@@ -1,0 +1,89 @@
+{
+  "Species": "Rayquaza (Mega Form)",
+  "Name": "Rayquaza (Mega Form)",
+  "Trainer": "Giorgio",
+  "Category": "The caves near the school",
+  "Img": "",
+  "Ico": "",
+  "Rank": "Beginner",
+  "Type1": "Dragon",
+  "Type2": "Flying",
+  "HP": {
+    "current": 11,
+    "max": 11
+  },
+  "Will": {
+    "current": 5,
+    "max": 5
+  },
+  "Strength": {
+    "current": 9,
+    "max": 9
+  },
+  "Dexterity": {
+    "current": 6,
+    "max": 6
+  },
+  "Vitality": {
+    "current": 6,
+    "max": 6
+  },
+  "Special": {
+    "current": 9,
+    "max": 9
+  },
+  "Insight": {
+    "current": 6,
+    "max": 6
+  },
+  "Ability": {
+    "Name": "Delta Stream",
+    "Effect": "",
+    "Description": ""
+  },
+  "Brawl": 1,
+  "Channel": 1,
+  "Clash": 1,
+  "Evasion": 1,
+  "Alert": 1,
+  "Athletics": 1,
+  "Nature": 1,
+  "Stealth": 1,
+  "Initiative": 1,
+  "void": 0,
+  "Height": {
+    "Meters": 10.8,
+    "Feet": 35.4
+  },
+  "Weight": {
+    "Kilograms": 392,
+    "Pounds": 864.2
+  },
+  "DexDescription": "What does the power of the Mega Stone truly entail? Is it the bond between a Trainer and their companion? Or is it all about taking a hold of a forbidden power?",
+  "Evolutions": [
+    {
+      "From": "Rayquaza",
+      "Kind": "Mega",
+      "Item": "Pokeball"
+    }
+  ],
+  "Moves": [
+    {
+      "Name": "Twister",
+      "Learned": "Master"
+    },
+    {
+      "Name": "Scary Face",
+      "Learned": "Master"
+    },
+    {
+      "Name": "Ancient Power",
+      "Learned": "Master"
+    },
+    {
+      "Name": "Crunch",
+      "Learned": "Master"
+    }
+  ],
+  "Id": "Rayquaza (Mega Form)"
+}

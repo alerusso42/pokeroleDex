@@ -24,6 +24,7 @@
         .add-pokemon-box {
             background: #f0f0f0; padding: 15px; border-radius: 10px; border: 2px dashed #ccc;
             display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end;
+            position: relative; /* Necessario per il posizionamento assoluto della ricerca */
         }
 
         .btn-add { background: var(--poke-red); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
@@ -35,6 +36,72 @@
         }
         .btn-save:hover { background: #219150; transform: translateY(-2px); }
         .section-title { border-bottom: 2px solid var(--poke-red); padding-bottom: 5px; margin-top: 20px; font-weight: bold; }
+
+        /* STILI AGGIUNTI PER L'AUTOCOMPLETAMENTO SOTTO L'INPUT SPECIE */
+        .search-species-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #search-results-preview {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        #search-results-preview:empty {
+            display: none;
+        }
+
+        /* Adattamento classi iniettate dal backend per il dropdown */
+        #search-results-preview .search-category-title {
+            background: #f4f4f4;
+            padding: 5px 10px;
+            font-size: 0.75em;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #666;
+        }
+
+        #search-results-preview .search-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            text-decoration: none;
+            color: #333;
+            gap: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        #search-results-preview .search-item:hover {
+            background: #f9f9f9;
+        }
+
+        #search-results-preview .item-icon {
+            width: 30px;
+            height: 30px;
+            object-fit: contain;
+        }
+
+        #search-results-preview .item-type-label {
+            margin-left: auto;
+            font-size: 0.75em;
+            background: #ddd;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: none; /* Nascondiamo la label della categoria dato che siamo già dentro pokedex */
+        }
     </style>
 </head>
 <body>
@@ -61,26 +128,27 @@
                 </select>
             </div>
 
-			<div class="section-title">Immagini Allenatore</div>
-			<div class="form-group">
-				<label>Sprite Allenatore (Img)</label>
-				<input type="file" id="upload-img" accept="image/*" onchange="handleUpload(this, 'Img')">
-			</div>
+            <div class="section-title">Immagini Allenatore</div>
+            <div class="form-group">
+                <label>Sprite Allenatore (Img)</label>
+                <input type="file" id="upload-img" accept="image/*" onchange="handleUpload(this, 'Img')">
+            </div>
 
-			<div class="form-group">
-				<label>Icona (Ico)</label>
-				<input type="file" id="upload-ico" accept="image/*" onchange="handleUpload(this, 'Ico')">
-			</div>
+            <div class="form-group">
+                <label>Icona (Ico)</label>
+                <input type="file" id="upload-ico" accept="image/*" onchange="handleUpload(this, 'Ico')">
+            </div>
 
             <div class="section-title">Squadra Pokémon</div>
             <div id="pokemon-list-container">
-                </div>
+            </div>
 
             <div class="section-title">Aggiungi Nuovo Pokémon</div>
             <div class="add-pokemon-box">
-                <div class="form-group" style="margin:0">
+                <div class="form-group search-species-wrapper" style="margin:0">
                     <label>Specie</label>
-                    <input type="text" id="new-pkmn-species" placeholder="Es: Pikachu">
+                    <input type="text" id="new-pkmn-species" placeholder="Es: Pikachu" autocomplete="off">
+                    <div id="search-results-preview"></div>
                 </div>
                 <div class="form-group" style="margin:0">
                     <label>Rank</label>
@@ -109,7 +177,7 @@
     
     // Lista visiva attuale (quella che l'utente vede a schermo)
     let visualPokemonList = [];
-	let	trainerName;
+    let trainerName;
 
     async function loadTrainerData() {
         const pathParts = window.location.pathname.split('/');
@@ -140,66 +208,118 @@
         });
     }
 
-	function removePokemon(index) 
-	{
-		const pkmnId = visualPokemonList[index];
+    function removePokemon(index) 
+    {
+        const pkmnId = visualPokemonList[index];
 
-		// Se il Pokémon è nuovo (placeholder "_NEW"), dobbiamo semplicemente 
-		// cancellare l'operazione di creazione corrispondente
-		if (pkmnId.endsWith("_NEW")) {
-			// Troviamo l'indice dell'operazione CREATE basandoci su quante 
-			// operazioni di creazione ci sono prima di questa
-			let createIndex = -1;
-			let count = 0;
-			
-			// Cerchiamo l'operazione che corrisponde a questo specifico inserimento
-			// Per semplicità, cerchiamo l'operazione CREATE che ha lo stesso nome
-			const speciesName = pkmnId.split("_NEW")[0];
-			
-			// Troviamo l'indice reale in pendingOperations
-			const opIndex = pendingOperations.findIndex(op => 
-				op.type === "CREATE" && op.name === speciesName
-			);
+        // Se il Pokémon è nuovo (placeholder "_NEW"), dobbiamo semplicemente 
+        // cancellare l'operazione di creazione corrispondente
+        if (pkmnId.endsWith("_NEW")) {
+            // Troviamo l'indice dell'operazione CREATE basandoci su quante 
+            // operazioni di creazione ci sono prima di questa
+            let createIndex = -1;
+            let count = 0;
+            
+            // Cerchiamo l'operazione che corrisponde a questo specifico inserimento
+            // Per semplicità, cerchiamo l'operazione CREATE che ha lo stesso nome
+            const speciesName = pkmnId.split("_NEW")[0];
+            
+            // Troviamo l'indice reale in pendingOperations
+            const opIndex = pendingOperations.findIndex(op => 
+                op.type === "CREATE" && op.name === speciesName
+            );
 
-			if (opIndex !== -1) {
-				pendingOperations.splice(opIndex, 1);
-			}
-		} else {
-			// Se il Pokémon esisteva già sul server, allora serve una DELETE reale
-			pendingOperations.push({
-				type: "DELETE",
-				id: pkmnId,
-				reason: "FREED"
-			});
-		}
+            if (opIndex !== -1) {
+                pendingOperations.splice(opIndex, 1);
+            }
+        } else {
+            // Se il Pokémon esisteva già sul server, allora serve una DELETE reale
+            pendingOperations.push({
+                type: "DELETE",
+                id: pkmnId,
+                reason: "FREED"
+            });
+        }
 
-		// Rimuoviamo dalla vista in ogni caso
-		visualPokemonList.splice(index, 1);
-		renderPokemonList();
-	}
+        // Rimuoviamo dalla vista in ogni caso
+        visualPokemonList.splice(index, 1);
+        renderPokemonList();
+    }
 
-	function addPokemonToList() {
-		const species = document.getElementById('new-pkmn-species').value.trim();
-		const rank = document.getElementById('new-pkmn-rank').value;
+    function addPokemonToList() {
+        const species = document.getElementById('new-pkmn-species').value.trim();
+        const rank = document.getElementById('new-pkmn-rank').value;
 
-		if (!species) return alert("Inserisci una specie!");
+        if (!species) return alert("Inserisci una specie!");
 
-		// Aggiungiamo l'operazione
-		pendingOperations.push({
-			type: "CREATE",
-			name: species,
-			data: { 
-				Rank: rank,
-				Trainer: document.getElementById('t-name').value 
-			}
-		});
+        // Aggiungiamo l'operazione
+        pendingOperations.push({
+            type: "CREATE",
+            name: species,
+            data: { 
+                Rank: rank,
+                Trainer: document.getElementById('t-name').value 
+            }
+        });
 
-		// Usiamo il nome della specie + un marker unico per riconoscerlo come "nuovo"
-		visualPokemonList.push(`${species}_NEW`);
-		
-		document.getElementById('new-pkmn-species').value = '';
-		renderPokemonList();
-	}
+        // Usiamo il nome della specie + un marker unico per riconoscerlo come "nuovo"
+        visualPokemonList.push(`${species}_NEW`);
+        
+        document.getElementById('new-pkmn-species').value = '';
+        renderPokemonList();
+    }
+
+    /* ==========================================
+       LOGICA SUGGERIMENTI KEYPRESSED (POKÉMON)
+       ========================================== */
+    const speciesInput = document.getElementById('new-pkmn-species');
+    const previewContainer = document.getElementById('search-results-preview');
+
+    async function executeSpeciesTip() {
+        const query = speciesInput.value.trim();
+        
+        if (query.length < 1) {
+            previewContainer.innerHTML = '';
+            return;
+        }
+
+        try {
+            // Invio array codificato in query string come richiesto dal tuo backend ["pokedex"]
+            const response = await fetch(`/keyPressed/search/${query}?include=%5B%22pokedex%22%5D`);
+            const htmlOutput = await response.text();
+            previewContainer.innerHTML = htmlOutput;
+        } catch (err) {
+            console.error("Errore live search:", err);
+        }
+    }
+
+    // Ascolta la digitazione dell'utente sulla Specie
+    speciesInput.addEventListener('input', executeSpeciesTip);
+
+    // Gestione del click sul Pokémon suggerito dal backend
+    previewContainer.addEventListener('click', function(e) {
+        // Cerca l'ancora <a> più vicina all'elemento cliccato (es. se clicchi l'immagine o lo span)
+        const targetAnchor = e.target.closest('.search-item');
+        
+        if (targetAnchor) {
+            e.preventDefault(); // Blocca l'apertura del link del backend
+            
+            // Estrae il nome del Pokémon dallo span interno (.item-name)
+            const pkmnName = targetAnchor.querySelector('.item-name').innerText.trim();
+            
+            // Assegna il nome all'input e pulisce il dropdown
+            speciesInput.value = pkmnName;
+            previewContainer.innerHTML = '';
+        }
+    });
+
+    // Chiude la tendina se l'utente clicca fuori dal box di ricerca
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-species-wrapper')) {
+            previewContainer.innerHTML = '';
+        }
+    });
+    /* ========================================== */
 
     document.getElementById('trainer-form').onsubmit = async (e) => {
         e.preventDefault();
@@ -216,15 +336,15 @@
                 body: JSON.stringify(payload)
             });
 
-			let	err = await response.text();
+            let err = await response.text();
             if (response.ok) {
                 window.location.href = `/trainer/${payload.name}`;
             }
-			else if (response.status == 500)
-			{
-				window.location.href = `/html/error/500.html?msg=${encodeURIComponent(err)}`;
-			} 
-			else {
+            else if (response.status == 500)
+            {
+                window.location.href = `/html/error/500.html?msg=${encodeURIComponent(err)}`;
+            } 
+            else {
                 alert("Errore durante il salvataggio (" + response.status + ": " + err + ")");
             }
         } catch (err) {
@@ -263,7 +383,7 @@ async function handleUpload(input, filetype) {
         });
 
         if (response.ok) {} 
-		else {
+        else {
             const errorMsg = await response.text();
             alert(`Errore caricamento ${filetype}: ${errorMsg}`);
             input.value = ""; // Resetta l'input in caso di errore
