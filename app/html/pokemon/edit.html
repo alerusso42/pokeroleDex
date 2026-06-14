@@ -60,9 +60,9 @@
                     <div id="species-autocomplete-container" style="position: absolute; width: 100%; top: 100%; left: 0; z-index: 1000; max-height: 250px; overflow-y: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.15);"></div>
                 </div>
                 <div class="form-group">
-                    <label>HP (Attuali / Max)</label>
+                    <label>HP (Attuali / Max Specie)</label>
                     <div class="stat-input-group">
-                        <input type="number" id="f-hp-curr"> <span>/</span> <input type="number" id="f-hp-max">
+                        <input type="number" id="f-hp-curr"> <span>/</span> <input type="text" id="f-hp-max" readonly style="background: #eee; border: none;">
                     </div>
                 </div>
                 <div class="form-group">
@@ -73,10 +73,10 @@
                 </div>
             </div>
 
-            <div class="section-title">Attributi (Attuale / Max)</div>
+            <div class="section-title">Attributi (Attuale / Max Pokedex)</div>
             <div class="stats-grid" id="attributes-container"></div>
 
-            <div class="section-title">Skills</div>
+            <div class="section-title">Skills (Valore Attuale)</div>
             <div class="stats-grid" id="skills-container"></div>
 
             <div class="section-title">Abilità</div>
@@ -98,6 +98,7 @@
         const attrNames = ["Strength", "Dexterity", "Vitality", "Special", "Insight"];
         const skillNames = ["Brawl", "Channel", "Clash", "Evasion", "Alert", "Athletics", "Nature", "Stealth", "Initiative"];
         let originalData = null;
+        let currentSpeciesData = null; // Contiene l'oggetto Pokedex locale del pokemon attuale
 
         // Inizializzazione UI statica
         const attrContainer = document.getElementById('attributes-container');
@@ -106,7 +107,7 @@
                 <div class="form-group">
                     <label>${attr}</label>
                     <div class="stat-input-group">
-                        <input type="number" id="curr-${attr}"> <span>/</span> <input type="number" id="max-${attr}">
+                        <input type="number" id="curr-${attr}"> <span>/</span> <input type="text" id="max-${attr}" readonly style="background:#eee; border:none; width:60px; text-align:center;">
                     </div>
                 </div>`;
         });
@@ -121,7 +122,66 @@
         });
 
         // =========================================================================
-        // LOGICA DI LIVE SEARCH PER IL CAMPO SPECIE (FIXED PER ARRAY DI OGGETTI)
+        // LOGICA DI AGGIORNAMENTO DATI SPECIE (MAX ATTRIBUTI / SKILLS / HP)
+        // =========================================================================
+        
+        // Cerca i dati del pokemon sul server e aggiorna i tetti massimi della scheda
+        async function updateSpeciesMaxData(speciesName) {
+            if (!speciesName) {
+                clearMaxFields();
+                return;
+            }
+
+            try {
+                const response = await fetch(`/keyPressed/autoindex/pokedex/${encodeURIComponent(speciesName)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ conds: [] })
+                });
+
+                if (response.ok) {
+                    const match = await response.json();
+                    // Controlliamo se c'è un match valido nell'array e prendiamo il primo elemento
+                    if (match && match.length > 0) {
+                        currentSpeciesData = match[0];
+                        applyMaxValues(currentSpeciesData);
+                        return;
+                    }
+                }
+                clearMaxFields();
+            } catch (error) {
+                console.error("Errore nel recupero dei limiti di specie:", error);
+                clearMaxFields();
+            }
+        }
+
+        // Applica i valori massimi presi dall'oggetto del pokedex recuperato
+        function applyMaxValues(data) {
+            // HP di base della specie
+            document.getElementById('f-hp-max').value = data.BaseHP !== undefined ? data.BaseHP : "???";
+
+            // Sincronizza i massimi degli attributi usando la chiave "Max" + NomeAttributo (es: MaxStrength)
+            attrNames.forEach(attr => {
+                const maxKey = "Max" + attr;
+                const maxField = document.getElementById(`max-${attr}`);
+                if (maxField) {
+                    maxField.value = data[maxKey] !== undefined ? data[maxKey] : "???";
+                }
+            });
+        }
+
+        // Se l'indice è vuoto o fallisce, riempie i campi di "???"
+        function clearMaxFields() {
+            currentSpeciesData = null;
+            document.getElementById('f-hp-max').value = "???";
+            attrNames.forEach(attr => {
+                const maxField = document.getElementById(`max-${attr}`);
+                if (maxField) maxField.value = "???";
+            });
+        }
+
+        // =========================================================================
+        // LOGICA LIVE SEARCH PER IL CAMPO SPECIE
         // =========================================================================
         const speciesInput = document.getElementById('f-species');
         const speciesContainer = document.getElementById('species-autocomplete-container');
@@ -138,6 +198,7 @@
 
             if (!keyPressed) {
                 speciesContainer.innerHTML = '';
+                clearMaxFields();
                 return;
             }
 
@@ -153,6 +214,14 @@
                 const match = await response.json();
                 renderSpeciesResults(match);
 
+                // Se l'utente digita esattamente il nome di un pokemon valido della lista, aggiorna i massimi al volo
+                if (match && match.length > 0 && match[0].Name.toLowerCase() === keyPressed.toLowerCase()) {
+                    currentSpeciesData = match[0];
+                    applyMaxValues(currentSpeciesData);
+                } else if (!match || match.length === 0) {
+                    clearMaxFields();
+                }
+
             } catch (error) {
                 console.error("Errore fetch autoindex:", error);
                 speciesContainer.innerHTML = `<div class="search-category-title" style="background: var(--poke-red);">Errore di rete</div>`;
@@ -161,11 +230,8 @@
 
         function renderSpeciesResults(match) {
             speciesContainer.innerHTML = '';
-
-            // Se l'array è vuoto, non fare nulla
             if (!match || match.length === 0) return;
 
-            // Essendo una ricerca specifica su pokedex, usiamo "pokedex" come titolo di categoria statico
             const titleDiv = document.createElement('div');
             titleDiv.className = 'search-category-title';
             titleDiv.textContent = 'pokedex';
@@ -174,9 +240,8 @@
             const listDiv = document.createElement('div');
             listDiv.className = 'search-results-list';
 
-            // Cicliamo direttamente l'array di oggetti ricevuto
             match.forEach(pokemon => {
-                const name = pokemon.Name; // Estraiamo il nome dall'oggetto
+                const name = pokemon.Name;
                 const imgFile = pokemonToSnakeCase(name) + ".png";
                 
                 const itemAnchor = document.createElement('a');
@@ -193,11 +258,14 @@
                     <span class="item-type-label">pokedex</span>
                 `;
 
-                // Al click sul suggerimento, aggiorniamo il valore e chiudiamo la tendina
                 itemAnchor.addEventListener('click', (e) => {
                     e.preventDefault();
                     speciesInput.value = name;
                     speciesContainer.innerHTML = '';
+                    
+                    // Salviamo l'oggetto pokemon selezionato e aggiorniamo i massimi della UI
+                    currentSpeciesData = pokemon;
+                    applyMaxValues(currentSpeciesData);
                 });
 
                 listDiv.appendChild(itemAnchor);
@@ -226,16 +294,17 @@
             document.getElementById('f-name').value = originalData.Name;
             document.getElementById('f-species').value = originalData.Species;
             
-            // Gestione HP e Will (oggetti)
+            // Popola i massimi iniziali mandando la richiesta con la specie corrente caricata
+            await updateSpeciesMaxData(originalData.Species);
+
+            // Gestione HP e Will
             document.getElementById('f-hp-curr').value = originalData.HP.current || 0;
-            document.getElementById('f-hp-max').value = originalData.HP.max || 0;
             document.getElementById('f-will-curr').value = originalData.Will ? originalData.Will.current : 0;
             document.getElementById('f-will-max').value = originalData.Will ? originalData.Will.max : 0;
 
-            // Popola Attributi
+            // Popola Attributi Correnti
             attrNames.forEach(attr => {
                 document.getElementById(`curr-${attr}`).value = originalData[attr].current;
-                document.getElementById(`max-${attr}`).value = originalData[attr].max;
             });
 
             // Popola Skills
@@ -282,9 +351,11 @@
             // Sync Base
             updatedData.Name = document.getElementById('f-name').value;
             updatedData.Species = document.getElementById('f-species').value;
+            
+            // Salviamo l'HP calcolato / o quello presente
             updatedData.HP = {
                 current: parseInt(document.getElementById('f-hp-curr').value),
-                max: parseInt(document.getElementById('f-hp-max').value)
+                max: parseInt(document.getElementById('f-hp-max').value) || originalData.HP.max
             };
             updatedData.Will = {
                 current: parseInt(document.getElementById('f-will-curr').value),
@@ -295,7 +366,7 @@
             attrNames.forEach(attr => {
                 updatedData[attr] = {
                     current: parseInt(document.getElementById(`curr-${attr}`).value),
-                    max: parseInt(document.getElementById(`max-${attr}`).value)
+                    max: parseInt(document.getElementById(`max-${attr}`).value) || originalData[attr].max
                 };
             });
 
