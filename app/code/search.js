@@ -206,6 +206,39 @@ function searchByKey(key, data, validArray = [])
 	return (match);
 }
 
+/**
+ * 
+ * @param {string} dir 
+ * @param {string} name 
+ * @param {* | null} res
+ */
+function searchServerData(dir, name, res=null)
+{
+	let	path;
+	let	data;
+
+	dir = dataNormalize(dir);
+	name = dataNormalize(name);
+	if (dir.includes("..") || name.includes(".."))
+	{
+		res?.status(403).end("Searching .. or similar not allowed.");
+		return (null);
+	}
+	path = dataPath + dir + '/' + name + '.json';
+	if (lib.fs.existsSync(path) == false)
+	{
+		res?.status(404).end(`${dir}/${name} not found.`);
+		return (null);
+	}
+	data = lib.fs.readFileSync(path, 'utf8');
+	if (!data)
+	{
+		res?.status(500).end(`${dir}/${name} has been lost by server, what?`);
+		return (null);
+	}
+	return (data);
+}
+
 /** @typedef {import("../metadata/cond.json")} Cond*/
 /** @typedef {Array<Cond>} Conds*/
 /** @typedef {import('./utils/classes/DataList.js').ExpPrototype} ExpData*/
@@ -355,4 +388,4 @@ function getRandomQuote()
 	}
 }
 
-module.exports = {getData, searchByKey, searchByDataExpanded, searchByDirExpanded};
+module.exports = {getData, searchByKey, searchServerData, searchByDataExpanded, searchByDirExpanded};

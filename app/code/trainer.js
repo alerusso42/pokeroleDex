@@ -1,3 +1,4 @@
+const { searchServerData } = require("./search.js");
 const lib = require("./utils/lib.js");
 
 /** @typedef {typeof import("../data/questData/template/trainer.json")} Trainer */
@@ -44,7 +45,7 @@ function editTrainer(server, client, res)
 	for (let pkmn of client.body.pkmn)
 	{
 		if (pkmn.type == "DELETE")
-			error = deletePkmn(server, trainerNewData, pkmn);
+			deletePkmn(server, trainerNewData, pkmn);
 		else if (pkmn.type == "CREATE")
 			error = createPkmn(server, trainerNewData, pkmn);
 		if (error != null)
@@ -166,9 +167,7 @@ function createPkmn(server, trainerNewData, pkmn)
     // 3. Abilità
     if (dataSpecie.Ability1)
 	{
-        dataNew.Ability.Name = dataSpecie.Ability1;
-        dataNew.Ability.Effect = "";
-        dataNew.Ability.Description = "";
+		dataNew.Ability = JSON.parse(searchServerData("ability", dataSpecie.Ability1));
     }
 
     // 4. Dati Fisici e Bio

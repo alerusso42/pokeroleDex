@@ -694,7 +694,7 @@
                 Effect: document.getElementById(`move-effect-${i}`).value
             }));
 
-            const response = await fetch(`/api/pokemon/${originalData.Id}`, {
+            const response = await fetch(`/api/pokemon/${originalData.Id}?onlySome=true`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedData)

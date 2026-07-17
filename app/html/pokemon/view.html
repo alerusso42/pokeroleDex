@@ -14,11 +14,18 @@
             text-transform: uppercase; padding: 5px 15px; border-radius: 5px;
             color: white; font-weight: bold; font-size: 0.8em; margin: 0 5px;
         }
-        /* Colori tipi Pokerole (Aggiunti per completezza) */
+        /* Colori tipi Pokerole */
         .type-grass { background-color: #78C850; }
         .type-ice { background-color: #98D8D8; color: #333; }
         .type-fire { background-color: #F08030; }
         .type-water { background-color: #6890F0; }
+        .type-normal { background-color: #A8A878; }
+        .type-fighting { background-color: #C03028; }
+        .type-poison { background-color: #A040A0; }
+        .type-ground { background-color: #E0C068; }
+        .type-rock { background-color: #B8A038; }
+        .type-ghost { background-color: #705898; }
+        .type-electric { background-color: #F8D030; color: #333; }
         
         .stat-dot {
             height: 12px; width: 12px; border-radius: 50%; display: inline-block;
@@ -29,7 +36,7 @@
         
         .move-card {
             background: #f9f9f9; border: 1px solid #eee; padding: 15px;
-            border-radius: 10px; margin-bottom: 10px;
+            border-radius: 10px; margin-bottom: 15px; position: relative;
         }
 
         /* Layout per le Skills */
@@ -43,11 +50,145 @@
         }
         .skill-item { font-size: 0.9em; display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; }
         .skill-val { font-weight: bold; color: var(--poke-red); }
+
+        /* --- STILI NUOVI SIMULATORE --- */
+        .btn-simulate {
+            background-color: #e74c3c; color: white; border: none; padding: 6px 12px;
+            border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.8em;
+            margin-top: 10px; transition: background 0.2s; display: inline-flex; align-items: center; gap: 5px;
+        }
+        .btn-simulate:hover { background-color: #c0392b; }
+
+        .sim-box {
+            margin-top: 12px; background: #fff; border: 2px solid #ddd;
+            border-radius: 8px; padding: 12px; font-family: sans-serif;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .sim-title { font-weight: bold; font-size: 0.95em; margin-bottom: 8px; color: #333; }
+        .sim-row { margin-bottom: 6px; font-size: 0.9em; }
+        .dice-container { display: flex; gap: 5px; margin: 4px 0 10px 0; font-size: 1.8rem; line-height: 1; }
+        
+        /* Colori dei Dadi */
+        .dice-success { color: #2ecc71; filter: drop-shadow(0 0 2px rgba(46,204,113,0.3)); }
+        .dice-fail { color: #95a5a6; }
+        .dice-chance-success { color: #f1c40f; filter: drop-shadow(0 0 3px rgba(241,196,15,0.5)); }
+        .dice-chance-fail { color: #bdc3c7; }
+
+        .sim-warning {
+            background-color: #f39c12; color: white; padding: 4px 8px;
+            border-radius: 4px; font-size: 0.75em; margin-top: 8px; font-weight: bold;
+        }
+/* Stile per la barra delle azioni */
+.action-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.btn-pdf {
+    background-color: #34495e;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9em;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: background 0.2s;
+}
+.btn-pdf:hover {
+    background-color: #2c3e50;
+}
+
+/* --- REGOLE SPECIFICHE PER LA STAMPA / PDF --- */
+@media print {
+    /* Nascondiamo tutto ciò che non serve su carta/PDF */
+    .action-bar, 
+    .edit-icon, 
+    .btn-simulate, 
+    .sim-box {
+        display: none !important;
+    }
+
+    /* Ottimizzazioni per il foglio */
+    body {
+        background: white !important;
+        color: black !important;
+        font-size: 12pt;
+        margin: 0;
+        padding: 0;
+    }
+
+    #test {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+    }
+
+    /* Evita che le mosse vengano tagliate a metà tra una pagina e l'altra */
+    .move-card {
+        page-break-inside: avoid;
+        break-inside: avoid;
+        background: #fff !important;
+        border: 1px solid #ccc !important;
+    }
+    
+    .skills-grid {
+        background: #fff !important;
+        border: 1px solid #ccc !important;
+    }
+.image-wrapper {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        margin: 0 auto 15px auto !important;
+        text-align: center !important;
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    /* Ridimensioniamo l'immagine del Pokémon per il PDF */
+    #data-img {
+        max-width: 150px !important; /* Riduce l'immagine a una dimensione corretta per il foglio */
+        height: auto !important;
+        display: none !important;
+        margin: 0 auto !important;
+        position: relative !important;
+    }
+
+    /* Diamo respiro al titolo, assicurandoci che vada sotto l'immagine */
+    #title {
+        font-size: 20pt !important;
+        margin-top: 10px !important;
+        margin-bottom: 10px !important;
+        text-align: center !important;
+        clear: both !important;
+    }
+
+    /* Allineiamo anche i badge dei tipi al centro */
+    #types {
+        text-align: center !important;
+        margin-bottom: 20px !important;
+    }
+
+    /* Assicurati che i colori di sfondo dei tipi si vedano anche in stampa */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
     </style>
 </head>
 <body>
 
+<div class="action-bar">
     <a href="/" class="btn-home">🏠 HOME</a>
+    <button onclick="window.print()" class="btn-pdf">📄 Salva in PDF</button>
+</div>
 
     <div id="test">
         <div class="image-wrapper">
@@ -56,13 +197,19 @@
 
         <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" class="edit-icon" onclick="requestEdit()">
 
+		<br><br>
         <h1 id="title">Caricamento...</h1>
         <div id="types" style="text-align: center; margin-bottom: 20px;"></div>
-        
         <div id="content-anchor"></div>
     </div>
 
     <script>
+        // Mappa globale per salvare il Pokémon e le sue mosse fetchate
+        let pokemonData = null;
+        const fetchedMoves = {};
+
+        const diceIcons = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+
         function generateDots(current, max) {
             let dots = '';
             for (let i = 0; i < max; i++) {
@@ -71,78 +218,271 @@
             return dots;
         }
 
+        // Estrae il valore di un attributo o di una skill dal pokemon
+        function getStatValue(statName) {
+            if (!statName) return 0;
+            const normalized = statName.trim();
+            
+            // Cerca prima negli attributi (es. Strength: {current: 3, max: 7})
+            if (pokemonData[normalized] && typeof pokemonData[normalized] === 'object' && 'current' in pokemonData[normalized]) {
+                return pokemonData[normalized].current;
+            }
+            // Cerca nelle skills (es. Brawl: 1) o in altre chiavi dirette
+            if (pokemonData[normalized] !== undefined) {
+                return pokemonData[normalized];
+            }
+            return null; // Non trovata
+        }
+
+        // Esegue fisicamente i lanci dei dadi
+        function rollDice(amount) {
+            const rolls = [];
+            for (let i = 0; i < amount; i++) {
+                rolls.push(Math.floor(Math.random() * 6) + 1);
+            }
+            return rolls;
+        }
+
+        // Gestore della simulazione di una mossa
+        function runSimulation(moveName) {
+            const move = fetchedMoves[moveName];
+            if (!move) return;
+
+            const simContainer = document.getElementById(`sim-box-${move._id}`);
+            simContainer.style.display = 'block';
+
+            let warnings = [];
+            
+            // --- 1. ACCURACY (Tiro per Colpire) ---
+            let accuracyHtml = '';
+            let accuracySuccesses = 0;
+            let hitAchieved = true;
+
+            const isNeverFail = move.Attributes && move.Attributes.NeverFail;
+
+            if (isNeverFail) {
+                accuracyHtml = `<div class="sim-row">🎯 <strong>Tiro per Colpire:</strong> Colpisce Automaticamente (Never Fail)!</div>`;
+            } else {
+                const acc1Val = getStatValue(move.Accuracy1);
+                const acc2Val = getStatValue(move.Accuracy2);
+
+                if (acc1Val === null) warnings.push(`Statistica "${move.Accuracy1}" non trovata! Considerata a 0.`);
+                if (acc2Val === null) warnings.push(`Statistica "${move.Accuracy2}" non trovata! Considerata a 0.`);
+
+                const acc1 = acc1Val || 0;
+                const acc2 = acc2Val || 0;
+                const reduction = (move.Attributes && move.Attributes.AccuracyReduction) ? move.Attributes.AccuracyReduction : 0;
+                
+                let accPool = acc1 + acc2 - reduction;
+                if (accPool < 0) accPool = 0;
+
+                const accRolls = rollDice(accPool);
+                accuracySuccesses = accRolls.filter(r => r >= 4).length;
+                hitAchieved = accuracySuccesses > 0;
+
+                let diceHtml = accRolls.map(r => {
+                    const cssClass = r >= 4 ? 'dice-success' : 'dice-fail';
+                    return `<span class="${cssClass}">${diceIcons[r-1]}</span>`;
+                }).join(' ');
+
+                accuracyHtml = `
+                    <div class="sim-row">🎯 <strong>Tiro per Colpire:</strong> ${accuracySuccesses} Successi (Minimo 1 richiesto)</div>
+                    <div class="sim-row" style="font-size:0.8em; color:#666;">
+                        Formula: ${move.Accuracy1} (${acc1}) + ${move.Accuracy2} (${acc2}) ${reduction ? `- Reduction (${reduction})` : ''} = <strong>${accPool} d6</strong>
+                    </div>
+                    <div class="dice-container">${diceHtml || 'Nessun dado lanciato'}</div>
+                `;
+            }
+
+            // --- 2. DANNI ---
+            let damageHtml = '';
+            if (hitAchieved && (move.Damage1 || move.Power > 0)) {
+                const dmg1Val = getStatValue(move.Damage1);
+                const dmg2Val = getStatValue(move.Damage2);
+
+                if (move.Damage1 && dmg1Val === null) warnings.push(`Statistica "${move.Damage1}" non trovata! Considerata a 0.`);
+                if (move.Damage2 && dmg2Val === null) warnings.push(`Statistica "${move.Damage2}" non trovata! Considerata a 0.`);
+
+                const dmg1 = dmg1Val || 0;
+                const dmg2 = dmg2Val || 0;
+                const power = move.Power || 0;
+
+                const dmgPool = power + dmg1 + dmg2;
+                const dmgRolls = rollDice(dmgPool);
+                const damageSuccesses = dmgRolls.filter(r => r >= 4).length;
+
+                let diceHtml = dmgRolls.map(r => {
+                    const cssClass = r >= 4 ? 'dice-success' : 'dice-fail';
+                    return `<span class="${cssClass}">${diceIcons[r-1]}</span>`;
+                }).join(' ');
+
+                // Gestione caso speciale Guillotine (Lethal / OneHitKO)
+                const isLethal = move.Attributes && move.Attributes.Lethal;
+                const damageResultLabel = isLethal ? `${damageSuccesses} Danni (💀Se va KO, FATALITY💀)` : `${damageSuccesses} Danni`;
+
+                damageHtml = `
+                    <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
+                    <div class="sim-row">⚔️ <strong>Danni:</strong> ${damageResultLabel}</div>
+                    <div class="sim-row" style="font-size:0.8em; color:#666;">
+                        Formula: Power (${power}) ${move.Damage1 ? `+ ${move.Damage1} (${dmg1})` : ''} ${move.Damage2 ? `+ ${move.Damage2} (${dmg2})` : ''} = <strong>${dmgPool} d6</strong>
+                    </div>
+                    <div class="dice-container">${diceHtml || 'Nessun dado lanciato'}</div>
+                `;
+            } else if (!hitAchieved) {
+                damageHtml = `
+                    <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
+                    <div class="sim-row" style="color: #e74c3c; font-weight: bold;">❌ L'attacco ha mancato il bersaglio! Nessun danno inflitto.</div>
+                `;
+            }
+
+            // --- 3. EFFETTI AGGIUNTIVI (Chance Dice) ---
+            let effectHtml = '';
+            let chanceDiceAmount = 0;
+
+            // Cerchiamo se ci sono ChanceDice definiti negli AddedEffects
+            if (move.AddedEffects) {
+                if (move.AddedEffects.StatChanges) {
+                    move.AddedEffects.StatChanges.forEach(sc => {
+                        if (sc.ChanceDice) chanceDiceAmount = Math.max(chanceDiceAmount, sc.ChanceDice);
+                    });
+                }
+                if (move.AddedEffects.Ailments) {
+                    move.AddedEffects.Ailments.forEach(ail => {
+                        if (ail.ChanceDice) chanceDiceAmount = Math.max(chanceDiceAmount, ail.ChanceDice);
+                    });
+                }
+            }
+
+            if (hitAchieved && chanceDiceAmount > 0) {
+                // Regola: 1 dado -> serve fare 6. 2 dadi -> serve fare 5-6. 3 dadi -> serve fare 4-6...
+                const threshold = 7 - chanceDiceAmount; 
+                const chanceRoll = rollDice(1)[0]; // Si tira un solo dado opportunità
+                const chanceSuccess = chanceRoll >= threshold;
+
+                const chanceCss = chanceSuccess ? 'dice-chance-success' : 'dice-chance-fail';
+                
+                effectHtml = `
+                    <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
+                    <div class="sim-row">✨ <strong>Effetto Secondario (Chance Dice ${chanceDiceAmount}):</strong> 
+                        ${chanceSuccess ? '<span style="color:#f1c40f; font-weight:bold;">ATTIVATO!</span>' : '<span style="color:#7f8c8d;">Fallito</span>'}
+                    </div>
+                    <div class="sim-row" style="font-size:0.8em; color:#666;">
+                        Richiede un risultato di <strong>${threshold}+</strong> su 1d6.
+                    </div>
+                    <div class="dice-container">
+                        <span class="${chanceCss}">${diceIcons[chanceRoll-1]}</span> <span style="font-size:0.5em; align-self:center; color:#666;">(Lanciato: ${chanceRoll})</span>
+                    </div>
+                `;
+            }
+
+            // --- 4. WARNINGS ---
+            let warningHtml = '';
+            if (warnings.length > 0) {
+                warningHtml = `<div class="sim-warning">⚠️ WARNING:<br>${warnings.join('<br>')}</div>`;
+            }
+
+            // Aggiorna il Box
+            simContainer.innerHTML = `
+                <div class="sim-title">🎲 Simulazione: ${move.Name}</div>
+                ${accuracyHtml}
+                ${damageHtml}
+                ${effectHtml}
+                ${warningHtml}
+            `;
+        }
+
         async function loadPokemon() {
             try {
                 const pathParts = window.location.pathname.split('/');
                 const pkmnId = pathParts[pathParts.length - 1];
                 const response = await fetch(`/api/pokemon/${pkmnId}`);
-                const data = await response.json();
+                pokemonData = await response.json(); // Salvataggio dati globali
 
                 // 1. Immagine e Titolo
-                const spriteBase = data.Species.split(' ')[0].toLowerCase().replace("(", "").replace(")", "");
+                console.log(pokemonData);
+                const spriteBase = pokemonData.Species.split(' ')[0].toLowerCase().replace("(", "").replace(")", "");
                 document.getElementById('data-img').src = `https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/BookSprites/${spriteBase}.png`;
-                document.getElementById('title').innerText = `${data.Name} (${data.Species})`;
+                document.getElementById('title').innerText = `${pokemonData.Name} (${pokemonData.Species})`;
 
                 // 2. Tipi
-                let typesHtml = `<span class="type-badge type-${data.Type1.toLowerCase()}">${data.Type1}</span>`;
-                if(data.Type2) typesHtml += `<span class="type-badge type-${data.Type2.toLowerCase()}">${data.Type2}</span>`;
+                let typesHtml = `<span class="type-badge type-${pokemonData.Type1.toLowerCase()}">${pokemonData.Type1}</span>`;
+                if(pokemonData.Type2) typesHtml += `<span class="type-badge type-${pokemonData.Type2.toLowerCase()}">${pokemonData.Type2}</span>`;
                 document.getElementById('types').innerHTML = typesHtml;
 
                 // 3. Info e Attributi
                 let html = `
                     <div class="section-title">Informazioni</div>
-                    <div class="data-row"><span class="key">Allenatore:</span><span class="value">${data.Trainer}</span></div>
-                    <div class="data-row"><span class="key">HP:</span><span class="value"><strong>${generateDots(data.HP.current, data.HP.max)}</strong></span></div>
-                    <div class="data-row"><span class="key">Will:</span><span class="value"><strong>${generateDots(data.Will.current, data.Will.max)}</strong></span></div>
+                    <div class="data-row"><span class="key">Allenatore:</span><span class="value">${pokemonData.Trainer}</span></div>
+                    <div class="data-row"><span class="key">HP:</span><span class="value"><strong>${generateDots(pokemonData.HP.current, pokemonData.HP.max)}</strong></span></div>
+                    <div class="data-row"><span class="key">Will:</span><span class="value"><strong>${generateDots(pokemonData.Will.current, pokemonData.Will.max)}</strong></span></div>
                     <div class="section-title">Attributi</div>
-                    <div class="data-row"><span class="key">Strength:</span><span class="value">${generateDots(data.Strength.current, data.Strength.max)}</span></div>
-                    <div class="data-row"><span class="key">Dexterity:</span><span class="value">${generateDots(data.Dexterity.current, data.Dexterity.max)}</span></div>
-                    <div class="data-row"><span class="key">Vitality:</span><span class="value">${generateDots(data.Vitality.current, data.Vitality.max)}</span></div>
-                    <div class="data-row"><span class="key">Special:</span><span class="value">${generateDots(data.Special.current, data.Special.max)}</span></div>
-                    <div class="data-row"><span class="key">Insight:</span><span class="value">${generateDots(data.Insight.current, data.Insight.max)}</span></div>
+                    <div class="data-row"><span class="key">Strength:</span><span class="value">${generateDots(pokemonData.Strength.current, pokemonData.Strength.max)}</span></div>
+                    <div class="data-row"><span class="key">Dexterity:</span><span class="value">${generateDots(pokemonData.Dexterity.current, pokemonData.Dexterity.max)}</span></div>
+                    <div class="data-row"><span class="key">Vitality:</span><span class="value">${generateDots(pokemonData.Vitality.current, pokemonData.Vitality.max)}</span></div>
+                    <div class="data-row"><span class="key">Special:</span><span class="value">${generateDots(pokemonData.Special.current, pokemonData.Special.max)}</span></div>
+                    <div class="data-row"><span class="key">Insight:</span><span class="value">${generateDots(pokemonData.Insight.current, pokemonData.Insight.max)}</span></div>
 
                     <div class="section-title">Skills</div>
                     <div class="skills-grid">
-                        <div class="skill-item"><span>Brawl:</span> <span class="skill-val">${data.Brawl || 0}</span></div>
-                        <div class="skill-item"><span>Channel:</span> <span class="skill-val">${data.Channel || 0}</span></div>
-                        <div class="skill-item"><span>Clash:</span> <span class="skill-val">${data.Clash || 0}</span></div>
-                        <div class="skill-item"><span>Evasion:</span> <span class="skill-val">${data.Evasion || 0}</span></div>
-                        <div class="skill-item"><span>Alert:</span> <span class="skill-val">${data.Alert || 0}</span></div>
-                        <div class="skill-item"><span>Athletics:</span> <span class="skill-val">${data.Athletics || 0}</span></div>
-                        <div class="skill-item"><span>Nature:</span> <span class="skill-val">${data.Nature || 0}</span></div>
-                        <div class="skill-item"><span>Stealth:</span> <span class="skill-val">${data.Stealth || 0}</span></div>
-                        <div class="skill-item"><span>Initiative:</span> <span class="skill-val">${data.Initiative || 0}</span></div>
+                        <div class="skill-item"><span>Brawl:</span> <span class="skill-val">${pokemonData.Brawl || 0}</span></div>
+                        <div class="skill-item"><span>Channel:</span> <span class="skill-val">${pokemonData.Channel || 0}</span></div>
+                        <div class="skill-item"><span>Clash:</span> <span class="skill-val">${pokemonData.Clash || 0}</span></div>
+                        <div class="skill-item"><span>Evasion:</span> <span class="skill-val">${pokemonData.Evasion || 0}</span></div>
+                        <div class="skill-item"><span>Alert:</span> <span class="skill-val">${pokemonData.Alert || 0}</span></div>
+                        <div class="skill-item"><span>Athletics:</span> <span class="skill-val">${pokemonData.Athletics || 0}</span></div>
+                        <div class="skill-item"><span>Nature:</span> <span class="skill-val">${pokemonData.Nature || 0}</span></div>
+                        <div class="skill-item"><span>Stealth:</span> <span class="skill-val">${pokemonData.Stealth || 0}</span></div>
+                        <div class="skill-item"><span>Initiative:</span> <span class="skill-val">${pokemonData.Initiative || 0}</span></div>
                         <div class="skill-item"><span></span> <span class="skill-val"></span></div>
+                    </div>
 
-                    <div class="section-title">Abilità: ${data.Ability.Name}</div>
-                    <p style="font-size: 0.9em; color: #666; padding: 0 10px; line-height:1.4;">${data.Ability.Effect}</p>
+                    <div class="section-title">Abilità: ${pokemonData.Ability.Name}</div>
+                    <p style="font-size: 0.9em; color: #666; padding: 0 10px; line-height:1.4;">${pokemonData.Ability.Effect}</p>
 
                     <div class="section-title">Moveset</div>
                 `;
 
-                // 4. Moveset
-				try 
-				{
-                data.Moves.forEach(move => {
-                    html += `
-                        <div class="move-card">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <strong>${move.Name}</strong>
-                                <span class="type-badge type-${move.Type.toLowerCase()}" style="font-size:0.6em">${move.Type}</span>
+                // 4. Moveset con Fetch Parallele e simulatore integrato
+                try {
+                    const movePromises = pokemonData.Moves.map(async (moveData) => {
+                        const response = await fetch(`/pokedata/move/${moveData.Name}`);
+                        const move = await response.json();
+                        
+                        // Salvataggio mossa nella mappa globale
+                        fetchedMoves[move.Name] = move;
+
+                        // Gestione etichette accuratezza
+                        const reductionText = (move.Attributes && move.Attributes.AccuracyReduction) ? ` (Ridu. -${move.Attributes.AccuracyReduction})` : '';
+                        const accLabel = move.Attributes && move.Attributes.NeverFail ? 'Never Fail' : `${move.Accuracy1} + ${move.Accuracy2}${reductionText}`;
+                        const dmgLabel = (move.Damage1 || move.Power > 0) ? `${move.Damage1 || ''} + ${move.Power}`.replace(/^\s*\+\s*/, '') : 'Nessuno';
+
+                        return `
+                            <div class="move-card">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <strong>${move.Name}</strong>
+                                    <span class="type-badge type-${move.Type.toLowerCase()}" style="font-size:0.6em">${move.Type}</span>
+                                </div>
+                                <div style="font-size:0.8em; margin: 8px 0; color: #444; background: #eee; padding: 4px; border-radius: 4px;">
+                                    ⚔️ <strong>Danni:</strong> ${dmgLabel} 
+                                    | 🎯 <strong>Acc:</strong> ${accLabel}
+                                </div>
+                                <p style="font-size:0.85em; margin:0; line-height:1.3;">${move.Effect}</p>
+                                
+                                <!-- Pulsante lancia dadi -->
+                                <button class="btn-simulate" onclick="runSimulation('${move.Name}')">🎲 Lancia Dadi</button>
+                                
+                                <!-- Div per l'output della simulazione -->
+                                <div id="sim-box-${move._id}" class="sim-box" style="display:none;"></div>
                             </div>
-                            <div style="font-size:0.8em; margin: 8px 0; color: #444; background: #eee; padding: 4px; border-radius: 4px;">
-                                ⚔️ <strong>Danni:</strong> ${move.Damage1} + ${move.Power} 
-                                | 🎯 <strong>Acc:</strong> ${move.Accuracy1} + ${move.Accuracy2}
-                            </div>
-                            <p style="font-size:0.85em; margin:0; line-height:1.3;">${move.Effect}</p>
-                        </div>
-                    `;
-                });
-				}
-				catch (err)
-				{
-					console.log("moves bug");
-				}
+                        `;
+                    });
+
+                    const movesHtmlArray = await Promise.all(movePromises);
+                    html += movesHtmlArray.join('');
+
+                } catch (err) {
+                    console.log("moves bug: " + err);
+                }
 
                 document.getElementById('content-anchor').innerHTML = html;
 

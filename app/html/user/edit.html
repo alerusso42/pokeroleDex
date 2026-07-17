@@ -39,7 +39,26 @@
     </style>
 </head>
 <body>
-
+<script>
+    // Blocca immediatamente il rendering del resto della pagina
+    document.documentElement.style.display = 'none';
+    
+    // Scarica la pagina 501 e sovrascrive l'intero documento
+    fetch('/html/error/501.html')
+        .then(response => {
+            if (!response.ok) throw new Error();
+            return response.text();
+        })
+        .then(html => {
+            document.open();
+            document.write(html);
+            document.close();
+        })
+        .catch(() => {
+            // Fallback se la pagina non esiste: reindirizza o mostra errore base
+            window.location.href = '/html/error/501.html';
+        });
+</script>
     <a href="javascript:history.back()" class="btn-home">⬅️ ANNULLA</a>
 
     <div id="test">
@@ -76,10 +95,10 @@
 
             <div class="section-title">Team Trainers Associati</div>
             <div id="trainers-list-container">
-                <!-- Qui appariranno i trainer associati -->
             </div>
 
             <div class="section-title">Associa Nuovo Trainer</div>
+            <div class="section-title"></div>
             <div class="add-box">
                 <div class="form-group" style="margin:0; flex-grow: 1;">
                     <label>Nome Trainer</label>

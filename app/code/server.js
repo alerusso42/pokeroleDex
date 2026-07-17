@@ -7,9 +7,10 @@ const {view} = require('./view.js');
 const {edit} = require('./edit.js');
 const {create} = require('./create.js');
 const { editTrainer } = require('./trainer.js');
-const { enumAuth } = require('./utils/enums.js');
+const { enumAuth, protectedDirList } = require('./utils/enums.js');
 const { questImgPath } = require('./utils/macro.js');
 const { editJson } = require('./utils/json.js');
+const { includesOneOf, dataNormalize } = require('./utils/string.js');
 const types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
 const server = new lib.types.Server();
 
@@ -114,13 +115,31 @@ lib.app.post("/keyPressed/autoindex/:dir{/:keys}", (req, res) =>
 	let	keys;
 
 	if (!req.body)
-		res.status(400).send("missing body");
+		return (res.status(400).send("missing body"));
 	client.dirName = req.params.dir;
 	keys = req.params.keys;
 	match = locationSearch.searchByDirExpanded(server, client, keys, true);
 	res.send(match);
 }
 );
+
+lib.app.get("/pokedata/:dir/:name", (req, res) =>
+{	
+	let client = new lib.types.Client(server, req);
+	let	match;
+
+	req.params.dir = dataNormalize(req.params.dir);
+	req.params.name = dataNormalize(req.params.name);
+	if (includesOneOf(req.params.dir, protectedDirList) == true)
+	{
+		if (locationLogin.loginCheck(server, client, res, true))
+			return ;
+	}
+	match = locationSearch.searchServerData(req.params.dir, req.params.name, res); 
+	if (!match)
+		return ;
+	res.send(match);
+});
 
 lib.app.get("/search/*splat", (req, res) =>
 {

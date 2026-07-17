@@ -155,7 +155,6 @@ body {
     left: 50%;
     transform: translateX(-50%);
     z-index: 10;
-    /* overflow: hidden;  <-- RIMUOVI O COMMENTA QUESTA RIGA */
 }
 
 /* Cerchio centrale della Pokéball */
@@ -172,17 +171,17 @@ body {
 }
 
 .image-wrapper img {
-    /* max-width: 85%;  <-- Se vuoi che esca dai bordi, puoi aumentarlo o lasciarlo così */
-    max-height: 110%; /* Permette a Psyduck di sporgere un po' sopra e sotto */
+    max-height: 110%; /* Lasciamo il 110% per far sporgere i PNG come Pupitar */
     width: auto;
     object-fit: contain;
-    z-index: 5; /* Sta davanti al cerchio bianco */
+    z-index: 5;
     filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
     transition: transform 0.3s ease;
-    
-    /* Sposta l'immagine leggermente in avanti se serve */
     position: relative;
-    /* margin-top: 200px; */
+
+    /* --- IL TRUCCO PER LE FOTO REALI --- */
+    border-radius: 50%;
+    aspect-ratio: 1 / 1;
 }
 
 .image-wrapper:hover img {
