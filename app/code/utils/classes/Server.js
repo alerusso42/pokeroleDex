@@ -21,7 +21,7 @@ class Server
 		this.metaData = new metaData();
 
 		// @ts-ignore
-		/** @type {Map<number, User>} */this.userMap = getDataMap("user/", true, true);
+		/** @type {Map<number, User>} */this.userMap = getDataMap("user/", true);
 		
 		/** @type {number} */
 		this.userNum = this.userMap.size;
@@ -46,7 +46,9 @@ function getDataMap(typePath, readFileBool = false, useIdBool = false)
 	let map = new Map();
 	let dirName = questDataPath + typePath;
 	let dir = fs.readdirSync(dirName);
+	let	i;
 
+	i = 0;
 	for (let file of dir)
 	{
 		if (file[0] == ".")
@@ -55,7 +57,7 @@ function getDataMap(typePath, readFileBool = false, useIdBool = false)
 		if (readFileBool && !useIdBool)
 		{
 			let json = JSON.parse(fs.readFileSync(dirName + file, 'utf-8'));
-			map.set(json.Id, json);
+			map.set(fileNoExt, json);
 		}
 		else
 			map.set(fileNoExt, file);

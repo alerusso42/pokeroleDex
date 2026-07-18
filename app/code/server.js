@@ -346,7 +346,7 @@ lib.app.get("/api/userInfo", (req, res) =>
 	
 	client = new lib.types.Client(server, req);
 	locationLogin.loginCheck(server, client, res);
-	userInfo = client.user;
+	userInfo = structuredClone(client.user);
 	if (userInfo == null)
 	{
 		if (client.isAdmin == true)

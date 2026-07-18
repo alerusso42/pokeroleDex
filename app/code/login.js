@@ -23,14 +23,19 @@ function login(server, req, res, loginBool)
 {
 	let client = new lib.types.Client(server, req, "./html/login.html");
 
+	console.log(server.userMap);
 	for (let [id, user] of server.userMap)
 	{
 		if (user.Name == client.dataName)
 		{
 			if (loginBool == false)
 				return (res.status(403).end("Esiste gia"));
-			if (lib.crypt.compareSync(client.body, user.Password) == false)
-				return (res.status(401).end("Wrong password nigga"));
+			if (user.Password && !client.body)
+				return (res.status(401).end("Someone has forgot to put the password"));
+			console.log(client.body);
+			console.log(user.Password);
+			if (user.Password && lib.crypt.compareSync(client.body, user.Password) == false)
+				return (res.status(401).end("Wrong password man"));
 			client.isAdmin = user.isAdmin;
 			addUser(server, client, res, user);
 			return (res.redirect("/"));
@@ -69,7 +74,12 @@ function addUser(server, client, res, user = null)
 		newUser.File = dataPath + "user/" + client.dataName + ".json";
 		newUser.IsAdmin = client.isAdmin;
 		newUser.Name = client.dataName;
-		newUser.Password = lib.crypt.hashSync(client.body, server.cryptSalt);
+		console.log(newUser.Password);
+		if (client.body)
+			newUser.Password = lib.crypt.hashSync(client.body, server.cryptSalt);
+		else
+			newUser.Password = "";
+		console.log(newUser.Password);
 		if (createFirstUserTrainer(server, client, newUser.Name) == 1)
 			return (1);
 		newUser.Trainers = [newUser.Name];
