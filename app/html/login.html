@@ -51,11 +51,10 @@
         const pass = document.getElementById('password').value;
 
         try {
-            // Inviamo a /login/Nome o /register/Nome in base al click
             const response = await fetch(`/${actionType}/${user}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'text/plain' },
-                body: pass 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({password: pass})
             });
 
             if (response.redirected) {

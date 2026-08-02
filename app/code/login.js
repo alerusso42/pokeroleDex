@@ -32,9 +32,7 @@ function login(server, req, res, loginBool)
 				return (res.status(403).end("Esiste gia"));
 			if (user.Password && !client.body)
 				return (res.status(401).end("Someone has forgot to put the password"));
-			console.log(client.body);
-			console.log(user.Password);
-			if (user.Password && lib.crypt.compareSync(client.body, user.Password) == false)
+			if (user.Password && lib.crypt.compareSync(client.body.password, user.Password) == false)
 				return (res.status(401).end("Wrong password man"));
 			client.isAdmin = user.isAdmin;
 			addUser(server, client, res, user);
@@ -76,7 +74,7 @@ function addUser(server, client, res, user = null)
 		newUser.Name = client.dataName;
 		console.log(newUser.Password);
 		if (client.body)
-			newUser.Password = lib.crypt.hashSync(client.body, server.cryptSalt);
+			newUser.Password = lib.crypt.hashSync(client.body.password, server.cryptSalt);
 		else
 			newUser.Password = "";
 		console.log(newUser.Password);
