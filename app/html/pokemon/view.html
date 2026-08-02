@@ -14,7 +14,6 @@
             text-transform: uppercase; padding: 5px 15px; border-radius: 5px;
             color: white; font-weight: bold; font-size: 0.8em; margin: 0 5px;
         }
-        /* Colori tipi Pokerole */
         .type-normal { background-color: #A8A878; }
         .type-fighting { background-color: #C03028; }
         .type-flying { background-color: rgb(126, 174, 251); }
@@ -30,7 +29,7 @@
         .type-ice { background-color: #98D8D8; color: #333; }
         .type-ghost { background-color: #705898; }
         .type-psychic { background-color: #BB60BB; }
-        .type-dark { background-color: #282828; }
+        .type-dark { background-color: #2e1919; }
         .type-dragon { background-color: #264f75; }
         .type-fairy { background-color: rgb(255, 92, 252); }
         .type-missigno { background-color: #007777; animation: cubic-bezier(0.075, 0.82, 0.165, 1); }
@@ -474,7 +473,7 @@
                             <div class="move-card">
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
                                     <strong>${move.Name}</strong>
-                                    <span class="type-badge type-${move.Type.toLowerCase()}" style="font-size:0.6em">${move.Type}</span>
+                                    <span class="type-badge type-${move.Type.toLowerCase()}" style="font-size:0.6em">${move.Type != "missigno"? move.Type : "???"}</span>
                                 </div>
                                 <div style="font-size:0.8em; margin: 8px 0; color: #444; background: #eee; padding: 4px; border-radius: 4px;">
                                     ⚔️ <strong>Danni:</strong> ${dmgLabel} 
