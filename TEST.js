@@ -1,175 +1,211 @@
-let input;
-let inputTemp;
-let	data;
-let	index;
-let	skipCounter;
+const { getHtml } = require("./html.js");
+const lib = require("./utils/lib.js");
+const {json} = lib.utils;
+const {create, fillTemplate} = require("./create.js");
+const {} = require("./utils/classes/classes.js");
+const { editJson } = require("./utils/json.js");
+
+/** @typedef {typeof import("../data/template/user.json")} User */
+
+const dataPath = "../data/questData/";
+
+//SECTION login function
 
 /**
  * 
- * @param {{}} data 
- * @param {string} field 
- * @param {{counter: number, end: boolean}} skip
- * @returns {string | undefined}
+ * @param {lib.types.Server} server 
+ * @param {typeof import("express").Request} req
+ * @param {typeof import("express").Response} res
+ * @param {boolean} createUserBool
+ * @returns 
  */
-function resolveField(data, field, skip={counter: 0, end: false})
+function login(server, req, res, loginBool)
 {
-	let	index;
-	let	currKey;
-	let	input;
-	let	foundField;
+	let client = new lib.types.Client(server, req, "./html/login.html");
 
-	input = field;
-	index = input.indexOf(".");
-	skip.end = true;
-	while (input.length != 0)
+	for (let [id, user] of server.userMap)
 	{
-		if (Array.isArray(data) && input)
+		if (user.Name == client.dataName)
 		{
-			foundField = undefined;
-			for (const val of data)
-			{
-				foundField = resolveField(val, input, skip);
-				skip.end = false;
-				if (foundField != undefined)
-				{
-					if (skip.counter == 0)
-						break ;
-					foundField = undefined;
-					skip.counter -= 1;
-				}
-			}
-			if (foundField != undefined)
-			{
-				data = foundField;
-				break ;
-			}
-			skip.end = true;
-			return (undefined);
+			if (loginBool == false)
+				return (res.status(403).end("Esiste gia"));
+			if (user.Password && !client.body)
+				return (res.status(401).end("Someone has forgot to put the password"));
+			if (user.Password && lib.crypt.compareSync(client.body.password, user.Password) == false)
+				return (res.status(401).end("Wrong password man"));
+			client.isAdmin = user.isAdmin;
+			addUser(server, client, res, user);
+			console.log(`Welcome back, ${client.dataName}!`);
+			return (res.redirect("/"));
 		}
-		else if (Array.isArray(data))
-			break ;
-		console.log(input);
-		if (index != -1)
-		{
-			currKey = input.slice(0, index);
-			input = input.slice(index + 1);
-		}
+	}
+	if (loginBool == true)
+		return (res.status(404).end("Not found"));
+	if (addUser(server, client, res) == 1)
+	{
+		res.status(500).end("Impossibile creare il primo allenatore.");
+		return ;
+	}
+	console.log(`Welcome, ${client.dataName}!`);
+	res.redirect("/user/" + client.dataName);
+}
+
+/**
+ * 
+ * @param {lib.types.Server} server 
+ * @param {lib.types.Client} client
+ * @param {import("express").Response} res
+ * @param {lib.types.User} user
+ */
+function addUser(server, client, res, user = null)
+{
+	server.userNum++;
+	let id = server.userNum;
+	let idName;
+	/** @type {lib.types.User} */ let newUser = {};
+
+	if (user == null)
+	{
+		idName = client.dataName;
+		if (server.data.user.indexOf(client.dataName) != -1)
+			idName += "_" + id;
+		newUser = fillTemplate(server, client, "user", idName, id);
+		newUser.File = dataPath + "user/" + client.dataName + ".json";
+		newUser.IsAdmin = client.isAdmin;
+		newUser.Name = client.dataName;
+		if (client.body)
+			newUser.Password = lib.crypt.hashSync(client.body.password, server.cryptSalt);
 		else
+			newUser.Password = "";
+		if (createFirstUserTrainer(server, client, newUser.Name) == 1)
+			return (1);
+		newUser.Trainers = [newUser.Name];
+	}
+	else
+		newUser = user;
+	newUser.Id = id;
+	server.userMap.set(id, newUser);
+	server.data["user"].push(client.dataName);
+	server.expandedData["user"].set(client.dataName, 
+	{Category: "",
+	filename: "",
+	Ico: "",
+	Img: ""});
+	lib.fs.writeFileSync(newUser.File, JSON.stringify(newUser, null, 2), 'utf-8');
+	res.setHeader("Set-Cookie", `userId=${id}; Path=/; HttpOnly; Max-Age=31536000`);
+	return (0);
+}
+
+/**
+ * 
+ * @param {lib.types.Server} server 
+ * @param {lib.types.Client} client
+ * @param {String} user
+ */
+function createFirstUserTrainer(server, client, user)
+{
+	let	trainerJson;
+	let	trainerPath;
+
+	client.req.params = 
+	{
+		type: "trainer",
+		name: user,
+		user: user
+	}
+	if (create(server, client) == 1)
+	{
+		console.log("couldn't create user trainer :-(");
+		return (1);
+	}
+	trainerPath = `${server.data.GetPath("trainer")}/${user}`;
+	trainer = json.getJson(trainerPath);
+	trainer.User = user;
+	json.editJson(trainerPath, trainer);
+}
+
+//SECTION loginCheck function
+
+/**
+ * 
+ * @param {lib.types.Server} server
+ * @param {lib.types.Client} client 
+ * @param {Response} res 
+ * @param {bool} protectedPath
+ * @returns {number} 0 on success, 1 on failure
+ */
+function loginCheck (server, client, res, protectedPath = false)
+{
+	if (client.dirName == "")
+	{
+		res.status(400);
+		res.end(getHtml("./html/error/400.html").serialize());
+		return (1);
+	}
+	else if (client.isAdmin == true)
+		client.authLevel = lib.types.enumAuth.ADMIN;
+	else if (validSearch(server, client) == true)
+		client.authLevel = lib.types.enumAuth.CORRECT_LOGIN;
+	else if (protectedPath == true)
+	{
+		res.status(401);
+		res.end(getHtml("./html/error/401.html").serialize());
+		return (1);
+	}
+	else if (client.isLogged == true)
+		client.authLevel = lib.types.enumAuth.LOGIN;
+	else
+	{
+		res.status(401);
+		res.end(getHtml("./html/error/401.html").serialize());
+		return (1);
+	}
+	return (0);
+}
+
+/**
+ * Checks if the searched data can be found it:
+ * 1)	the user name;
+ * 2)	the user trainers' name;
+ * 3)	the user trainers's pokemon's name.
+ * If nothing is searched, returns true.
+ * @param {lib.types.Server} server
+ * @param {lib.types.Client} client 
+ * @param {string} dataName taken from client, if missing
+ */
+function validSearch(server, client, dataName=client.dataName)
+{
+	let	trainerJson;
+
+	if (client.isAdmin == true)
+		return (true);
+	if (!client.user || !client.user.Name)
+		return (false);
+	if (!dataName)
+		return (true);
+	if (client.user.Name == dataName)
+		return (true);
+	for (let trainer of client.user.Trainers)
+	{
+		if (trainer == dataName)
+			return (true);
+	}
+	console.log("failed. searching pokemonNames:");
+	for (let trainer of client.user.Trainers)
+	{
+		trainerJson = lib.utils.getJson(server.data.GetPath("trainer") + trainer);
+		if (!trainerJson)
+			throw (`INVALID TRAINER ${trainer} from ${client.user.Name}`);
+		for (let pkmn of trainerJson.Pokemon)
 		{
-			currKey = input;
-			input = "";
-		}//@ts-ignore
-		data = data[currKey];
-		if (data == undefined || data == null)
-		{
-			skip.end = true;
-			return (undefined);
+			console.log(pkmn);
+			if (pkmn == dataName)
+			{
+				return (true);
+			}
 		}
-		index = input.indexOf(".");
 	}
-	if (typeof(data) == "string")
-		return (data);
-	return (JSON.stringify(data, null, 0));
+	return (false);
 }
 
-let x = 
-{
-	x0:
-	[
-		1,
-		2,
-		3
-	],
-	x1: 
-	{
-		x2:
-		{
-			x3:"Xx2-X3",
-			y3:"Xx2-Y3"
-		},
-		y2:
-		{
-			x3:"Xy2-X3",
-			y3:"Xy2-Y3"
-		},
-	},
-	y1:
-	{
-		x2:
-		{
-			x3:"Yx2-X3",
-			y3:"Yx2-Y3"
-		},
-		y2:
-		{
-			x3:"Yy2-X3",
-			y3:"Yy2-Y3"
-		},
-		z:
-		[
-			{
-				z1: "Z1",
-				z2: "Z2"
-			},
-			{
-				z1: "Z3",
-				z2: "Z4"
-			},
-			{
-				z1: "Z5",
-				z2: "Z6"
-			},
-			[
-				{
-					z1: "Z7",
-					z2: "Z8"
-				},
-				{
-					z1: "Z9",
-					z2: "Z10"
-				},
-			]
-		]
-	}
-}
-
-input = process.argv.at(2);
-skipCounter = process.argv.at(3);
-inputTemp = input;
-
-if (!input)
-{
-	console.log("input a field (x1/x1.y2/y1.y2.x3/...)");
-	process.exit(1);
-}
-if (skipCounter)
-{
-	skipCounter = {counter: skipCounter, end: false};
-}
-// data = x;
-// index = input.indexOf(".");
-// while (input.length != 0)
-// {
-// 	console.log(input);
-// 	if (index != -1)
-// 	{
-// 		currKey = input.slice(0, index);
-// 		input = input.slice(index + 1);
-// 	}
-// 	else
-// 	{
-// 		currKey = input;
-// 		input = "";
-// 	}
-// 	data = data[currKey];
-// 	if (!data)
-// 	{
-// 		console.log(`input ${inputTemp}: key ${currKey} is invalid`);
-// 		process.exit(1);
-// 	}
-// 	index = input.indexOf(".");
-// }
-
-console.log("Result =>", resolveField(x, input, skipCounter));
-if (skipCounter)
-	console.log("Ended? =>", skipCounter);
+module.exports = {login, loginCheck, validSearch};

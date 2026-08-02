@@ -23,7 +23,6 @@ function login(server, req, res, loginBool)
 {
 	let client = new lib.types.Client(server, req, "./html/login.html");
 
-	console.log(server.userMap);
 	for (let [id, user] of server.userMap)
 	{
 		if (user.Name == client.dataName)
@@ -36,6 +35,7 @@ function login(server, req, res, loginBool)
 				return (res.status(401).end("Wrong password man"));
 			client.isAdmin = user.isAdmin;
 			addUser(server, client, res, user);
+			console.log(`Welcome back, ${client.dataName}!`);
 			return (res.redirect("/"));
 		}
 	}
@@ -46,6 +46,7 @@ function login(server, req, res, loginBool)
 		res.status(500).end("Impossibile creare il primo allenatore.");
 		return ;
 	}
+	console.log(`Welcome, ${client.dataName}!`);
 	res.redirect("/user/" + client.dataName);
 }
 
@@ -72,12 +73,10 @@ function addUser(server, client, res, user = null)
 		newUser.File = dataPath + "user/" + client.dataName + ".json";
 		newUser.IsAdmin = client.isAdmin;
 		newUser.Name = client.dataName;
-		console.log(newUser.Password);
 		if (client.body)
 			newUser.Password = lib.crypt.hashSync(client.body.password, server.cryptSalt);
 		else
 			newUser.Password = "";
-		console.log(newUser.Password);
 		if (createFirstUserTrainer(server, client, newUser.Name) == 1)
 			return (1);
 		newUser.Trainers = [newUser.Name];
@@ -114,7 +113,6 @@ function createFirstUserTrainer(server, client, user)
 		name: user,
 		user: user
 	}
-	console.log(client.req.params);
 	if (create(server, client) == 1)
 	{
 		console.log("couldn't create user trainer :-(");

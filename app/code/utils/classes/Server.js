@@ -1,7 +1,7 @@
 // @ts-check
 const fs = require("fs");
 const {metaDataPath, questDataPath, questImgPath} = require("../macro.js");
-const {dataList, expandedDataList} = require("./DataList.js");
+const {dataList, expandedDataList, dataListPath} = require("./DataList.js");
 
 /** @typedef {typeof import("../../../../data/questData/template/user.json")} User */
 
@@ -57,6 +57,8 @@ function getDataMap(typePath, readFileBool = false, useIdBool = false)
 		if (readFileBool && !useIdBool)
 		{
 			let json = JSON.parse(fs.readFileSync(dirName + file, 'utf-8'));
+			if (!json.File)
+				json.File = dataListPath.user + json.Name + ".json";
 			map.set(fileNoExt, json);
 		}
 		else
