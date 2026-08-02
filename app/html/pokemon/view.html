@@ -15,17 +15,25 @@
             color: white; font-weight: bold; font-size: 0.8em; margin: 0 5px;
         }
         /* Colori tipi Pokerole */
-        .type-grass { background-color: #78C850; }
-        .type-ice { background-color: #98D8D8; color: #333; }
-        .type-fire { background-color: #F08030; }
-        .type-water { background-color: #6890F0; }
         .type-normal { background-color: #A8A878; }
         .type-fighting { background-color: #C03028; }
+        .type-flying { background-color: rgb(126, 174, 251); }
         .type-poison { background-color: #A040A0; }
         .type-ground { background-color: #E0C068; }
         .type-rock { background-color: #B8A038; }
-        .type-ghost { background-color: #705898; }
+        .type-steel { background-color: #909090; }
+        .type-grass { background-color: #78C850; }
+        .type-bug { background-color: #388810; }
+        .type-fire { background-color: #F08030; }
+        .type-water { background-color: #6890F0; }
         .type-electric { background-color: #F8D030; color: #333; }
+        .type-ice { background-color: #98D8D8; color: #333; }
+        .type-ghost { background-color: #705898; }
+        .type-psychic { background-color: #BB60BB; }
+        .type-dark { background-color: #282828; }
+        .type-dragon { background-color: #264f75; }
+        .type-fairy { background-color: rgb(255, 92, 252); }
+        .type-missigno { background-color: #007777; animation: cubic-bezier(0.075, 0.82, 0.165, 1); }
         
         .stat-dot {
             height: 12px; width: 12px; border-radius: 50%; display: inline-block;
@@ -445,9 +453,15 @@
                 // 4. Moveset con Fetch Parallele e simulatore integrato
                 try {
                     const movePromises = pokemonData.Moves.map(async (moveData) => {
-                        const response = await fetch(`/pokedata/move/${moveData.Name}`);
-                        const move = await response.json();
-                        
+                        let	move;
+						const response = await fetch(`/pokedata/move/${moveData.Name}`);
+
+						if (response.status == 404)
+							move =  moveData;
+						else
+                        	move = await response.json();
+						if (!move.Type)
+							move.Type = "missigno";
                         // Salvataggio mossa nella mappa globale
                         fetchedMoves[move.Name] = move;
 
