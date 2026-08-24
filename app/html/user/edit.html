@@ -39,7 +39,7 @@
     </style>
 </head>
 <body>
-<script>
+<!-- <script>
     // Blocca immediatamente il rendering del resto della pagina
     document.documentElement.style.display = 'none';
     
@@ -58,7 +58,7 @@
             // Fallback se la pagina non esiste: reindirizza o mostra errore base
             window.location.href = '/html/error/501.html';
         });
-</script>
+</script> -->
     <a href="javascript:history.back()" class="btn-home">⬅️ ANNULLA</a>
 
     <div id="test">
@@ -78,8 +78,9 @@
 
             <div class="form-group">
                 <label>Sicurezza</label>
-                <button type="button" class="btn-clear-pw" onclick="clearPassword()">ELIMINA PASSWORD (RESET)</button>
-                <small id="pw-status" style="color: gray; margin-top: 5px;">Password attuale: impostata</small>
+                <button type="button" class="btn-clear-pw" onclick="resetPassword()">Cambia password</button>
+                <input type="password" id="u-password" placeholder="Inserisci password">
+				<small id="pw-status" style="color: gray; margin-top: 5px;">Password non cambiata</small>
             </div>
 
             <div class="section-title">Immagini Profilo</div>
@@ -115,7 +116,7 @@
     let userData = null;
     let visualTrainersList = [];
     let currentUserName;
-    let passwordToBeCleared = false;
+    let newPassword = null;
 
     async function loadUserData() {
         const pathParts = window.location.pathname.split('/');
@@ -167,9 +168,9 @@
         renderTrainersList();
     }
 
-    function clearPassword() {
-        if(confirm("Sei sicuro di voler rimuovere la password?")) {
-            passwordToBeCleared = true;
+    function resetPassword() {
+        if(confirm("Sei sicuro di voler cambiare la password?")) {
+            newPassword = document.getElementById(`u-password`).value;
             document.getElementById('pw-status').innerText = "Password verrà resettata al salvataggio";
             document.getElementById('pw-status').style.color = "#e74c3c";
         }
@@ -182,8 +183,7 @@
             Name: document.getElementById('u-name').value,
             Category: document.getElementById('u-category').value,
             Trainers: visualTrainersList,
-            // Se l'utente ha cliccato "Elimina", mandiamo stringa vuota, altrimenti manteniamo l'originale (o gestito lato server)
-            Password: passwordToBeCleared ? "" : userData.Password 
+            Password: newPassword ? newPassword : undefined 
         };
 
         try {

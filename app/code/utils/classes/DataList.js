@@ -68,7 +68,7 @@ function getDirName(dirName)
  * @param {string} dataName 
  * @param {string} dirName 
  * @param {string} root 
- * @param {string} ext 
+ * @param {string | null} ext 
  * @param {boolean} checkExistBool
  */
 function getfilename(dataName, dirName="", root=questDataPath, ext="json", checkExistBool=true)
@@ -228,6 +228,12 @@ function getData(id, dir)
 	data = this[dir].get(id);
 	if (!data)
 		throw (`expandedDataList, getId: data ${dir}/${id} invalid`);
+	if (data.Ico == undefined)
+		data.Ico = "";
+	if (data.Img == undefined)
+		data.Img = "";
+	if (data.Category == undefined)
+		data.Category = "";
 	return (data);
 }
 
@@ -272,15 +278,15 @@ function setId(id, dir, username)
 		Id: username,
 		Category: data.Category,
 		filename: data.filename,
-		Ico: data.Ico,
-		Img: data.Img
+		Ico: data.Ico ? data.Ico : "",
+		Img: data.Img ? data.Img : ""
 	};//@ts-ignore
 	this[dir].set(username, newData);
 	this.SetImg(username, dir, newData.Img, id);
 	this.SetIco(username, dir, newData.Ico, id);
 	if (username != id)//@ts-ignore
 		this[dir].delete(id);
-	return (id);
+	return (username);
 }
 
 /**
