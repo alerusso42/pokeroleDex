@@ -1,14 +1,16 @@
 // @ts-check
-const JSDOM = require("jsdom").JSDOM;
-const fs = require("fs");
-const url = require("url");
-const {Server} = require("./Server");
-const net = require('../net.js');
-const stringUtils = require('../string.js');
-const {enumAuth} = require("../enums.js");
+import jsdom from "jsdom";
+import fs from "node:fs";
+import url from "node:url";
+import * as net from "../net.js";
+import * as stringUtils from "../string.js";
+import {enumAuth} from "../enums.js";
+
+const { JSDOM } = jsdom;
 
 /** @typedef {import("express").Request} ExpressRequest */
 /** @typedef {typeof import("../../../../data/questData/template/user.json")} User */
+/** @typedef {import("./Server.js").Server} Server */
 
 //SECTION - Client class definition
 
@@ -73,7 +75,7 @@ class Client
  * @param {string} path 
  * @returns 
  */
-function getHtml (path)
+function getHtml(path)
 {
 	const fd = fs.readFileSync(path);
 	const dom = new JSDOM(fd);
@@ -143,4 +145,4 @@ function isAdmin(req, user)
 	return (false);
 }
 
-module.exports = {Client};
+export {Client};

@@ -1,6 +1,6 @@
 // @ts-check
 
-const {dataPath, metaDataPath, questDataPath, questImgPath} = require("./macro.js");
+import {dataPath, metaDataPath, questDataPath, questImgPath} from "./macro.js";
 
 /** @enum {*} */
 const enumAuth = 
@@ -60,4 +60,4 @@ const dataListPath =
 const protectedDirList = [dataListDirName.user, dataListDirName.trainer, dataListDirName.pokemon];
 
 
-module.exports = {enumAuth, enumConds, enumCondBooleans, dataListDirName, dataListPath, protectedDirList};
+export {enumAuth, enumConds, enumCondBooleans, dataListDirName, dataListPath, protectedDirList};

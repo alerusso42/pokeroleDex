@@ -1,9 +1,11 @@
 // @ts-check
-const Server = require("./Server").Server;
-const Client = require("./Client").Client;
-const dataList = require("./DataList").dataList;
-const dataListExp = require("./DataList").expandedDataList;
-const enumAuth = require("../enums").enumAuth;
-const {dataPath, metaDataPath, questDataPath} = require("../macro");
+import {Server} from "./Server.js";
+import {Client} from "./Client.js";
+import {DataList, ExpandedDataList} from "./DataList.js";
+import {enumAuth} from "../enums.js";
+import {dataPath, metaDataPath, questDataPath} from "../macro.js";
 
-module.exports = {Server, Client, dataList, dataListExp, enumAuth, questDataPath, dataPath, metaDataPath};
+const dataList = DataList;
+const dataListExp = ExpandedDataList;
+
+export {Server, Client, dataList, dataListExp, enumAuth, questDataPath, dataPath, metaDataPath};

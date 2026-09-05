@@ -58,4 +58,4 @@ function dataNormalize(dataName)
 	return (dataName);
 }
 
-module.exports = {includesOneOf, pokemonToSnakeCase, dataNormalize};
+export {includesOneOf, pokemonToSnakeCase, dataNormalize};

@@ -1,13 +1,15 @@
 //@ts-check
-const lib = require('./utils/lib.js');
-const html = require('./html.js');
-const { getJson } = require('./utils/json.js');
-const {validSearch} = require("./login.js");
-const { includesOneOf, pokemonToSnakeCase } = require('./utils/string.js');
-const { questDataPath } = require('./utils/macro.js');
-const { Server } = require('./utils/classes/Server.js');
-const { Client } = require('./utils/classes/Client.js');
-const { condCheck, condSanifier } = require('./utils/conds.js');
+import * as lib from "./utils/lib.js";
+import * as html from "./html.js";
+import { getJson } from "./utils/json.js";
+import {validSearch} from "./login.js";
+import { includesOneOf, pokemonToSnakeCase } from "./utils/string.js";
+import { questDataPath } from "./utils/macro.js";
+import { Server } from "./utils/classes/Server.js";
+import { Client } from "./utils/classes/Client.js";
+import { condCheck, condSanifier, resolveField } from "./utils/conds.js";
+import { existFile, readFile } from "./utils/data.js";
+
 const dataPath = '../data/v2.0/';
 const imgMissingno = "https://media.pokemoncentral.it/wiki/0/02/Sprrz0000.png";
 const imgSigma = "https://imgcdn.stablediffusionweb.com/2024/3/17/3dc94a28-83bd-4f7c-b33e-71652870473a.jpg";
@@ -20,7 +22,6 @@ const expLowCaseTypes = new Array("user", "trainer", "pokemon", "category", "wor
 const linkSpecial = new Array("Ability", "Pokemon", "Name", "Type", "Evolutions", "Move");
 const linkIgnored = new Array("Kind", "Value", "Stat");
 const dataNormalize = lib.utils.dataNormalize;
-const {resolveField} = require("./utils/conds.js");
 
 //SECTION - getData
 
@@ -64,17 +65,17 @@ async function getData(client)
  * @throws on error, returns to getData try catch block.
  * @param {lib.types.Client} client 
  */
-function search(client)
+async function search(client)
 {
 	if (client.dirName.includes("..") || client.dataName.includes(".."))
 		throw ("Searching .. or similar not allowed.\n");
 	let path = dataPath + client.dirName + '/' + client.dataName + '.json';
-	if (lib.fs.existsSync(path) == false)
+	if (await existFile(path) == false)
 	{
 		console.log(path);
 		throw ("file does not exist");
 	}
-	pkmn = JSON.parse(lib.fs.readFileSync(path, 'utf8'));
+	let pkmn = JSON.parse(await readFile(path));
 	let special = "";
 	for (let key in pkmn)
 	{
@@ -180,13 +181,15 @@ function write(client, msg)
  * @param {string} key 
  * @param {lib.types.dataList} data 
  * @param {Array<string>} validArray 
- * @returns {lib.types.dataList}
+ * @returns {Promise<lib.types.dataList>}
  */
-function searchByKey(key, data, validArray = [])
+async function searchByKey(key, data, validArray = [])
 {
 	let match = new lib.types.dataList(false);
 	let	ascii;
 
+	for (const [k, v] of Object.entries(match))//@ts-ignore
+		match[k] = [];
 	if (validArray == undefined)
 		validArray = [];
 	key = dataNormalize(key);
@@ -212,7 +215,7 @@ function searchByKey(key, data, validArray = [])
  * @param {string} name 
  * @param {* | null} res
  */
-function searchServerData(dir, name, res=null)
+async function searchServerData(dir, name, res=null)
 {
 	let	path;
 	let	data;
@@ -225,12 +228,12 @@ function searchServerData(dir, name, res=null)
 		return (null);
 	}
 	path = dataPath + dir + '/' + name + '.json';
-	if (lib.fs.existsSync(path) == false)
+	if (await existFile(path) == false)
 	{
 		res?.status(404).end(`${dir}/${name} not found.`);
 		return (null);
 	}
-	data = lib.fs.readFileSync(path, 'utf8');
+	data = await readFile(path);
 	if (!data)
 	{
 		res?.status(500).end(`${dir}/${name} has been lost by server, what?`);
@@ -251,9 +254,9 @@ function searchServerData(dir, name, res=null)
  * @param {Client} client
  * @param {string} field
  * @param {boolean} checkValidBool
- * @returns {*}
+ * @returns {Promise<*>}
  */
-function searchByDataExpanded(server, client, field="", checkValidBool=true)
+async function searchByDataExpanded(server, client, field="", checkValidBool=true)
 {
 	/** @type {Conds} */	let	conds;
 	/** @type {ExpData}*/let	data;
@@ -283,9 +286,9 @@ function searchByDataExpanded(server, client, field="", checkValidBool=true)
 		throw Error(`searchByKeyExp: error getting dataSet for => ${dir}`);
 	if (!data.Id)
 		Error(`searchByKeyExp: invalid data => ${data}`);
-	if (checkValidBool == true && !validSearch(server, client, data.Id))
+	if (checkValidBool == true && await !validSearch(server, client, data.Id))
 		return (undefined);
-	json = getJson(data.Id, dir, server);
+	json = await getJson(data.Id, dir, server);
 	if (typeof(json) != "object")
 		throw Error(`searchByKeyExp: trash data => ${json}`);
 	if (field)
@@ -308,9 +311,9 @@ function searchByDataExpanded(server, client, field="", checkValidBool=true)
  * @param {Client} client
  * @param {string} input
  * @param {boolean} checkValidBool
- * @returns {ExpDataArray}
+ * @returns {Promise<ExpDataArray>}
  */
-function searchByDirExpanded(server, client, input, checkValidBool=true)
+async function searchByDirExpanded(server, client, input, checkValidBool=true)
 {
 	/** @type {Conds} */	let	conds;
 	/** @type {ExpDataMap}*/let	dataSet;
@@ -339,9 +342,9 @@ function searchByDirExpanded(server, client, input, checkValidBool=true)
 		data.Id = key;
 		if (input && data.Id.startsWith(input, 0) == false)
 			continue ;
-		if (checkValidBool == true && !validSearch(server, client, data.Id))
+		if (checkValidBool == true && await !validSearch(server, client, data.Id))
 			continue ;
-		json = getJson(key, dir, server);
+		json = await getJson(key, dir, server);
 		if (typeof(json) != "object")
 			throw Error(`searchByKeyExp: trash data => ${json}`);
 		if (condCheck(json, conds) == false)
@@ -388,4 +391,4 @@ function getRandomQuote()
 	}
 }
 
-module.exports = {getData, searchByKey, searchServerData, searchByDataExpanded, searchByDirExpanded};
+export {getData, searchByKey, searchServerData, searchByDataExpanded, searchByDirExpanded};

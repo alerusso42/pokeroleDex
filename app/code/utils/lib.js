@@ -1,26 +1,28 @@
 //SECTION - external libraries
-const http = require('http');
-const express = require('express');
+import http from "node:http";
+import express from "express";
+import jsdom from "jsdom";
+import url from "node:url";
+import fs from "node:fs";
+import path from "node:path";
+import crypt from "bcrypt";
+import * as net from "./net.js";
+import * as string from "./string.js";
+import * as json from "./json.js";
+import * as enums from "./enums.js";
+import * as macro from "./macro.js";
+import * as data from "./data.js";
+import * as types from "./classes/classes.js";
+
 const app = express();
-const doc = require("jsdom");
-const { JSDOM } = doc;
-const url = require('url');
-const fs = require('fs');
-const path = require('path');
-const crypt = require('bcrypt');
+const { JSDOM } = jsdom;
 
 //SECTION - libft
-let net = require('./net.js');
-const string = require('./string.js');
-const json = require('./json.js');
 const utils = {
-  ...require('./net.js'),
-  ...require('./string.js'),
-  ...require('./json.js'),
+  ...net,
+  ...string,
+  ...json,
   net, string, json
 };
 
-//SECTION - custom data structures
-const types = require('./classes/classes.js');
-
-module.exports = {http, url, fs, path, crypt, express, app, JSDOM, utils, types};
+export {http, url, fs, path, crypt, express, app, JSDOM, utils, types, data, macro, enums};

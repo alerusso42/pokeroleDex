@@ -1,4 +1,5 @@
-const lib = require("./utils/lib.js");
+import { readFile } from "./utils/data.js";
+import * as lib from "./utils/lib.js";
 const imgBox = "https://raw.githubusercontent.com/Pokerole-Software-Development/Pokerole-Data/master/images/BoxSprites/";
 
 
@@ -40,4 +41,4 @@ function getHtml(path)
 	return (dom);
 }
 
-module.exports = {loadImgUrl, getMetaData, getHtml};
+export {loadImgUrl, getMetaData, getHtml};

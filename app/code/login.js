@@ -1,9 +1,10 @@
-const { getHtml } = require("./html.js");
-const lib = require("./utils/lib.js");
+import { getHtml } from "./html.js";
+import * as lib from "./utils/lib.js";
+import {create, fillTemplate} from "./create.js";
+import { editJson } from "./utils/json.js";
+import { writeFile } from "./utils/data.js";
+
 const {json} = lib.utils;
-const {create, fillTemplate} = require("./create.js");
-const {} = require("./utils/classes/classes.js");
-const { editJson } = require("./utils/json.js");
 
 /** @typedef {typeof import("../data/template/user.json")} User */
 
@@ -19,7 +20,7 @@ const dataPath = "../data/questData/";
  * @param {boolean} createUserBool
  * @returns 
  */
-function login(server, req, res, loginBool)
+async function login(server, req, res, loginBool)
 {
 	let client = new lib.types.Client(server, req, "./html/login.html");
 
@@ -41,7 +42,7 @@ function login(server, req, res, loginBool)
 	}
 	if (loginBool == true)
 		return (res.status(404).end("Not found"));
-	if (addUser(server, client, res) == 1)
+	if (await addUser(server, client, res) == 1)
 	{
 		res.status(500).end("Impossibile creare il primo allenatore.");
 		return ;
@@ -57,7 +58,7 @@ function login(server, req, res, loginBool)
  * @param {import("express").Response} res
  * @param {lib.types.User} user
  */
-function addUser(server, client, res, user = null)
+async function addUser(server, client, res, user = null)
 {
 	server.userNum++;
 	let id = server.userNum;
@@ -69,7 +70,7 @@ function addUser(server, client, res, user = null)
 		idName = client.dataName;
 		if (server.data.user.indexOf(client.dataName) != -1)
 			idName += "_" + id;
-		newUser = fillTemplate(server, client, "user", idName, id);
+		newUser = await fillTemplate(server, client, "user", idName, id);
 		newUser.File = dataPath + "user/" + client.dataName + ".json";
 		newUser.IsAdmin = client.isAdmin;
 		newUser.Name = client.dataName;
@@ -77,7 +78,7 @@ function addUser(server, client, res, user = null)
 			newUser.Password = lib.crypt.hashSync(client.body.password, server.cryptSalt);
 		else
 			newUser.Password = "";
-		if (createFirstUserTrainer(server, client, newUser.Name) == 1)
+		if (await createFirstUserTrainer(server, client, newUser.Name) == 1)
 			return (1);
 		newUser.Trainers = [newUser.Name];
 	}
@@ -91,7 +92,7 @@ function addUser(server, client, res, user = null)
 	filename: "",
 	Ico: "",
 	Img: ""});
-	lib.fs.writeFileSync(newUser.File, JSON.stringify(newUser, null, 2), 'utf-8');
+	writeFile(newUser.File, JSON.stringify(newUser, null, 2));
 	res.setHeader("Set-Cookie", `userId=${id}; Path=/; HttpOnly; Max-Age=31536000`);
 	return (0);
 }
@@ -102,7 +103,7 @@ function addUser(server, client, res, user = null)
  * @param {lib.types.Client} client
  * @param {String} user
  */
-function createFirstUserTrainer(server, client, user)
+async function createFirstUserTrainer(server, client, user)
 {
 	let	trainerJson;
 	let	trainerPath;
@@ -113,15 +114,15 @@ function createFirstUserTrainer(server, client, user)
 		name: user,
 		user: user
 	}
-	if (create(server, client) == 1)
+	if (await create(server, client) == 1)
 	{
 		console.log("couldn't create user trainer :-(");
 		return (1);
 	}
 	trainerPath = `${server.data.GetPath("trainer")}/${user}`;
-	trainer = json.getJson(trainerPath);
-	trainer.User = user;
-	json.editJson(trainerPath, trainer);
+	trainerJson = await json.getJson(trainerPath);
+	trainerJson.User = user;
+	json.editJson(trainerPath, trainerJson);
 }
 
 //SECTION loginCheck function
@@ -134,22 +135,22 @@ function createFirstUserTrainer(server, client, user)
  * @param {bool} protectedPath
  * @returns {number} 0 on success, 1 on failure
  */
-function loginCheck (server, client, res, protectedPath = false)
+async function loginCheck (server, client, res, protectedPath = false)
 {
 	if (client.dirName == "")
 	{
 		res.status(400);
-		res.end(getHtml("./html/error/400.html").serialize());
+		res.end(await getHtml("./html/error/400.html").serialize());
 		return (1);
 	}
 	else if (client.isAdmin == true)
 		client.authLevel = lib.types.enumAuth.ADMIN;
-	else if (validSearch(server, client) == true)
+	else if (await validSearch(server, client) == true)
 		client.authLevel = lib.types.enumAuth.CORRECT_LOGIN;
 	else if (protectedPath == true)
 	{
 		res.status(401);
-		res.end(getHtml("./html/error/401.html").serialize());
+		res.end(await getHtml("./html/error/401.html").serialize());
 		return (1);
 	}
 	else if (client.isLogged == true)
@@ -157,7 +158,7 @@ function loginCheck (server, client, res, protectedPath = false)
 	else
 	{
 		res.status(401);
-		res.end(getHtml("./html/error/401.html").serialize());
+		res.end(await getHtml("./html/error/401.html").serialize());
 		return (1);
 	}
 	return (0);
@@ -173,7 +174,7 @@ function loginCheck (server, client, res, protectedPath = false)
  * @param {lib.types.Client} client 
  * @param {string} dataName taken from client, if missing
  */
-function validSearch(server, client, dataName=client.dataName)
+async function validSearch(server, client, dataName=client.dataName)
 {
 	let	trainerJson;
 
@@ -193,7 +194,7 @@ function validSearch(server, client, dataName=client.dataName)
 	console.log("failed. searching pokemonNames:");
 	for (let trainer of client.user.Trainers)
 	{
-		trainerJson = lib.utils.getJson(server.data.GetPath("trainer") + trainer);
+		trainerJson = await lib.utils.getJson(server.data.GetPath("trainer") + trainer);
 		if (!trainerJson)
 			throw (`INVALID TRAINER ${trainer} from ${client.user.Name}`);
 		for (let pkmn of trainerJson.Pokemon)
@@ -208,4 +209,4 @@ function validSearch(server, client, dataName=client.dataName)
 	return (false);
 }
 
-module.exports = {login, loginCheck, validSearch};
+export {login, loginCheck, validSearch};

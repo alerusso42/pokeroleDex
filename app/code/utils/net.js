@@ -59,4 +59,4 @@ async function fetchText(url)
 	}
 }
 
-module.exports = {urlArg, urlDir, urlNormalize, fetchBinary, fetchText}
+export {urlArg, urlDir, urlNormalize, fetchBinary, fetchText};

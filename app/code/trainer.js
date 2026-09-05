@@ -1,5 +1,6 @@
-const { searchServerData } = require("./search.js");
-const lib = require("./utils/lib.js");
+import { searchServerData } from "./search.js";
+import { writeFile, rmFile, readFile } from "./utils/data.js";
+import * as lib from "./utils/lib.js";
 
 /** @typedef {typeof import("../data/questData/template/trainer.json")} Trainer */
 
@@ -14,7 +15,7 @@ const	pokemonTemplate = questDataPath + "template/" + "pokemon.json";
  * @param {lib.types.Client} client 
  * @param {lib.express.Response} res 
  */
-function editTrainer(server, client, res)
+async function editTrainer(server, client, res)
 {
 	let	trainerFile;
 	let	trainerPath;
@@ -22,15 +23,14 @@ function editTrainer(server, client, res)
 	let	trainerName;
 	let	trainerOldName;
 	let	trainerOldNameIndex;
-	let	trainerUpd;
 	let	trainerNewData;
 	let	error = null;
 
 	trainerOldName = client.req.params.name;
 	trainerName = lib.utils.dataNormalize(client.body.name);
-	trainerOldPath = trainerDirPath + trainerOldName + ".json"; 
+	trainerOldPath = trainerDirPath + trainerOldName + ".json";
 	trainerPath = trainerDirPath + trainerName + ".json"; 
-	trainerFile = lib.fs.readFileSync(trainerOldPath);
+	trainerFile = await readFile(trainerOldPath);
 	trainerNewData = JSON.parse(trainerFile);
 	if (
 	(trainerName != trainerOldName) &&
@@ -47,11 +47,11 @@ function editTrainer(server, client, res)
 		if (pkmn.type == "DELETE")
 			deletePkmn(server, trainerNewData, pkmn);
 		else if (pkmn.type == "CREATE")
-			error = createPkmn(server, trainerNewData, pkmn);
+			error = await createPkmn(server, trainerNewData, pkmn);
 		if (error != null)
 			return (res.status(500).send(error));
 	}
-	lib.fs.writeFileSync(trainerPath, JSON.stringify(trainerNewData, null, 2), 'utf-8');
+	await writeFile(trainerPath, JSON.stringify(trainerNewData, null, 2));
 	trainerOldNameIndex = server.data.trainer.indexOf(trainerOldName);
 	console.assert(trainerOldNameIndex != -1, "old trainer name not found");
 	server.data.trainer.splice(trainerOldNameIndex, 1);
@@ -59,7 +59,7 @@ function editTrainer(server, client, res)
 	if (trainerPath != trainerOldPath)
 	{
 		updateUserTrainers(server, trainerPath, trainerOldName, trainerName);
-		lib.fs.rmSync(trainerOldPath);
+		rmFile(trainerOldPath);
 	}
 	res.status(200).end();
 }
@@ -92,7 +92,7 @@ function parseTeam(server, team)
 		else if (type == null)
 			continue ;
 		else
-			return (`wtf are u doin on ${trainerName} team??`) ;
+			return (`wtf are u doin on this team??`) ;
 	}
 	return (null);
 }
@@ -119,7 +119,7 @@ function deletePkmn(server, trainerNewData, pkmn)
 	if (i == -1)
 		return ("pokemon not found in server");
 	server.data.pokemon.splice(i, 1);
-	lib.fs.rmSync(path);
+	rmFile(path);
 	return (null);
 }
 
@@ -130,14 +130,14 @@ function deletePkmn(server, trainerNewData, pkmn)
  * @param {*} pkmn 
  * @returns {string | null} error string
  */
-function createPkmn(server, trainerNewData, pkmn)
+async function createPkmn(server, trainerNewData, pkmn)
 {
 	let	id = createUniqueId(server, pkmn.name);
 	pkmn.id = id;
 	let	specieFilename = server.data.GetPath("pokedex") + pkmn.name + ".json";
 	let	newFilename = server.data.GetPath("pokemon") + id + ".json";
-	let	dataTemplate = JSON.parse(lib.fs.readFileSync(pokemonTemplate));
-	let	dataSpecie = JSON.parse(lib.fs.readFileSync(specieFilename));
+	let	dataTemplate = JSON.parse(await readFile(pokemonTemplate));
+	let	dataSpecie = JSON.parse(await readFile(specieFilename));
 	let	dataNew = dataTemplate;
 
 	// 1. Dati Identità
@@ -167,7 +167,7 @@ function createPkmn(server, trainerNewData, pkmn)
     // 3. Abilità
     if (dataSpecie.Ability1)
 	{
-		dataNew.Ability = JSON.parse(searchServerData("ability", dataSpecie.Ability1));
+		dataNew.Ability = JSON.parse(await searchServerData("ability", dataSpecie.Ability1));
     }
 
     // 4. Dati Fisici e Bio
@@ -180,8 +180,9 @@ function createPkmn(server, trainerNewData, pkmn)
 		return { Name: m.Name, Learned: m.Learned }; 
     });
 	dataNew.Moves = dataNew.Moves.slice(0, 4);
-	lib.fs.writeFileSync(newFilename, JSON.stringify(dataNew, null, 2), 'utf-8');
+	writeFile(newFilename, JSON.stringify(dataNew, null, 2));
 	server.data.pokemon.push(id);
+	server.expandedData.pokemon.set(id, {Id: id});
 	trainerNewData.Pokemon.push(id);
 	return (null);
 }
@@ -243,4 +244,4 @@ function updateUserTrainers(server, trainerPath, trainerOldName, trainerName)
 // 	}
 // }
 
-module.exports = {editTrainer};
+export {editTrainer};

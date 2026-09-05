@@ -1,6 +1,6 @@
 //@ts-check
-const {enumConds, enumCondBooleans} = require("./enums.js");
-const { dataNormalize } = require("./string.js");
+import {enumConds, enumCondBooleans} from "./enums.js";
+import { dataNormalize } from "./string.js";
 
 /** @typedef {import("../../metadata/cond.json")} Cond*/
 /** @typedef {Array<Cond>} Conds*/
@@ -325,4 +325,4 @@ function numericHandler(field, value)
 	return ({numField: field, numValue: value});
 }
 
-module.exports = {condCheck, condSanifier, resolveField};
+export {condCheck, condSanifier, resolveField};

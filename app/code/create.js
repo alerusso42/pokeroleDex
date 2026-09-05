@@ -1,5 +1,7 @@
-const lib = require("./utils/lib.js");
-const {questDataPath, dataPath} = require('./utils/classes/classes.js');
+import * as lib from "./utils/lib.js";
+import { getHtml } from "./html.js";
+import {questDataPath, dataPath} from "./utils/classes/classes.js";
+import { existFile, writeFile, readFile } from "./utils/data.js";
 
 /**
  * 
@@ -7,7 +9,7 @@ const {questDataPath, dataPath} = require('./utils/classes/classes.js');
  * @param {lib.types.Client} client 
  * @param {Response} res 
  */
-function create(server, client, res=null)
+async function create(server, client, res=null)
 {
 	let type = client.req.params.type;
 	let name = client.req.params.name;
@@ -27,22 +29,22 @@ function create(server, client, res=null)
 	else
 		filename = path + name + ".json";
 	console.log("edit: filename ->", filename);
-	if (lib.fs.existsSync(filename) == true)
+	if (await existFile(filename) == true)
 	{
 		if (res == null)
 			return (1);
 		res.status(500);
-		res.end(getHtml("./html/error/500.html").serialize());
+		res.end(await getHtml("./html/error/500.html").serialize());
 		return ;
 	}
 	console.log("creating", type, name);
-	let newData = fillTemplate(server, client, type, name, id);
+	let newData = await fillTemplate(server, client, type, name, id);
 	if (newData == null)
 	{
 		if (res == null)
 			return (1);
 		res.status(500);
-		res.end(getHtml("./html/error/500.html").serialize());
+		res.end(await getHtml("./html/error/500.html").serialize());
 		return ;
 	}
 	console.log(newData);
@@ -60,7 +62,7 @@ function create(server, client, res=null)
 		Ico: "",
 		Img: ""});
 	}
-	lib.fs.writeFileSync(filename, JSON.stringify(newData, null, 2), 'utf-8');
+	writeFile(filename, JSON.stringify(newData, null, 2), 'utf-8');
 	if (res == null)
 		return (0);
 	res.status(200);
@@ -75,21 +77,21 @@ function create(server, client, res=null)
  * @param {string} name
  * @param {number} id
  */
-function fillTemplate(server, client, type, name, id)
+async function fillTemplate(server, client, type, name, id)
 {
 	let templatePath = questDataPath + "template/" + type + ".json";
 	let path = dataPath + "Pokemon/" + name + ".json"; 
 	let	template;
 	let data;
 
-	template = JSON.parse(lib.fs.readFileSync(templatePath));
+	template = JSON.parse(await readFile(templatePath));
 	template.id = id;
 	template.Name = name;
 	if (client.req.params.type == "trainer")
 		template.User = client.req.params.user ? client.req.params.user : client.user.Name;
 	if (type != "pokemon")
 		return (template);
-	data = JSON.parse(lib.fs.readFileSync(path));
+	data = JSON.parse(await readFile(path));
 	for (let key in data)
 	{
 		console.log(key);
@@ -124,4 +126,4 @@ function fillTemplate(server, client, type, name, id)
 // 	return (id);
 // }
 
-module.exports = {create, fillTemplate};
+export {create, fillTemplate};

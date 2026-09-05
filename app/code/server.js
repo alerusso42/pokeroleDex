@@ -1,18 +1,20 @@
-const lib = require('./utils/lib.js');
-const html = require('./html.js');
-const locationSearch = require('./search.js');
-const locationLogin = require('./login.js');
-const locationAutoIndex = require('./autoindex.js');
-const {view} = require('./view.js');
-const {edit} = require('./edit.js');
-const {create} = require('./create.js');
-const { editTrainer } = require('./trainer.js');
-const { enumAuth, protectedDirList } = require('./utils/enums.js');
-const { questImgPath } = require('./utils/macro.js');
-const { editJson } = require('./utils/json.js');
-const { includesOneOf, dataNormalize } = require('./utils/string.js');
+import * as lib from "./utils/lib.js";
+import * as html from "./html.js";
+import * as locationSearch from "./search.js";
+import * as locationLogin from "./login.js";
+import * as locationAutoIndex from "./autoindex.js";
+import {view} from "./view.js";
+import {edit} from "./edit.js";
+import {create} from "./create.js";
+import { editTrainer } from "./trainer.js";
+import { enumAuth, protectedDirList } from "./utils/enums.js";
+import { questImgPath } from "./utils/macro.js";
+import { editJson } from "./utils/json.js";
+import { includesOneOf, dataNormalize } from "./utils/string.js";
+import { existFile, readFile, writeFile } from "./utils/data.js";
 const types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
 const server = new lib.types.Server();
+server.Init();
 
 // interpreta il body
 lib.app.use(lib.express.text());
@@ -20,9 +22,9 @@ lib.app.use(lib.express.raw({ type: 'application/octet-stream', limit: '5mb' }))
 lib.app.use(lib.express.json());
 lib.app.use(lib.express.urlencoded({ extended: true }));
 
-lib.app.get("/html/error/:page", (req, res) => 
+lib.app.get("/html/error/:page", async (req, res) =>
 {
-	
+
 	try
 	{
 		let		page = req.params.page;
@@ -33,7 +35,7 @@ lib.app.get("/html/error/:page", (req, res) =>
 			page += ".html";
 		path += page;
 		console.log(path);
-		dom = html.getHtml(path);
+		dom = await html.getHtml(path);
 		if (req.query.msg != null)
 			dom.window.document.getElementById("msg").innerHTML = `<h3>${req.query.msg}</h3>`;
 		res.send(dom.serialize());
@@ -48,13 +50,13 @@ lib.app.get("/html/error/:page", (req, res) =>
 lib.app.use("/html", lib.express.static("html/"));
 // lib.app.use("/html/error", lib.express.static("html/error/"));
 
-lib.app.get("/", (req, res) => 
+lib.app.get("/", async (req, res) =>
 {
-	const dom = html.getHtml("./html/home.html");
+	const dom = await html.getHtml("./html/home.html");
 	res.send(dom.serialize());
 });
 
-lib.app.get("/keyPressed/search*splat", (req, res) => 
+lib.app.get("/keyPressed/search*splat", async (req, res) =>
 {
 	let url = lib.url.parse(req.url).pathname;
 	let arg = lib.utils.urlArg(url);
@@ -62,7 +64,7 @@ lib.app.get("/keyPressed/search*splat", (req, res) =>
 	if (arg.length <= 1)
 		return (res.end(""));
 	arg = arg.slice(1, arg.length);// elimina lo /
-	let match = locationSearch.searchByKey(arg, server.data, req.query.include);
+	let match = await locationSearch.searchByKey(arg, server.data, req.query.include);
 	for (let category in match)
 	{
 		if (match[category].length == 0)
@@ -90,7 +92,7 @@ lib.app.get("/keyPressed/search*splat", (req, res) =>
 }
 );
 
-lib.app.post("/keyPressed/data/:dir/:name/:field", (req, res) => 
+lib.app.post("/keyPressed/data/:dir/:name/:field", async (req, res) =>
 {
 	let client = new lib.types.Client(server, req);
 	let match;
@@ -101,14 +103,14 @@ lib.app.post("/keyPressed/data/:dir/:name/:field", (req, res) =>
 	client.dataName = req.params.name;
 	client.dirName = req.params.dir;
 	field = req.params.field;
-	match = locationSearch.searchByDataExpanded(server, client, field, true);
+	match = await locationSearch.searchByDataExpanded(server, client, field, true);
 	console.clear();
 	console.log(match);
 	res.send(match);
 }
 );
 
-lib.app.post("/keyPressed/autoindex/:dir{/:keys}", (req, res) => 
+lib.app.post("/keyPressed/autoindex/:dir{/:keys}", async (req, res) =>
 {
 	let client = new lib.types.Client(server, req);
 	let match;
@@ -118,13 +120,13 @@ lib.app.post("/keyPressed/autoindex/:dir{/:keys}", (req, res) =>
 		return (res.status(400).send("missing body"));
 	client.dirName = req.params.dir;
 	keys = req.params.keys;
-	match = locationSearch.searchByDirExpanded(server, client, keys, true);
+	match = await locationSearch.searchByDirExpanded(server, client, keys, true);
 	res.send(match);
 }
 );
 
-lib.app.get("/pokedata/:dir/:name", (req, res) =>
-{	
+lib.app.get("/pokedata/:dir/:name", async (req, res) =>
+{
 	let client = new lib.types.Client(server, req);
 	let	match;
 
@@ -132,10 +134,10 @@ lib.app.get("/pokedata/:dir/:name", (req, res) =>
 	req.params.name = dataNormalize(req.params.name);
 	if (includesOneOf(req.params.dir, protectedDirList) == true)
 	{
-		if (locationLogin.loginCheck(server, client, res, true))
+		if (await locationLogin.loginCheck(server, client, res, true))
 			return ;
 	}
-	match = locationSearch.searchServerData(req.params.dir, req.params.name, res); 
+	match = await locationSearch.searchServerData(req.params.dir, req.params.name, res);
 	if (!match)
 		return ;
 	res.send(match);
@@ -151,12 +153,12 @@ lib.app.get("/search/*splat", (req, res) =>
 	if (client.dirName == "")
 		client.dirName = types[0];
 	locationSearch.getData(client)
-	.then(() => 
+	.then(() =>
 	{
 		client.doc.getElementById("test").innerHTML += client.buff;
 		res.send(client.dom.serialize());
 	}
-	).catch((err) => 
+	).catch((err) =>
 	{
 		write(client, client.dirName + " " + client.dataName + " not found.");
 		console.log(err);
@@ -172,163 +174,163 @@ lib.app.get("/searchAdvanced/", (req, res) =>
 	res.send(client.dom.serialize());
 });
 
-lib.app.get("/auth", (req, res) => 
+lib.app.get("/auth", (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/login.html");
 	res.send(client.dom.serialize());
 });
 
-lib.app.post("/login/:user", async (req, res) => 
+lib.app.post("/login/:user", async(req, res) =>
 {
-	return (locationLogin.login(server, req, res, true));
+	return (await locationLogin.login(server, req, res, true));
 });
 
-lib.app.post("/register/:user", async (req, res) => 
+lib.app.post("/register/:user", async (req, res) =>
 {
-	return (locationLogin.login(server, req, res, false));
+	return (await locationLogin.login(server, req, res, false));
 });
 
-lib.app.get("/user/", (req, res) => 
+lib.app.get("/user/", async (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/autoindex.html");
-	if (locationLogin.loginCheck(server, client, res) == 1)
+	if (await locationLogin.loginCheck(server, client, res) == 1)
 		return ;
 	return (locationAutoIndex.autoIndex(server, client, res));
 });
 
-lib.app.get("/trainer/", (req, res) => 
+lib.app.get("/trainer/", async (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/autoindex.html");
-	if (locationLogin.loginCheck(server, client, res) == 1)
+	if (await locationLogin.loginCheck(server, client, res) == 1)
 		return ;
 	return (locationAutoIndex.autoIndex(server, client, res));
 });
 
-lib.app.get("/pokemon/", (req, res) => 
+lib.app.get("/pokemon/", async (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/autoindex.html");
-	if (locationLogin.loginCheck(server, client, res) == 1)
+	if (await locationLogin.loginCheck(server, client, res) == 1)
 		return ;
 	return (locationAutoIndex.autoIndex(server, client, res));
 });
 
-lib.app.get("/user/:name", (req, res) => 
+lib.app.get("/user/:name", async (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/user/view.html");
-	if (locationLogin.loginCheck(server, client, res, true) == 1)
+	if (await locationLogin.loginCheck(server, client, res, true) == 1)
 		return ;
 	return (res.send(client.dom.serialize()));
 });
 
-lib.app.get("/trainer/:name", (req, res) => 
+lib.app.get("/trainer/:name", async (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/trainer/view.html");
-	if (locationLogin.loginCheck(server, client, res, true) == 1)
+	if (await locationLogin.loginCheck(server, client, res, true) == 1)
 		return ;
 	return (res.send(client.dom.serialize()));
 });
 
-lib.app.get("/pokemon/:name", (req, res) => 
+lib.app.get("/pokemon/:name", async (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
-	if (locationLogin.loginCheck(server, client, res, true) == 1)
+	if (await locationLogin.loginCheck(server, client, res, true) == 1)
 		return ;
 	return (res.send(client.dom.serialize()));
 });
 
-lib.app.get("/edit/user/:name", (req, res) => 
+lib.app.get("/edit/user/:name", async (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/user/edit.html");
-	if (locationLogin.loginCheck(server, client, res, true) == 1)
+	if (await locationLogin.loginCheck(server, client, res, true) == 1)
 		return ;
 	return (res.send(client.dom.serialize()));
 });
 
-lib.app.get("/edit/trainer/:name", (req, res) => 
+lib.app.get("/edit/trainer/:name", async (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/trainer/edit.html");
-	if (locationLogin.loginCheck(server, client, res, true) == 1)
+	if (await locationLogin.loginCheck(server, client, res, true) == 1)
 		return ;
 	return (res.send(client.dom.serialize()));
 });
 
-lib.app.get("/edit/pokemon/:name", (req, res) => 
+lib.app.get("/edit/pokemon/:name", async (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/edit.html");
-	if (locationLogin.loginCheck(server, client, res, true) == 1)
+	if (await locationLogin.loginCheck(server, client, res, true) == 1)
 		return ;
 	return (res.send(client.dom.serialize()));
 });
 
-lib.app.get("/api/user/:name", (req, res) => 
+lib.app.get("/api/user/:name", async (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/user/view.html");
-	if (locationLogin.loginCheck(server, client, res) == 1)
+	if (await locationLogin.loginCheck(server, client, res) == 1)
 		return ;
-	return (view(server, client, res));
+	return (await view(server, client, res));
 });
 
-lib.app.get("/api/trainer/:name", (req, res) => 
+lib.app.get("/api/trainer/:name", async (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/trainer/view.html");
-	if (locationLogin.loginCheck(server, client, res) == 1)
+	if (await locationLogin.loginCheck(server, client, res) == 1)
 		return ;
-	return (view(server, client, res));
+	return (await view(server, client, res));
 });
 
-lib.app.post("/api/user/:name", (req, res) => 
+lib.app.post("/api/user/:name", async (req, res) =>
 {
 	let client = new lib.types.Client(server, req);
-	if (locationLogin.loginCheck(server, client, res, true) == 1)
+	if (await locationLogin.loginCheck(server, client, res, true) == 1)
 		return ;
-	return (edit(server, client, res));
+	return (await edit(server, client, res));
 });
 
-lib.app.post("/api/trainer/:name", (req, res) => 
+lib.app.post("/api/trainer/:name", async (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/trainer/view.html");
-	if (locationLogin.loginCheck(server, client, res, true) == 1)
+	if (await locationLogin.loginCheck(server, client, res, true) == 1)
 		return ;
-	return (editTrainer(server, client, res));
+	return (await editTrainer(server, client, res));
 });
 
-lib.app.get("/api/pokemon/:name", (req, res) => 
+lib.app.get("/api/pokemon/:name", async (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
-	if (locationLogin.loginCheck(server, client, res) == 1)
+	if (await locationLogin.loginCheck(server, client, res) == 1)
 		return ;
-	return (view(server, client, res));
+	return (await view(server, client, res));
 });
 
-lib.app.post("/api/pokemon/:name", (req, res) => 
+lib.app.post("/api/pokemon/:name", async (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
-	if (locationLogin.loginCheck(server, client, res, true) == 1)
+	if (await locationLogin.loginCheck(server, client, res, true) == 1)
 		return ;
-	return (edit(server, client, res));
+	return (await edit(server, client, res));
 });
 
-lib.app.post("/api/create/:type/:name", (req, res) => 
+lib.app.post("/api/create/:type/:name", async (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
 
-	if (locationLogin.loginCheck(server, client, res, true) == 1)
+	if (await locationLogin.loginCheck(server, client, res, true) == 1)
 		return ;
-	return (create(server, client, res));
+	return (await create(server, client, res));
 });
 
-lib.app.post("/api/delete/:type/:name", (req, res) => 
+lib.app.post("/api/delete/:type/:name", async (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
-	if (locationLogin.loginCheck(server, client, res, true) == 1)
+	if (await locationLogin.loginCheck(server, client, res, true) == 1)
 		return ;
 	console.log("delete");
 });
 
-lib.app.get("/api/info/:name", (req, res) => 
+lib.app.get("/api/info/:name", async (req, res) =>
 {
 	let client = new lib.types.Client(server, req, "./html/pokemon/view.html");
-	if (locationLogin.loginCheck(server, client, res, true) == 1)
+	if (await locationLogin.loginCheck(server, client, res, true) == 1)
 		return ;
 	let name = req.params.name;
 	if (name == "id")
@@ -339,13 +341,13 @@ lib.app.get("/api/info/:name", (req, res) =>
 	res.send(JSON.stringify({name: server.metaData[name]}));
 });
 
-lib.app.get("/api/userInfo", (req, res) =>
+lib.app.get("/api/userInfo", async (req, res) =>
 {
 	let client;
 	let	userInfo;
-	
+
 	client = new lib.types.Client(server, req);
-	locationLogin.loginCheck(server, client, res);
+	await locationLogin.loginCheck(server, client, res);
 	userInfo = structuredClone(client.user);
 	if (userInfo == null)
 	{
@@ -359,7 +361,7 @@ lib.app.get("/api/userInfo", (req, res) =>
 	res.json(userInfo);
 });
 
-lib.app.post("/api/upload/:type/:id", (req, res) =>
+lib.app.post("/api/upload/:type/:id", async (req, res) =>
 {
 	let client;
 	let	buffer;
@@ -369,7 +371,7 @@ lib.app.post("/api/upload/:type/:id", (req, res) =>
 	let	update;
 
 	client = new lib.types.Client(server, req);
-	if (locationLogin.loginCheck(server, client, res, true) == 1)
+	if (await locationLogin.loginCheck(server, client, res, true) == 1)
 		return ;
 	if (req.params.id.indexOf("..") != -1 || req.params.type.indexOf("..") != -1)
 		return (res.status(400).end("upload: filename with .. invalid"));
@@ -390,7 +392,7 @@ lib.app.post("/api/upload/:type/:id", (req, res) =>
 	if (!filename)
 		return (res.status(400).end("upload: cannot get filename"));
 	filename = filename.replace(`.${ext}`, `_${filetype}.${ext}`);
-	lib.fs.writeFileSync(filename, buffer);
+	writeFile(filename, buffer);
 	update[filetype] = `.${ext}`;
 	editJson(server.data.GetFilename(req.params.id, "trainer"), update, true);
 	server.expandedData[req.params.type].get(req.params.id)[filetype] = `.${ext}`;
@@ -398,7 +400,7 @@ lib.app.post("/api/upload/:type/:id", (req, res) =>
 	return (res.status(200).end());
 });
 
-lib.app.get("/media/pictures/:type/:filename", (req, res) =>
+lib.app.get("/media/pictures/:type/:filename", async (req, res) =>
 {
 	let	client;
 	let	filename;
@@ -411,12 +413,21 @@ lib.app.get("/media/pictures/:type/:filename", (req, res) =>
 		return ;
 	}
 	filename = server.data.GetFilename(client.dataName, req.params.type, questImgPath, null, true);
-	buffer = lib.fs.readFileSync(filename);
-	buffer = Buffer.from(buffer);
-	res.send(buffer);
+	try
+	{
+		if (!await existFile(filename))
+			return (res.status(404).end("img not found"));
+		buffer = await readFile(filename);
+		buffer = Buffer.from(buffer);
+		res.send(buffer);
+	}
+	catch(err)
+	{
+		res.status(500).end("img lost..");
+	}
 });
 
-lib.app.get("/admin/", (req, res) => 
+lib.app.get("/admin/", async (req, res) =>
 {
 	let	client;
 
@@ -424,7 +435,7 @@ lib.app.get("/admin/", (req, res) =>
 	if (client.isAdmin == false)
 	{
 		res.status(401);
-		res.end(getHtml("./html/error/401.html").serialize());
+		res.end(await html.getHtml("./html/error/401.html").serialize());
 		return (1);
 	}
 	res.send(client.dom.serialize());

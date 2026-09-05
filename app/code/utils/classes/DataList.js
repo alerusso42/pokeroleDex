@@ -1,16 +1,16 @@
 // @ts-check
-const fs = require("fs");
-const {dataPath, metaDataPath, questDataPath, questImgPath} = require("../macro.js");
-const {dataListDirName, dataListPath, protectedDirList} = require("../enums.js");
-const {getJson} = require("../json.js");
-const { kMaxLength } = require("buffer");
+import fs from "node:fs";
+import {dataPath, metaDataPath, questDataPath, questImgPath} from "../macro.js";
+import {dataListDirName, dataListPath, protectedDirList} from "../enums.js";
+import {getJson} from "../json.js";
+import { copyFile, existFile, readDir, rmFile } from "../data.js";
 
-//SECTION - dataList class definition
+//SECTION - DataList class definition
 
-class dataList
+class DataList
 {
 	/**
-	 * 
+	 *
 	 * @param {boolean} fill
 	 */
 	constructor(fill)
@@ -23,18 +23,22 @@ class dataList
 		/** @type {Array<string>} */	this.user = fillDataListArray(fill, "user");
 		/** @type {Array<string>} */	this.trainer = fillDataListArray(fill, "trainer");
 		/** @type {Array<string>} */	this.pokemon = fillDataListArray(fill, "pokemon");
-		
+
 		this.Print = print.bind(this);
 		this.GetPath = getPath;
 		this.GetDirName = getDirName;
 		this.GetFilename = getfilename;
 	}
+	async Resolve()
+	{
+		listGet(this);
+	}
 }
 
-//SECTION - dataList class methods/utils
+//SECTION - DataList class methods/utils
 
 /**
- * 
+ *
  * @this {*}
  */
 function print()
@@ -64,11 +68,11 @@ function getDirName(dirName)
 }
 
 /**
- * 
- * @param {string} dataName 
- * @param {string} dirName 
- * @param {string} root 
- * @param {string | null} ext 
+ *
+ * @param {string} dataName
+ * @param {string} dirName
+ * @param {string} root
+ * @param {string | null} ext
  * @param {boolean} checkExistBool
  */
 function getfilename(dataName, dirName="", root=questDataPath, ext="json", checkExistBool=true)
@@ -83,18 +87,16 @@ function getfilename(dataName, dirName="", root=questDataPath, ext="json", check
 		filename = root + dirName + "/" + dataName + `.${ext}`;
 	else
 		filename = root + dirName + "/" + dataName;
-	if (checkExistBool == true && fs.existsSync(filename) == false)
-		throw ("getFilename: cannot find " + filename);
 	return (filename);
 }
 
 /**
- * 
+ *
  * @param {boolean} fill
- * @param {string} type 
+ * @param {string} type
  * @returns {Array<string>} the array filled with all files in that directory
  */
-function fillDataListArray(fill, type)
+async function fillDataListArray(fill, type)
 {
 	// @ts-ignore
 	let path = dataListPath[type];
@@ -102,7 +104,7 @@ function fillDataListArray(fill, type)
 
 	if (fill == false)
 		return (array);
-	for (let file of fs.readdirSync(path))
+	for (let file of await readDir(path))
 	{
 		if (file[0] == ".")
 			continue ;
@@ -123,9 +125,9 @@ function fillDataListArray(fill, type)
  * @property {string} Category category of data
  */
 
-class expandedDataList
+class ExpandedDataList
 {
-	/** @param {dataList} list */
+	/** @param {DataList} list */
 	constructor(list)
 	{
 		this.pokedex = fillDataListExpanded(list, "pokedex", dataPath);
@@ -148,17 +150,21 @@ class expandedDataList
 		this.GetIco = getIco;
 		this.SetIco = setIco;
 	}
+	async Resolve()
+	{//@ts-ignore
+		listGet(this);
+	}
 	/** @param {string} id*/
 	GetRealName(id){return (getRealName(id));}
 }
 
 /**
- * 
- * @param {dataList} list the lists of data divided by directories
- * @param {string} type the directory name 
+ *
+ * @param {DataList} list the lists of data divided by directories
+ * @param {string} type the directory name
  * @returns {Map<string, ExpPrototype>}
  */
-function fillDataListExpanded(list, type, root=questDataPath)
+async function fillDataListExpanded(list, type, root=questDataPath)
 {
 	/**  @type {ExpPrototype}*/let	expData;
 	let	arrayFiles;
@@ -176,7 +182,7 @@ function fillDataListExpanded(list, type, root=questDataPath)
 		// @ts-ignore
 		expData = {};
 		filename = getfilename(data, getDirName(type), root);
-		json = getJson(filename);
+		json = await getJson(filename);
 		expData.filename = filename;
 		if (json.Category)
 			expData.Category = json.category;
@@ -189,7 +195,7 @@ function fillDataListExpanded(list, type, root=questDataPath)
 }
 
 /**
- * 
+ *
  * @this {*}
  */
 function printExp()
@@ -211,10 +217,10 @@ function printExp()
 // 		this.SetIco = setIco;
 
 /**
- * 
- * @this {expandedDataList}
- * @param {string} id 
- * @param {string} dir 
+ *
+ * @this {ExpandedDataList}
+ * @param {string} id
+ * @param {string} dir
  * @returns {ExpPrototype}
  */
 function getData(id, dir)
@@ -223,11 +229,11 @@ function getData(id, dir)
 
 	//@ts-ignore
 	if (!this[dir])
-		throw (`expandedDataList, getId: dir ${dir} invalid`);
+		throw (`ExpandedDataList, getId: dir ${dir} invalid`);
 	//@ts-ignore
 	data = this[dir].get(id);
 	if (!data)
-		throw (`expandedDataList, getId: data ${dir}/${id} invalid`);
+		throw (`ExpandedDataList, getId: data ${dir}/${id} invalid`);
 	if (data.Ico == undefined)
 		data.Ico = "";
 	if (data.Img == undefined)
@@ -238,8 +244,8 @@ function getData(id, dir)
 }
 
 /**
- * 
- * @param {string} id 
+ *
+ * @param {string} id
  */
 function getRealName(id)
 {
@@ -253,10 +259,10 @@ function getRealName(id)
 }
 
 /**
- * 
- * @this {expandedDataList}
- * @param {string} id 
- * @param {string} dir 
+ *
+ * @this {ExpandedDataList}
+ * @param {string} id
+ * @param {string} dir
  * @param {string} username
  */
 function setId(id, dir, username)
@@ -273,7 +279,7 @@ function setId(id, dir, username)
 	else
 		idNumber = "";
 	username = username + idNumber;
-	newData = 
+	newData =
 	{
 		Id: username,
 		Category: data.Category,
@@ -290,10 +296,10 @@ function setId(id, dir, username)
 }
 
 /**
- * 
- * @this {expandedDataList}
- * @param {string} id 
- * @param {string} dir 
+ *
+ * @this {ExpandedDataList}
+ * @param {string} id
+ * @param {string} dir
  * @returns {string}
  */
 function getImg(id, dir)
@@ -308,14 +314,14 @@ function getImg(id, dir)
 }
 
 /**
- * 
- * @this {expandedDataList}
- * @param {string} id 
- * @param {string} dir 
- * @param {string} newData 
+ *
+ * @this {ExpandedDataList}
+ * @param {string} id
+ * @param {string} dir
+ * @param {string} newData
  * @param {string} oldId
  */
-function setImg(id, dir, newData, oldId="")
+async function setImg(id, dir, newData, oldId="")
 {
 	let	data;
 	let	filepath;
@@ -332,23 +338,23 @@ function setImg(id, dir, newData, oldId="")
 		oldpath = oldpath.replace(`${data.Img}`, `_Img${data.Img}`);
 		filepath = filepath.replace(newData, `_Img${data.Img}`);
 	}
-	existBool = fs.existsSync(oldpath);
+	existBool = await existFile(oldpath);
 	data.Img = newData;
 	if (existBool)
 	{
-		existBool = fs.existsSync(filepath);
+		existBool = await existFile(filepath);
 		if (existBool == false && newData.at(0) == ".")
-			fs.copyFileSync(oldpath, filepath);
+			copyFile(oldpath, filepath);
 		if (oldpath != filepath)
-			fs.rmSync(oldpath);
+			(oldpath);
 	}
 }
 
 /**
  * returns a href to the ico
- * @this {expandedDataList}
- * @param {string} id 
- * @param {string} dir 
+ * @this {ExpandedDataList}
+ * @param {string} id
+ * @param {string} dir
  * @returns {string}
  */
 function getIco(id, dir)
@@ -365,14 +371,14 @@ function getIco(id, dir)
 }
 
 /**
- * 
- * @this {expandedDataList}
- * @param {string} id 
- * @param {string} dir 
+ *
+ * @this {ExpandedDataList}
+ * @param {string} id
+ * @param {string} dir
  * @param {string} newData
  * @param {string} oldId
  */
-function setIco(id, dir, newData, oldId="")
+async function setIco(id, dir, newData, oldId="")
 {
 	let	data;
 	let	filepath;
@@ -389,16 +395,41 @@ function setIco(id, dir, newData, oldId="")
 		oldpath = oldpath.replace(`${data.Ico}`, `_Ico${data.Ico}`);
 		filepath = filepath.replace(newData, `_Ico${data.Ico}`);
 	}
-	existBool = fs.existsSync(oldpath);
+	existBool = await existFile(oldpath);
 	data.Ico = newData;
 	if (existBool)
 	{
-		existBool = fs.existsSync(filepath);
+		existBool = await existFile(filepath);
 		if (existBool == false && newData.at(0) == ".")
-			fs.copyFileSync(oldpath, filepath);
+			copyFile(oldpath, filepath);
 		if (oldpath != filepath)
-			fs.rmSync(oldpath);
+			rmFile(oldpath);
 	}
 }
 
-module.exports = {dataList, expandedDataList, dataListPath};
+/**
+ *
+ * @param {DataList} list
+ * @param {DataList | null} list2
+ */
+async function listGet(list, list2=null)
+{
+	if (list2)
+		await (listGet(list2));
+	list.ability = await list.ability;
+	list.item = await list.item;
+	list.move = await list.move;
+	list.nature = await list.nature;
+	list.pokedex = await list.pokedex;
+	list.trainer = await list.trainer;
+	list.user = await list.user;
+	list.pokemon = await list.pokemon;
+
+}
+
+const dataList = new DataList(true);
+await listGet(dataList);
+const expandedDataList = new ExpandedDataList(dataList);//@ts-ignore
+await listGet(expandedDataList);
+
+export {DataList, ExpandedDataList, dataList, expandedDataList, dataListPath};

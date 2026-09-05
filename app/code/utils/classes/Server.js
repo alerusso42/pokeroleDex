@@ -1,7 +1,8 @@
 // @ts-check
-const fs = require("fs");
-const {metaDataPath, questDataPath, questImgPath} = require("../macro.js");
-const {dataList, expandedDataList, dataListPath} = require("./DataList.js");
+import fs from "node:fs";
+import {metaDataPath, questDataPath, questImgPath} from "../macro.js";
+import {dataList, expandedDataList, dataListPath} from "./DataList.js";
+import { readDir, readFile, writeFile } from "../data.js";
 
 /** @typedef {typeof import("../../../../data/questData/template/user.json")} User */
 
@@ -12,16 +13,16 @@ class Server
 	constructor()
 	{
 		/** @type {dataList} */
-		this.data = new dataList(true);
+		this.data = dataList;
 
 		/** @type {expandedDataList} */
-		this.expandedData = new expandedDataList(this.data);
+		this.expandedData = expandedDataList;
 
 		/** @type {metaData} */
 		this.metaData = new metaData();
 
 		// @ts-ignore
-		/** @type {Map<number, User>} */this.userMap = getDataMap("user/", true);
+		/** @type {Map<number, User>} */this.userMap = new Map();
 		
 		/** @type {number} */
 		this.userNum = this.userMap.size;
@@ -31,6 +32,10 @@ class Server
 
 		//this.data.Print();
 	}
+	async Init()
+	{// @ts-ignore
+		this.userMap = await getDataMap("user/", true);
+	}
 }
 
 //SECTION - Server class methods/utils
@@ -39,13 +44,13 @@ class Server
  * 
  * @param {string} typePath the data type path 
  * @param {boolean} readFileBool the data type path 
- * @returns {Map<string, {} | string>}
+ * @returns {Promise<Map<string, {} | string>>}
  */
-function getDataMap(typePath, readFileBool = false, useIdBool = false)
+async function getDataMap(typePath, readFileBool = false, useIdBool = false)
 {
 	let map = new Map();
 	let dirName = questDataPath + typePath;
-	let dir = fs.readdirSync(dirName);
+	let dir = readDir(dirName);
 	let	i;
 
 	i = 0;
@@ -56,7 +61,7 @@ function getDataMap(typePath, readFileBool = false, useIdBool = false)
 		let fileNoExt = file.replace(".json", "");
 		if (readFileBool && !useIdBool)
 		{
-			let json = JSON.parse(fs.readFileSync(dirName + file, 'utf-8'));
+			let json = JSON.parse(await readFile(dirName + file));
 			if (!json.File)
 				json.File = dataListPath.user + json.Name + ".json";
 			map.set(fileNoExt, json);
@@ -72,15 +77,15 @@ class metaData
 	constructor()
 	{
 		// @ts-ignore
-		/** @type {number} */	this.id = parseInt(fs.readFileSync(metaDataPath + "id.txt"));
+		/** @type {number} */	this.id = 0;
 	}
-	Update(metaParam="", newData="")
+	async Update(metaParam="", newData="")
 	{
 		// @ts-ignore
 		if (this[metaParam] == undefined || newData == "")
 			return (console.log("invalid metaData::Update params."));
-		fs.writeFileSync(metaDataPath + metaParam + ".txt", String(newData));
+		writeFile(metaDataPath + metaParam + ".txt", String(newData));
 	}
 }
 
-module.exports = {Server};
+export {Server};

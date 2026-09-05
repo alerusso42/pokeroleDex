@@ -3,4 +3,9 @@ const questDataPath = "../data/questData/";
 const questImgPath = "../data/questPictures/";
 const dataPath = "../data/v2.0/";
 
-module.exports = {metaDataPath, questDataPath, questImgPath, dataPath};
+const env =
+{
+	VERCEL: process.env.VERCEL == "true" ? true : false
+};
+
+export {env, metaDataPath, questDataPath, questImgPath, dataPath};

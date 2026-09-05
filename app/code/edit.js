@@ -1,7 +1,8 @@
 //@ts-check
 
-const { hashSync } = require("bcrypt");
-const lib = require("./utils/lib.js");
+import * as lib from "./utils/lib.js";
+import { rmFile, createFile, writeFile, readFile } from "./utils/data.js";
+import { getHtml } from "./html.js";
 
 const questDataPath = "../data/questData/";
 
@@ -11,7 +12,7 @@ const questDataPath = "../data/questData/";
  * @param {lib.types.Client} client 
  * @param {Response} res 
  */
-function edit(server, client, res)
+async function edit(server, client, res)
 {
 	let	id;
 	let	img;
@@ -52,13 +53,13 @@ function edit(server, client, res)
 		json.Ico = ico.slice(ico.lastIndexOf("."), ico.length);
 	if (id != client.dataName)
 	{
-		lib.fs.rmSync(filename);
+		await rmFile(filename);
 		filename = server.data.GetFilename(id, client.dirName, questDataPath, "json", false);
-		lib.fs.openSync(filename, "a+");
+		await createFile(filename);
 	}
 	if (json.Password)
 		json.Password = lib.crypt.hashSync(json.Password, server.cryptSalt);
-	lib.fs.writeFileSync(filename, JSON.stringify(json, null, 2), 'utf-8');
+	writeFile(filename, JSON.stringify(json, null, 2));
 	// json.Img = server.expandedData.GetImg(id, client.dirName);
 	// json.Ico = server.expandedData.GetIco(id, client.dirName);
 	for (const [k, v] of Object.entries(data))
@@ -75,9 +76,9 @@ function edit(server, client, res)
  * @param {string} filename 
  * @param {*} newData
  */
-function overrideOriginal(filename, newData)
+async function overrideOriginal(filename, newData)
 {
-	let rawOldData = lib.fs.readFileSync(filename);
+	let rawOldData = await readFile(filename);
 	let oldData = JSON.parse(rawOldData);
 
 	console.log("overriding");
@@ -90,4 +91,4 @@ function overrideOriginal(filename, newData)
 	}
 }
 
-module.exports = {edit};
+export {edit};

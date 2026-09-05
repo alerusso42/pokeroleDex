@@ -1,4 +1,5 @@
-const fs = require("fs");
+import fs from "node:fs";
+import { readDir, readFile, writeFile } from "./data.js";
 
 /** @typedef {import('./classes/Server.js').Server} Server*/
 
@@ -8,12 +9,12 @@ const fs = require("fs");
  * @param {JSON} data new json data
  * @param {boolean} addBool true if you want not existing field to be add
  */
-function editJson(path, data, addBool=false)
+async function editJson(path, data, addBool=false)
 {
 	let oldData;
 
 	if (typeof(path) == "string")
-		oldData = getJson(path);
+		oldData = await getJson(path);
 	else
 		oldData = path;
 	if (path.indexOf(".json") == -1)
@@ -29,7 +30,7 @@ function editJson(path, data, addBool=false)
 			oldData[key] = data[key];
 	}
 	if (typeof(path) == "string")
-		fs.writeFileSync(path, JSON.stringify(oldData, null, 2), 'utf-8');
+		writeFile(path, JSON.stringify(oldData, null, 2));
 }
 
 /**
@@ -38,7 +39,7 @@ function editJson(path, data, addBool=false)
  * @param {String} dir this allow to find file root path
  * @param {Server | null} server
  */
-function getJson(path, dir="", server=null)
+async function getJson(path, dir="", server=null)
 {
 	let	rawData;
 	let	data;
@@ -49,9 +50,9 @@ function getJson(path, dir="", server=null)
 	}
 	if (path.indexOf(".json") == -1)
 		path = path + ".json";
-	rawData = fs.readFileSync(path);
+	rawData = await readFile(path);
 	data = JSON.parse(rawData);
 	return (data);
 }
 
-module.exports = {editJson, getJson};
+export {editJson, getJson};
