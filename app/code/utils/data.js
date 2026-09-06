@@ -6,6 +6,17 @@ import { env } from "./macro.js";
 
 console.log(env.VERCEL);//true / false
 
+const BLOB_OPTIONS = {
+	access: /** @type {const} */ ("private"),
+	addRandomSuffix: false,
+};
+
+const AUTH_HEADERS = {
+	headers: {
+		Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`,
+	},
+};
+
 /** @param {string} path */
 async function readFile(path)
 {
@@ -18,7 +29,7 @@ async function readFile(path)
 	{
 		throw new Error(`readFile (Blob): File non trovato -> ${blobPath}`);
 	}
-	const response = await fetch(targetBlob.url);
+	const response = await fetch(targetBlob.url, AUTH_HEADERS);
 	if (!response.ok)
 	{
 		throw new Error(`readFile (Blob): Errore HTTP ${response.status}`);
