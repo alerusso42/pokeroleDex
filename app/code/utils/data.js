@@ -81,7 +81,7 @@ async function writeFile(path, data)
 	const blobPath = cleanPath(path);
 	return await put(blobPath, data, 
 	{
-		access: "public",
+		access: "private",
 		addRandomSuffix: false,
 	});
 }
@@ -120,7 +120,7 @@ async function copyFile(pathOld, pathNew)
  */
 function cleanPath(path)
 {
-	return (path.startsWith("./") ? path.slice(2) : path.replace(/^\/+/, ""));
+  return (path.replace(/^(\.\.\/|\.\/)+/, "").replace(/^\/+/, ""));
 }
 
 export {readFile, readDir, createFile, existFile, writeFile, rmFile, copyFile};

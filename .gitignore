@@ -4,3 +4,4 @@ logs/
 app/.install-fingerprint
 data/questData/
 data/questPictures/
+.env

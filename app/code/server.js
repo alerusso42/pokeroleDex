@@ -462,3 +462,4 @@ lib.app.use((err, req, res, next) =>
 });
 
 lib.app.listen(8080, "0.0.0.0");
+export default lib.app;
