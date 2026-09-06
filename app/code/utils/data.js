@@ -1,32 +1,68 @@
 //@ts-check
 
 import fs from "node:fs";
-import {env} from "./macro.js";
+import { put, del, list } from "@vercel/blob";
+import { env } from "./macro.js";
 
 console.log(env.VERCEL);//true / false
 
 /** @param {string} path */
-function readFile(path)
+async function readFile(path)
 {
-	return (fs.readFileSync(path));
+	if (fs.existsSync(path))
+		return (fs.readFileSync(path));
+	const blobPath = cleanPath(path);
+	const { blobs } = await list({ prefix: blobPath });
+	const targetBlob = blobs.find((b) => b.pathname === blobPath);
+	if (!targetBlob) 
+	{
+		throw new Error(`readFile (Blob): File non trovato -> ${blobPath}`);
+	}
+	const response = await fetch(targetBlob.url);
+	if (!response.ok)
+	{
+		throw new Error(`readFile (Blob): Errore HTTP ${response.status}`);
+	}
+	const arrayBuffer = await response.arrayBuffer();
+	return Buffer.from(arrayBuffer);
 }
 
 /** @param {string} path */
-function readDir(path)
+async function readDir(path)
 {
-	return (fs.readdirSync(path));
+	if (fs.existsSync(path))
+		return (fs.readdirSync(path));
+	let prefix = cleanPath(path);
+	if (prefix && !prefix.endsWith("/"))
+	{
+		prefix += "/";
+	}
+	const { blobs } = await list({ prefix });
+	const files = blobs
+		.map((b) => b.pathname.replace(prefix, "").split("/")[0])
+		.filter((name, index, self) => name && self.indexOf(name) === index);
+	return files;
 }
 
 /** @param {string} path */
-function createFile(path)
+async function createFile(path)
 {
-	return (fs.openSync(path, 'a+'));
+	if (!env.VERCEL)
+		return (fs.openSync(path, 'a+'));
+	if (!(await existFile(path))) 
+	{
+		await writeFile(path, "");
+	}
 }
 
 /** @param {string} path */
-function existFile(path)
+async function existFile(path)
 {
-	return (fs.existsSync(path));
+	if (!env.VERCEL)
+		return (fs.existsSync(path));
+	const blobPath = cleanPath(path);
+	const { blobs } = await list({ prefix: blobPath });
+	return blobs.some((b) => b.pathname === blobPath);
 }
 
 /**
@@ -34,24 +70,57 @@ function existFile(path)
  *  @param {string} path 
  *  @param {*} data
 */
-function writeFile(path, data)
+async function writeFile(path, data)
 {
-	return (fs.writeFileSync(path, data));
+	if (!env.VERCEL)
+	{
+		if (!fs.existsSync(path))
+			createFile(path);
+		return (fs.writeFileSync(path, data));
+	}
+	const blobPath = cleanPath(path);
+	return await put(blobPath, data, 
+	{
+		access: "public",
+		addRandomSuffix: false,
+	});
 }
 
 /** @param {string} path */
-function rmFile(path)
+async function rmFile(path)
 {
-	return (fs.rmSync(path));
+	if (fs.existsSync(path))
+		return (fs.rmSync(path));
+	
+	const blobPath = cleanPath(path);
+	const { blobs } = await list({ prefix: blobPath });
+	const targetBlob = blobs.find((b) => b.pathname === blobPath);
+	if (targetBlob) 
+	{
+		await del(targetBlob.url);
+	}
 }
 
 /** 
  * @param {string} pathOld
  *  @param {string} pathNew 
  **/
-function copyFile(pathOld, pathNew)
+async function copyFile(pathOld, pathNew)
 {
-	return (fs.copyFileSync(pathOld, pathNew));
+	if (fs.existsSync(pathOld))
+		return (fs.copyFileSync(pathOld, pathNew));
+	
+	const content = await readFile(pathOld);
+	return await writeFile(pathNew, content);
+}
+
+/**
+ * Clean the path for vercel
+ * @param {string} path 
+ */
+function cleanPath(path)
+{
+	return (path.startsWith("./") ? path.slice(2) : path.replace(/^\/+/, ""));
 }
 
 export {readFile, readDir, createFile, existFile, writeFile, rmFile, copyFile};

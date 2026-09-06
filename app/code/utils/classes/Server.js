@@ -50,7 +50,7 @@ async function getDataMap(typePath, readFileBool = false, useIdBool = false)
 {
 	let map = new Map();
 	let dirName = questDataPath + typePath;
-	let dir = readDir(dirName);
+	let dir = await readDir(dirName);
 	let	i;
 
 	i = 0;
