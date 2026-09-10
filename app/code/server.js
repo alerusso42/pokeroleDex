@@ -12,6 +12,29 @@ import { questImgPath } from "./utils/macro.js";
 import { editJson } from "./utils/json.js";
 import { includesOneOf, dataNormalize } from "./utils/string.js";
 import { existFile, readFile, writeFile } from "./utils/data.js";
+
+function DEBUGvercelDir()
+{
+	console.log("=== VERCEL FS DEBUG ===");
+	console.log("Current Working Directory (process.cwd()):", process.cwd());
+
+	try {
+	console.log("Contenuto della Root attuale:", fs.readdirSync(process.cwd()));
+	
+	const htmlPath = path.join(process.cwd(), "html");
+	if (fs.existsSync(htmlPath)) {
+		console.log("Contenuto di /html:", fs.readdirSync(htmlPath));
+	} else {
+		console.log("La cartella /html NON esiste in process.cwd()");
+	}
+	} catch (err) {
+	console.error("Errore durante ls:", err);
+	}
+	console.log("=======================");
+}
+
+DEBUGvercelDir();
+
 const types = new Array("Pokemon", "Move", "Nature", "Ability", "Item");
 const server = new lib.types.Server();
 server.Init();
