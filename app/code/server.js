@@ -15,22 +15,22 @@ import { existFile, readFile, writeFile } from "./utils/data.js";
 
 function DEBUGvercelDir()
 {
-	console.error("=== VERCEL FS DEBUG ===");
-	console.error("Current Working Directory (process.cwd()):", process.cwd());
+	console.log("=== VERCEL FS DEBUG ===");
+	console.log("Current Working Directory (process.cwd()):", process.cwd());
 
 	try {
-	console.error("Contenuto della Root attuale:", fs.readdirSync(process.cwd()));
+	console.log("Contenuto della Root attuale:", fs.readdirSync(process.cwd()));
 	
 	const htmlPath = path.join(process.cwd(), "html");
 	if (fs.existsSync(htmlPath)) {
-		console.error("Contenuto di /html:", fs.readdirSync(htmlPath));
+		console.log("Contenuto di /html:", fs.readdirSync(htmlPath));
 	} else {
-		console.error("La cartella /html NON esiste in process.cwd()");
+		console.log("La cartella /html NON esiste in process.cwd()");
 	}
 	} catch (err) {
-	console.error("Errore durante ls:", err);
+	console.log("Errore durante ls:", err);
 	}
-	console.error("=======================");
+	console.log("=======================");
 }
 
 DEBUGvercelDir();
